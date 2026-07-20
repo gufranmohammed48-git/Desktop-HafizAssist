@@ -1,0 +1,18 @@
+# Local dev artifacts
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Editor / IDE
+.vscode/
+.idea/
+*.iml
+*~
+
+# Logs
+*.log
+
+# Don't ignore the actual app files
+!HafizAssist.html
+!phonemes-data.js
