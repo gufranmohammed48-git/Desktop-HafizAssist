@@ -8,7 +8,8 @@ the easiest possible setup: just open the HTML file in Chrome.
 
 ## What's in this repo
 
-- **`HafizAssist.html`** - the entire app. Open this in Chrome.
+- **`index.html`** - the main app. Open this in Chrome.
+- **`support.html`** - the Contact Support page (linked from the top-right of the app).
 - **`phonemes-data.js`** (5.3 MB) - Quran text + Tajweed phoneme data, loaded
   as a sibling file. Must live in the same directory as the HTML.
 

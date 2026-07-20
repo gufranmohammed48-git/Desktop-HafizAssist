@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact Support — HifzAssist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0A1220;
+    --panel: #101A2C;
+    --card: #131F33;
+    --card-hover: #182640;
+    --border: rgba(255,255,255,0.08);
+    --text: #E8EDF4;
+    --text-dim: #8A96A8;
+    --green: #2ECC71;
+    --green-soft: rgba(46,204,113,0.14);
+    --red: #E74C3C;
+    --red-soft: rgba(231,76,60,0.14);
+    --yellow: #F1C40F;
+    --yellow-soft: rgba(241,196,15,0.14);
+    --blue: #3498DB;
+    --blue-soft: rgba(52,152,219,0.14);
+    --purple: #B57EDC;
+    --purple-soft: rgba(181,126,220,0.14);
+    --primary: #2ECC71;
+    --primary-soft: rgba(46,204,113,0.14);
+    --accent: #B57EDC;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;background-image:radial-gradient(ellipse at top,rgba(181,126,220,.08) 0%,transparent 60%),radial-gradient(ellipse at bottom right,rgba(46,204,113,.05) 0%,transparent 50%);background-attachment:fixed}
+  .app{max-width:780px;margin:0 auto;padding:24px}
+
+  /* BACK LINK */
+  .back-link{
+    display:inline-flex;align-items:center;gap:6px;
+    color:var(--text-dim);text-decoration:none;
+    font-size:13px;font-weight:500;
+    margin-bottom:24px;transition:color .15s ease;
+  }
+  .back-link:hover{color:var(--accent)}
+  .back-link .arrow{font-size:16px;line-height:1}
+
+  /* HEADER */
+  .support-header{text-align:center;margin:8px 0 36px}
+  .support-header .icon{
+    width:64px;height:64px;margin:0 auto 16px;
+    display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(135deg,var(--accent) 0%,#9C6AD3 100%);
+    border-radius:18px;font-size:32px;
+    box-shadow:0 8px 24px rgba(181,126,220,.35);
+  }
+  .support-header h1{margin:0 0 8px;font-size:28px;font-weight:700;letter-spacing:-.3px}
+  .support-header .lede{margin:0;color:var(--text-dim);font-size:14px;line-height:1.6;max-width:520px;margin:0 auto}
+
+  /* CATEGORY CARDS */
+  .categories{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+    gap:10px;margin-bottom:24px;
+  }
+  .cat{
+    background:var(--card);border:1px solid var(--border);
+    border-radius:12px;padding:16px 12px;
+    text-align:center;cursor:pointer;
+    transition:transform .15s ease,border-color .15s ease,background .15s ease;
+    user-select:none;
+  }
+  .cat:hover{transform:translateY(-2px);background:var(--card-hover);border-color:rgba(255,255,255,.16)}
+  .cat.active{
+    background:var(--purple-soft);
+    border-color:var(--accent);
+    box-shadow:0 0 0 1px var(--accent),0 4px 16px rgba(181,126,220,.2);
+  }
+  .cat .emoji{font-size:28px;display:block;margin-bottom:6px;line-height:1}
+  .cat .label{font-size:13px;font-weight:600;color:var(--text)}
+
+  /* FORM */
+  .form-panel{
+    background:var(--panel);border:1px solid var(--border);
+    border-radius:16px;padding:24px;
+    box-shadow:0 4px 20px rgba(0,0,0,.25);
+  }
+  .form-panel .intro{color:var(--text-dim);font-size:13px;margin:0 0 18px;line-height:1.5}
+  .field{margin-bottom:16px}
+  .field label{
+    display:block;font-size:12px;font-weight:600;
+    color:var(--text-dim);margin-bottom:6px;
+    text-transform:uppercase;letter-spacing:.5px;
+  }
+  .field input,.field textarea{
+    width:100%;background:var(--card);
+    border:1px solid var(--border);border-radius:8px;
+    color:var(--text);font-family:inherit;font-size:14px;
+    padding:10px 12px;transition:border-color .15s ease,background .15s ease;
+  }
+  .field input:focus,.field textarea:focus{
+    outline:none;border-color:var(--accent);
+    background:var(--card-hover);
+  }
+  .field textarea{min-height:90px;resize:vertical;line-height:1.5}
+  .field .hint{font-size:11px;color:var(--text-dim);margin-top:4px}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media (max-width:540px){.field-row{grid-template-columns:1fr}}
+
+  /* HIDDEN FIELDS PER CATEGORY */
+  .category-fields{display:none}
+  .category-fields.active{display:block}
+
+  /* SUBMIT BUTTON */
+  .submit{
+    width:100%;background:linear-gradient(135deg,var(--accent) 0%,#9C6AD3 100%);
+    color:#fff;border:none;border-radius:10px;padding:14px 20px;
+    font-family:inherit;font-size:15px;font-weight:600;letter-spacing:.3px;
+    cursor:pointer;margin-top:8px;
+    box-shadow:0 4px 16px rgba(181,126,220,.4);
+    transition:transform .15s ease,box-shadow .15s ease,opacity .15s ease;
+  }
+  .submit:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(181,126,220,.55)}
+  .submit:active{transform:translateY(0)}
+  .submit:disabled{opacity:.6;cursor:not-allowed;transform:none}
+  .submit .spinner{display:none;margin-left:8px}
+  .submit.loading .spinner{display:inline-block}
+
+  /* META INFO */
+  .meta{
+    margin-top:24px;text-align:center;
+    color:var(--text-dim);font-size:12px;line-height:1.6;
+  }
+  .meta a{color:var(--accent);text-decoration:none}
+  .meta a:hover{text-decoration:underline}
+  .meta .divider{margin:0 8px;opacity:.5}
+
+  /* SUCCESS STATE */
+  .success-state{display:none;text-align:center;padding:30px 20px}
+  .success-state.show{display:block}
+  .success-state .check{
+    width:64px;height:64px;margin:0 auto 16px;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--green-soft);border:2px solid var(--green);
+    border-radius:50%;font-size:32px;color:var(--green);
+  }
+  .success-state h2{margin:0 0 8px;font-size:20px}
+  .success-state p{margin:0;color:var(--text-dim);font-size:14px;line-height:1.5}
+  .success-state .back{margin-top:20px;display:inline-block}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <a class="back-link" href="index.html"><span class="arrow">←</span> Back to app</a>
+
+  <div class="support-header">
+    <div class="icon" aria-hidden="true">💬</div>
+    <h1>How can we help?</h1>
+    <p class="lede">Pick a category below and tell us what's on your mind. We read every message and usually reply within a day or two.</p>
+  </div>
+
+  <!-- CATEGORY PICKER -->
+  <div class="categories" role="tablist">
+    <div class="cat active" data-cat="bug" role="tab" tabindex="0">
+      <span class="emoji">🐛</span>
+      <span class="label">Report a bug</span>
+    </div>
+    <div class="cat" data-cat="feature" role="tab" tabindex="0">
+      <span class="emoji">💡</span>
+      <span class="label">Suggest a feature</span>
+    </div>
+    <div class="cat" data-cat="feedback" role="tab" tabindex="0">
+      <span class="emoji">💬</span>
+      <span class="label">Feedback</span>
+    </div>
+    <div class="cat" data-cat="contact" role="tab" tabindex="0">
+      <span class="emoji">📞</span>
+      <span class="label">Contact</span>
+    </div>
+    <div class="cat" data-cat="other" role="tab" tabindex="0">
+      <span class="emoji">❓</span>
+      <span class="label">Something else</span>
+    </div>
+  </div>
+
+  <!-- FORM -->
+  <form class="form-panel" id="supportForm" action="https://formsubmit.co/support@hifzapp.example.com" method="POST">
+    <!-- FormSubmit config -->
+    <input type="hidden" name="_subject" value="HifzAssist Support">
+    <input type="hidden" name="_template" value="table">
+    <input type="hidden" name="_captcha" value="true">
+    <input type="hidden" name="category" id="categoryField" value="bug">
+
+    <!-- BUG FIELDS -->
+    <div class="category-fields active" data-cat="bug">
+      <p class="intro">Found something broken? Help us reproduce it by sharing what you were doing.</p>
+      <div class="field">
+        <label for="bugWhat">What were you doing?</label>
+        <textarea name="bug_what" id="bugWhat" placeholder="e.g. I clicked 'Start reciting' and then recited Surah Al-Ikhlas" required></textarea>
+      </div>
+      <div class="field">
+        <label for="bugExpected">What did you expect to happen?</label>
+        <textarea name="bug_expected" id="bugExpected" placeholder="e.g. The words should have highlighted in green" required></textarea>
+      </div>
+      <div class="field">
+        <label for="bugActual">What actually happened?</label>
+        <textarea name="bug_actual" id="bugActual" placeholder="e.g. The page froze, or the words didn't highlight at all" required></textarea>
+      </div>
+    </div>
+
+    <!-- FEATURE FIELDS -->
+    <div class="category-fields" data-cat="feature">
+      <p class="intro">Got an idea? Tell us what would make HifzAssist even better for you.</p>
+      <div class="field">
+        <label for="featureIdea">What feature would you like?</label>
+        <textarea name="feature_idea" id="featureIdea" placeholder="e.g. Add a way to record my recitation and play it back" required></textarea>
+      </div>
+      <div class="field">
+        <label for="featureWhy">Why would this be useful?</label>
+        <textarea name="feature_why" id="featureWhy" placeholder="e.g. So I can review my mistakes and improve"></textarea>
+      </div>
+    </div>
+
+    <!-- FEEDBACK FIELDS -->
+    <div class="category-fields" data-cat="feedback">
+      <p class="intro">Tell us what's working, what isn't, or anything in between. We appreciate the honesty.</p>
+      <div class="field">
+        <label for="feedbackLiked">What do you like?</label>
+        <textarea name="feedback_liked" id="feedbackLiked" placeholder="e.g. The word-by-word highlighting is super helpful"></textarea>
+      </div>
+      <div class="field">
+        <label for="feedbackImprove">What could be better?</label>
+        <textarea name="feedback_improve" id="feedbackImprove" placeholder="e.g. The accuracy could improve for longer surahs"></textarea>
+      </div>
+    </div>
+
+    <!-- CONTACT FIELDS -->
+    <div class="category-fields" data-cat="contact">
+      <p class="intro">Want to get in touch about something else? Drop us a line.</p>
+      <div class="field">
+        <label for="contactMessage">Your message</label>
+        <textarea name="contact_message" id="contactMessage" placeholder="e.g. I'd love to contribute to the project..." required></textarea>
+      </div>
+    </div>
+
+    <!-- OTHER FIELDS -->
+    <div class="category-fields" data-cat="other">
+      <p class="intro">Anything else on your mind? We're all ears.</p>
+      <div class="field">
+        <label for="otherMessage">Your message</label>
+        <textarea name="other_message" id="otherMessage" placeholder="Tell us what's up" required></textarea>
+      </div>
+    </div>
+
+    <!-- COMMON FIELDS -->
+    <div class="field-row">
+      <div class="field">
+        <label for="email">Your email <span style="text-transform:none;opacity:.6">(only if you want a reply)</span></label>
+        <input type="email" name="email" id="email" placeholder="you@example.com">
+        <div class="hint">We won't add you to any list. Promise.</div>
+      </div>
+      <div class="field">
+        <label for="name">Your name <span style="text-transform:none;opacity:.6">(optional)</span></label>
+        <input type="text" name="name" id="name" placeholder="How should we address you?">
+      </div>
+    </div>
+
+    <!-- Anti-spam honeypot (must stay empty) -->
+    <input type="text" name="_honey" style="display:none">
+
+    <button type="submit" class="submit" id="submitBtn">
+      Send message
+      <span class="spinner">⏳</span>
+    </button>
+
+    <!-- SUCCESS STATE — shown via JS after submit, since we use no-cors mode -->
+    <div class="success-state" id="successState">
+      <div class="check">✓</div>
+      <h2>Message sent</h2>
+      <p>Thanks for reaching out. We've received your message and will get back to you if you left an email.</p>
+      <a class="back-link back" href="index.html"><span class="arrow">←</span> Back to app</a>
+    </div>
+  </form>
+
+  <div class="meta">
+    HifzAssist v3.1
+    <span class="divider">·</span>
+    <a href="https://github.com/gufranmohammed48-git/Desktop-HafizAssist" target="_blank" rel="noopener noreferrer">Source on GitHub</a>
+    <span class="divider">·</span>
+    <a href="https://github.com/gufranmohammed48-git/Desktop-HafizAssist/issues" target="_blank" rel="noopener noreferrer">Report an issue</a>
+  </div>
+</div>
+
+<script>
+  // Category tab switching
+  const cats = document.querySelectorAll('.cat');
+  const catFields = document.querySelectorAll('.category-fields');
+  const catField = document.getElementById('categoryField');
+
+  function selectCategory(cat) {
+    cats.forEach(c => c.classList.toggle('active', c.dataset.cat === cat));
+    catFields.forEach(f => f.classList.toggle('active', f.dataset.cat === cat));
+    catField.value = cat;
+  }
+
+  cats.forEach(c => {
+    c.addEventListener('click', () => selectCategory(c.dataset.cat));
+    c.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        selectCategory(c.dataset.cat);
+      }
+    });
+  });
+
+  // Form submission via FormSubmit (no-cors AJAX so we can show success UI)
+  const form = document.getElementById('supportForm');
+  const submitBtn = document.getElementById('submitBtn');
+  const successState = document.getElementById('successState');
+
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    submitBtn.disabled = true;
+    submitBtn.classList.add('loading');
+    try {
+      // FormSubmit requires no-cors for AJAX; we won't get a response body,
+      // but if the fetch doesn't throw, the request was sent.
+      await fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        mode: 'no-cors',
+      });
+      // Show success
+      form.querySelectorAll('.field, .submit, .intro, .categories').forEach(el => {
+        if (!el.closest('.success-state')) el.style.display = 'none';
+      });
+      successState.classList.add('show');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (err) {
+      // No-cors mode shouldn't error, but just in case
+      submitBtn.disabled = false;
+      submitBtn.classList.remove('loading');
+      alert('Could not send the message. Please try again, or email us directly.');
+      console.error(err);
+    }
+  });
+</script>
+</body>
+</html>
