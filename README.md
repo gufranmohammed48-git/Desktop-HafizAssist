@@ -13,23 +13,21 @@ the easiest possible setup: just open the HTML file in Chrome.
 - **`phonemes-data.js`** (5.3 MB) - Quran text + Tajweed phoneme data, loaded
   as a sibling file. Must live in the same directory as the HTML.
 
-## Setting up the Contact Support form (one-time, 2 min)
+## How the Contact Support form works
 
-The support form uses [Web3Forms](https://web3forms.com) to deliver messages
-to your email. Setup:
+The form posts directly to [FormSubmit](https://formsubmit.co), a free
+service that forwards form submissions to your email. No signup, no
+backend, no captcha.
 
-1. Go to https://web3forms.com
-2. Enter the email where you want to receive messages (e.g. `104tutorials104@gmail.com`)
-3. They'll instantly email you an **access key** (check spam if you don't see it)
-4. Open `support.html` and find this line near the top of the `<form>`:
-   ```html
-   <input type="hidden" name="access_key" id="accessKeyField" value="YOUR_ACCESS_KEY_HERE">
-   ```
-5. Replace `YOUR_ACCESS_KEY_HERE` with the access key you received
-6. Commit & push. Done. Every submission will arrive in your inbox.
+**First time you (or anyone) submits:** FormSubmit sends a one-time
+activation email to `104tutorials104@gmail.com`. Click the link in that
+email to start receiving submissions. That's it — one click, forever
+after that every submission lands in your Gmail.
 
-Free tier: 250 submissions/month. No captcha. No signup walls. No third-party
-storage — Web3Forms just forwards to your email.
+If activation emails don't arrive, check spam. If they never arrive,
+the email is being filtered by Gmail — switch to Web3Forms
+(web3forms.com, 250/month free) by editing the form action in
+`support.html` (instructions in the file).
 
 ## Quick Start
 

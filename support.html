@@ -57,6 +57,12 @@
   .support-header .lede{margin:0;color:var(--text-dim);font-size:14px;line-height:1.6;max-width:520px;margin:0 auto}
 
   /* CATEGORY CARDS */
+  .activation-note{
+    background:var(--purple-soft);border:1px solid var(--accent);
+    border-radius:10px;padding:10px 14px;margin:0 0 18px;
+    font-size:13px;color:var(--text);line-height:1.5;
+  }
+  .activation-note b{color:var(--accent)}
   .categories{
     display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
     gap:10px;margin-bottom:24px;
@@ -159,6 +165,7 @@
   </div>
 
   <!-- CATEGORY PICKER -->
+  <p class="activation-note">📬 <b>First time sending?</b> You'll get an activation email at <b>104tutorials104@gmail.com</b> — click the link once, then every submission lands in your inbox.</p>
   <div class="categories" role="tablist">
     <div class="cat active" data-cat="bug" role="tab" tabindex="0">
       <span class="emoji">⚠️</span>
@@ -179,16 +186,14 @@
   </div>
 
   <!-- FORM -->
-  <form class="form-panel" id="supportForm">
-    <!-- Web3Forms config: https://web3forms.com -->
-    <!-- 1) Sign up at web3forms.com (free, no card) using 104tutorials104@gmail.com -->
-    <!-- 2) Paste your access_key below to start receiving messages -->
-    <input type="hidden" name="access_key" id="accessKeyField" value="YOUR_ACCESS_KEY_HERE">
-    <input type="hidden" name="subject" value="HifzAssist Support">
-    <input type="hidden" name="from_name" value="HifzAssist Support Form">
+  <form class="form-panel" id="supportForm" action="https://formsubmit.co/104tutorials104@gmail.com" method="POST">
+    <!-- FormSubmit config (no _captcha — it was blocking submissions) -->
+    <input type="hidden" name="_subject" value="HifzAssist Support">
+    <input type="hidden" name="_template" value="table">
+    <input type="hidden" name="_next" value="https://gufranmohammed48-git.github.io/Desktop-HafizAssist/support.html?submitted=true">
     <input type="hidden" name="category" id="categoryField" value="bug">
-    <!-- Honeypot: bots fill this, humans don't -->
-    <input type="text" name="botcheck" style="display:none" aria-hidden="true">
+    <!-- Honeypot: bots fill it, humans don't -->
+    <input type="text" name="_honey" style="display:none" aria-hidden="true" tabindex="-1" autocomplete="off">
 
     <!-- BUG FIELDS -->
     <div class="category-fields active" data-cat="bug">
@@ -255,18 +260,17 @@
       </div>
     </div>
 
-    <!-- Anti-spam honeypot is in the hidden botcheck field above -->
+    <!-- Anti-spam honeypot is the _honey field above -->
 
     <button type="submit" class="submit" id="submitBtn">
       Send message
-      <span class="spinner">⏳</span>
     </button>
 
-    <!-- SUCCESS STATE — shown after Web3Forms confirms submission -->
+    <!-- SUCCESS STATE — shown after redirect back from FormSubmit -->
     <div class="success-state" id="successState">
       <div class="check">✓</div>
       <h2>Message sent</h2>
-      <p>Thanks for reaching out. We'll get back to you at the email you provided (or just note the feedback if you didn't leave one).</p>
+      <p>Thanks for reaching out. If this was your first time, check your email (incl. spam) for an activation link from FormSubmit — click it once and you'll get every future message.</p>
       <a class="back-link back" href="index.html"><span class="arrow">←</span> Back to app</a>
     </div>
   </form>
@@ -294,90 +298,23 @@
     });
   });
 
-  // Form submission via Web3Forms (https://web3forms.com)
-  // Free, no captcha, AJAX-friendly, no activation emails.
-  // First-time setup: get an access key at web3forms.com (2 min).
+  // Form posts directly to FormSubmit (no JS, no captcha).
+  // First time: FormSubmit sends an activation email to the
+  // destination address — click the link in that email to start
+  // receiving submissions. After that, every submit works
+  // automatically and the user is redirected back to this page.
   const form = document.getElementById('supportForm');
-  const submitBtn = document.getElementById('submitBtn');
   const successState = document.getElementById('successState');
+  const formPanel = document.querySelector('.form-panel');
 
-  const CATEGORY_LABELS = {
-    bug: 'Bug Report',
-    feature: 'Feature Request',
-    feedback: 'Feedback',
-    contact: 'Contact',
-  };
-  const FIELD_LABELS = {
-    bug_what: 'What were you doing when the bug happened?',
-    bug_expected: 'What did you expect to happen?',
-    bug_actual: 'What actually happened?',
-    feature_idea: 'What feature would you like?',
-    feature_why: 'Why would this be useful?',
-    feedback_liked: 'What do you like?',
-    feedback_improve: 'What could be better?',
-    contact_message: 'Your message',
-  };
-
-  form.addEventListener('submit', async e => {
-    e.preventDefault();
-
-    const accessKey = document.getElementById('accessKeyField').value.trim();
-    if (!accessKey || accessKey === 'YOUR_ACCESS_KEY_HERE') {
-      alert('Form not configured yet. The site owner needs to add a Web3Forms access key. See README.');
-      return;
-    }
-
-    submitBtn.disabled = true;
-    submitBtn.classList.add('loading');
-
-    const data = new FormData(form);
-    const category = data.get('category') || 'feedback';
-    const categoryLabel = CATEGORY_LABELS[category] || 'Support';
-
-    // Pretty-format the body with category + readable question labels
-    const sections = [];
-    for (const [key, value] of data.entries()) {
-      if (!value) continue;
-      if (key === 'category' || key === 'email' || key === 'name') continue;
-      if (key === 'access_key' || key === 'subject' || key === 'from_name' || key === 'botcheck') continue;
-      const label = FIELD_LABELS[key] || key;
-      sections.push(`${label}\n${value}`);
-    }
-    const name = (data.get('name') || '').trim();
-    const email = (data.get('email') || '').trim();
-    let body = `HifzAssist Support — ${categoryLabel}\n`;
-    body += `Submitted: ${new Date().toLocaleString()}\n\n`;
-    body += sections.join('\n\n');
-    if (name || email) {
-      body += '\n\n--- Reply to ---\n';
-      if (name) body += `Name: ${name}\n`;
-      if (email) body += `Email: ${email}\n`;
-    }
-    data.set('message', body);
-    data.set('subject', `HifzAssist: ${categoryLabel}`);
-
-    try {
-      const resp = await fetch('https://api.web3forms.com/submit', {
-        method: 'POST',
-        body: data,
-      });
-      const result = await resp.json();
-      if (result.success) {
-        form.querySelectorAll('.field, .submit, .intro, .categories').forEach(el => {
-          if (!el.closest('.success-state')) el.style.display = 'none';
-        });
-        successState.classList.add('show');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      } else {
-        throw new Error(result.message || 'Submission failed');
-      }
-    } catch (err) {
-      submitBtn.disabled = false;
-      submitBtn.classList.remove('loading');
-      alert('Could not send the message. Please try again, or email us directly at 104tutorials104@gmail.com');
-      console.error(err);
-    }
-  });
+  // If we just got redirected back from FormSubmit, show success state
+  if (new URLSearchParams(location.search).get('submitted') === 'true') {
+    if (formPanel) formPanel.style.display = 'none';
+    const cats = document.querySelector('.categories');
+    if (cats) cats.style.display = 'none';
+    successState.classList.add('show');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 </script>
 </body>
 </html>
