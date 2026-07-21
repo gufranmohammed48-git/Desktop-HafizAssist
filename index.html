@@ -178,7 +178,7 @@
 <body>
 
 <!-- VERSION BADGE — increment on every push so user can confirm fresh load -->
-<div class="version-badge" title="Increment on every change so you can verify your browser isn't loading a cached version">3.9</div>
+<div class="version-badge" title="Increment on every change so you can verify your browser isn't loading a cached version">4.0</div>
 
 <div class="app">
 
@@ -383,6 +383,10 @@ const SURAH_META = [
 const NEAR_WINDOW       = 8;     // normal lookahead
 const FAR_WINDOW        = 40;    // wider lookahead for resync
 const RESYNC_THRESHOLD  = 4;     // misses in a row before we trust a big jump
+const STRICT_MISS_LIMIT = 2;     // STRICT MODE: after this many misses in
+                                 // a row with no match, mark the current
+                                 // word as 'unclear' and advance the
+                                 // pointer. Lower = stricter.
 const LEVENSHTEIN_RATIO = 0.30;  // ≤30% edit distance is a match (was absolute 0.34)
 // Phoneme-similarity threshold (used as fallback when text is borderline)
 const PHONEME_LEVENSHTEIN_RATIO = 0.30;
@@ -682,6 +686,37 @@ function processNewWord(rawWord){
         `Miss #${consecutiveMisses}/${RESYNC_THRESHOLD} before resync. Pointer stays put.`,
     ts: Date.now(),
   });
+
+  // STRICT MODE: if we've missed STRICT_MISS_LIMIT times in a row with no
+  // match anywhere in the near/far window, the user clearly isn't saying
+  // the current word. Mark it as 'unclear' and advance the pointer so the
+  // recitation keeps moving. Resets the miss counter.
+  if(consecutiveMisses >= STRICT_MISS_LIMIT){
+    expected.el.dataset.status = 'unclear';
+    stats.unclear++;
+    debugLog.push({
+      kind:'unclear',
+      heard:rawWord, heardNorm:norm, heardPhoneme:heardPh,
+      expected:expected.text, expectedNorm:expected.norm, expectedPhoneme,
+      textRatio, phRatio,
+      surah:activeSurah, ayah:expected.ayah, position:expected.position,
+      reason:`Strick mode: ${consecutiveMisses} misses on "${expected.norm}". ` +
+             `Marked unclear and pointer advanced past it. ` +
+             `Heard "${norm}" (text=${textRatio.toFixed(2)}, phon=${phRatio != null ? phRatio.toFixed(2) : 'n/a'}).`,
+      ts: Date.now(),
+    });
+    consecutiveMisses = 0;
+    pointer++;
+    updateStats();
+    highlightCurrent();
+    renderDebugPanel();
+    if(pointer >= refWords.length){
+      statusEl.textContent = 'Surah complete. Press reset to go again, or pick another surah.';
+      stopListening();
+    }
+    return;
+  }
+
   renderDebugPanel();
 }
 
