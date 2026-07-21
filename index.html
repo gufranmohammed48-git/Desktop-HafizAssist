@@ -59,7 +59,8 @@
     .contact-btn span[aria-hidden]{display:none}
     .contact-btn{padding:7px 10px}
   }
-  header{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+  header{display:flex;flex-direction:column;align-items:flex-start;gap:8px;margin-bottom:18px}
+  header .bismillah{width:100%;max-width:480px;height:auto;filter:drop-shadow(0 4px 18px rgba(46,204,113,.25))}
   h1{margin:0;font-size:22px;font-weight:700}
   h1 .arabic{font-family:'Amiri',serif;font-size:26px;margin-left:8px;color:var(--accent)}
   .lede{margin:0 0 24px;color:var(--text-dim);font-size:14px;line-height:1.5;max-width:780px}
@@ -174,7 +175,7 @@
 <body>
 
 <!-- VERSION BADGE — increment on every push so user can confirm fresh load -->
-<div class="version-badge" title="Increment on every change so you can verify your browser isn't loading a cached version">3.6</div>
+<div class="version-badge" title="Increment on every change so you can verify your browser isn't loading a cached version">3.7</div>
 
 <a class="contact-btn" href="support.html" title="Report a bug, suggest a feature, or send feedback">
   <span aria-hidden="true">💬</span> Contact Support
@@ -183,6 +184,7 @@
 <div class="app">
 
 <header>
+  <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
   <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
 </header>
 
