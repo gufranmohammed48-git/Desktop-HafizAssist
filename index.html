@@ -231,7 +231,7 @@
 </div>
 
 <!-- VERSION BADGE — increment on every push so user can confirm fresh load -->
-<div class="version-badge" title="Increment on every change so you can verify your browser isn't loading a cached version">4.2</div>
+<div class="version-badge" title="Increment on every change so you can verify your browser isn't loading a cached version">4.3</div>
 
 <div class="app" id="appRoot">
 
@@ -467,10 +467,6 @@ const SURAH_META = [
 const NEAR_WINDOW       = 8;     // normal lookahead
 const FAR_WINDOW        = 40;    // wider lookahead for resync
 const RESYNC_THRESHOLD  = 4;     // misses in a row before we trust a big jump
-const STRICT_MISS_LIMIT = 2;     // STRICT MODE: after this many misses in
-                                 // a row with no match, mark the current
-                                 // word as 'unclear' and advance the
-                                 // pointer. Lower = stricter.
 const LEVENSHTEIN_RATIO = 0.30;  // ≤30% edit distance is a match (was absolute 0.34)
 // Phoneme-similarity threshold (used as fallback when text is borderline)
 const PHONEME_LEVENSHTEIN_RATIO = 0.30;
@@ -771,37 +767,60 @@ function processNewWord(rawWord){
     ts: Date.now(),
   });
 
-  // STRICT MODE: if we've missed STRICT_MISS_LIMIT times in a row with no
-  // match anywhere in the near/far window, the user clearly isn't saying
-  // the current word. Mark it as 'unclear' and advance the pointer so the
-  // recitation keeps moving. Resets the miss counter.
-  if(consecutiveMisses >= STRICT_MISS_LIMIT){
-    expected.el.dataset.status = 'unclear';
-    stats.unclear++;
+  // WRONG-WORD DETECTION: if the heard word matches NOTHING anywhere
+  // in the surah, the user is reciting a word that isn't in this
+  // passage. Mark the current word as a MISTAKE (red), play a short
+  // beep, and KEEP THE POINTER where it is. The user must say the
+  // correct word to advance. This is the Tarteel-style flow.
+  const anywhereMatch = findMatch(norm, 0, refWords.length);
+  if(anywhereMatch.idx === -1){
+    expected.el.dataset.status = 'mistake';
+    stats.mistake++;
     debugLog.push({
-      kind:'unclear',
+      kind:'mistake',
       heard:rawWord, heardNorm:norm, heardPhoneme:heardPh,
       expected:expected.text, expectedNorm:expected.norm, expectedPhoneme,
       textRatio, phRatio,
       surah:activeSurah, ayah:expected.ayah, position:expected.position,
-      reason:`Strick mode: ${consecutiveMisses} misses on "${expected.norm}". ` +
-             `Marked unclear and pointer advanced past it. ` +
-             `Heard "${norm}" (text=${textRatio.toFixed(2)}, phon=${phRatio != null ? phRatio.toFixed(2) : 'n/a'}).`,
+      reason:`Heard "${norm}" but it doesn't match any word in this surah. ` +
+             `Marked "${expected.norm}" as mistake. Pointer stays at ${pointer} — ` +
+             `recite the correct word to continue.`,
       ts: Date.now(),
     });
-    consecutiveMisses = 0;
-    pointer++;
+    playBeep();
+    statusEl.textContent = `Wrong word — recite "${expected.text}" to continue.`;
     updateStats();
-    highlightCurrent();
     renderDebugPanel();
-    if(pointer >= refWords.length){
-      statusEl.textContent = 'Surah complete. Press reset to go again, or pick another surah.';
-      stopListening();
-    }
     return;
   }
 
+  // WRONG-ish but matches SOMETHING in the surah: log and keep waiting
+  // (original lenient behavior — the user may have skipped ahead or
+  // is just pausing; we don't mark anything yet).
   renderDebugPanel();
+}
+
+// Short beep when the user says a wrong word — gives the same
+// audio feedback Tarteel uses to signal a mistake.
+function playBeep(){
+  try{
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if(!Ctx) return;
+    const ctx = new Ctx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.frequency.value = 660;        // ~E5, clear and short
+    osc.type = 'sine';
+    gain.gain.setValueAtTime(0.25, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.2);
+    setTimeout(() => ctx.close(), 300);
+  }catch(e){
+    // AudioContext blocked (e.g. autoplay policy) — fail silently
+  }
 }
 
 // =========================================================================
