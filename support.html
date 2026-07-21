@@ -180,7 +180,15 @@
 
   <!-- FORM -->
   <form class="form-panel" id="supportForm">
+    <!-- Web3Forms config: https://web3forms.com -->
+    <!-- 1) Sign up at web3forms.com (free, no card) using 104tutorials104@gmail.com -->
+    <!-- 2) Paste your access_key below to start receiving messages -->
+    <input type="hidden" name="access_key" id="accessKeyField" value="YOUR_ACCESS_KEY_HERE">
+    <input type="hidden" name="subject" value="HifzAssist Support">
+    <input type="hidden" name="from_name" value="HifzAssist Support Form">
     <input type="hidden" name="category" id="categoryField" value="bug">
+    <!-- Honeypot: bots fill this, humans don't -->
+    <input type="text" name="botcheck" style="display:none" aria-hidden="true">
 
     <!-- BUG FIELDS -->
     <div class="category-fields active" data-cat="bug">
@@ -247,20 +255,18 @@
       </div>
     </div>
 
-    <!-- Anti-spam honeypot (hidden from users, must stay empty) -->
-    <input type="text" name="website" id="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;opacity:0;pointer-events:none" aria-hidden="true">
+    <!-- Anti-spam honeypot is in the hidden botcheck field above -->
 
     <button type="submit" class="submit" id="submitBtn">
-      Open in your email app
+      Send message
       <span class="spinner">⏳</span>
     </button>
 
-    <!-- SUCCESS STATE — shown after submit (which opens the email client) -->
+    <!-- SUCCESS STATE — shown after Web3Forms confirms submission -->
     <div class="success-state" id="successState">
       <div class="check">✓</div>
-      <h2>Almost there!</h2>
-      <p>Your email app should have opened with the message pre-filled. Hit <b>Send</b> in the email window and it lands in our inbox.</p>
-      <p style="margin-top:8px;font-size:12px;opacity:.8">If nothing opened, you can also email us directly at <a href="mailto:104tutorials104@gmail.com" style="color:var(--accent)">104tutorials104@gmail.com</a>.</p>
+      <h2>Message sent</h2>
+      <p>Thanks for reaching out. We'll get back to you at the email you provided (or just note the feedback if you didn't leave one).</p>
       <a class="back-link back" href="index.html"><span class="arrow">←</span> Back to app</a>
     </div>
   </form>
@@ -288,13 +294,12 @@
     });
   });
 
-  // Form submission via mailto: link — works on every device, no third-party
-  // service, no captcha, no activation emails. The user's email client opens
-  // with everything pre-filled; they click Send and it lands in our inbox.
+  // Form submission via Web3Forms (https://web3forms.com)
+  // Free, no captcha, AJAX-friendly, no activation emails.
+  // First-time setup: get an access key at web3forms.com (2 min).
   const form = document.getElementById('supportForm');
   const submitBtn = document.getElementById('submitBtn');
   const successState = document.getElementById('successState');
-  const SUPPORT_EMAIL = '104tutorials104@gmail.com';
 
   const CATEGORY_LABELS = {
     bug: 'Bug Report',
@@ -302,8 +307,6 @@
     feedback: 'Feedback',
     contact: 'Contact',
   };
-
-  // Field key -> human-readable question
   const FIELD_LABELS = {
     bug_what: 'What were you doing when the bug happened?',
     bug_expected: 'What did you expect to happen?',
@@ -315,49 +318,65 @@
     contact_message: 'Your message',
   };
 
-  form.addEventListener('submit', e => {
+  form.addEventListener('submit', async e => {
     e.preventDefault();
 
-    // Honeypot: if the hidden 'website' field is filled, it's a bot
-    if (document.getElementById('website').value) return;
+    const accessKey = document.getElementById('accessKeyField').value.trim();
+    if (!accessKey || accessKey === 'YOUR_ACCESS_KEY_HERE') {
+      alert('Form not configured yet. The site owner needs to add a Web3Forms access key. See README.');
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.classList.add('loading');
 
     const data = new FormData(form);
     const category = data.get('category') || 'feedback';
     const categoryLabel = CATEGORY_LABELS[category] || 'Support';
 
-    // Build the email body from category-specific fields + contact info
+    // Pretty-format the body with category + readable question labels
     const sections = [];
     for (const [key, value] of data.entries()) {
-      if (!value || key === 'category' || key === 'email' || key === 'name' || key === 'website') continue;
+      if (!value) continue;
+      if (key === 'category' || key === 'email' || key === 'name') continue;
+      if (key === 'access_key' || key === 'subject' || key === 'from_name' || key === 'botcheck') continue;
       const label = FIELD_LABELS[key] || key;
       sections.push(`${label}\n${value}`);
     }
-
     const name = (data.get('name') || '').trim();
     const email = (data.get('email') || '').trim();
     let body = `HifzAssist Support — ${categoryLabel}\n`;
     body += `Submitted: ${new Date().toLocaleString()}\n\n`;
     body += sections.join('\n\n');
-    body += '\n';
     if (name || email) {
-      body += '\n--- Reply to ---\n';
+      body += '\n\n--- Reply to ---\n';
       if (name) body += `Name: ${name}\n`;
       if (email) body += `Email: ${email}\n`;
     }
-    body += '\n--\nSent from HifzAssist support form.';
+    data.set('message', body);
+    data.set('subject', `HifzAssist: ${categoryLabel}`);
 
-    const subject = `HifzAssist: ${categoryLabel}`;
-    const mailto = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-
-    // Show success UI
-    form.querySelectorAll('.field, .submit, .intro, .categories').forEach(el => {
-      if (!el.closest('.success-state')) el.style.display = 'none';
-    });
-    successState.classList.add('show');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-
-    // Open the email client
-    window.location.href = mailto;
+    try {
+      const resp = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        body: data,
+      });
+      const result = await resp.json();
+      if (result.success) {
+        form.querySelectorAll('.field, .submit, .intro, .categories').forEach(el => {
+          if (!el.closest('.success-state')) el.style.display = 'none';
+        });
+        successState.classList.add('show');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        throw new Error(result.message || 'Submission failed');
+      }
+    } catch (err) {
+      submitBtn.disabled = false;
+      submitBtn.classList.remove('loading');
+      alert('Could not send the message. Please try again, or email us directly at 104tutorials104@gmail.com');
+      console.error(err);
+    }
   });
 </script>
 </body>
