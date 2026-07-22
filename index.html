@@ -42,40 +42,6 @@
     box-shadow:0 2px 8px rgba(0,0,0,.3);user-select:none;
   }
   .version-badge::before{content:"v";opacity:.6;margin-right:1px}
-  /* BROWSER NOT SUPPORTED — shown when SpeechRecognition is unavailable.
-     Full-page overlay that hides the app and tells the user which
-     browsers work. Display is controlled by JS at startup. */
-  .browser-error{
-    position:fixed;inset:0;z-index:9999;
-    background:var(--bg);
-    background-image:radial-gradient(ellipse at top,rgba(231,76,60,.15) 0%,transparent 60%);
-    display:flex;align-items:center;justify-content:center;
-    padding:24px;text-align:center;
-  }
-  .browser-error.hidden{display:none}
-  .browser-error .card{
-    max-width:520px;background:var(--panel);
-    border:1px solid var(--border);border-radius:18px;
-    padding:32px 28px;box-shadow:0 20px 60px rgba(0,0,0,.5);
-  }
-  .browser-error .icon{font-size:48px;margin-bottom:12px;line-height:1}
-  .browser-error h1{margin:0 0 8px;font-size:22px;font-weight:700;color:var(--red)}
-  .browser-error p{margin:0 0 16px;color:var(--text-dim);font-size:14px;line-height:1.6}
-  .browser-error ul{list-style:none;padding:0;margin:0 0 20px;text-align:left}
-  .browser-error li{
-    padding:10px 14px;background:var(--card);
-    border:1px solid var(--border);border-radius:10px;
-    margin-bottom:8px;font-size:14px;
-    display:flex;align-items:center;justify-content:space-between;gap:12px;
-  }
-  .browser-error li b{color:var(--green)}
-  .browser-error a.browselink{
-    display:inline-block;background:var(--green);color:#0a1f12;
-    text-decoration:none;padding:6px 14px;border-radius:6px;
-    font-size:12px;font-weight:600;
-  }
-  .browser-error a.browselink:hover{filter:brightness(1.1)}
-  .browser-error .bismillah{width:100%;max-width:380px;height:auto;margin:0 auto 16px;filter:drop-shadow(0 4px 14px rgba(46,204,113,.25))}
   /* CONTACT SUPPORT — inline pill, lives inside the section header so it
      scrolls naturally with the page (not a fixed overlay). */
   .contact-btn{
@@ -211,31 +177,10 @@
 </head>
 <body>
 
-<!-- BROWSER COMPATIBILITY CHECK — hidden by default, JS shows it if
-     SpeechRecognition isn't available. The main app below is
-     wrapped in a #appRoot container that JS hides when this shows. -->
-<div class="browser-error hidden" id="browserError">
-  <div class="card">
-    <img class="bismillah" src="assets/bismillah.png" alt="Bismillah">
-    <div class="icon" aria-hidden="true">🌐</div>
-    <h1>This browser isn't supported</h1>
-    <p>HifzAssist uses your browser's built-in speech recognition to listen to your recitation. Unfortunately, <b id="beBrowserName">your browser</b> doesn't include that feature.</p>
-    <p style="font-size:13px">Please open this page in one of these:</p>
-    <ul>
-      <li><span><b>Google Chrome</b> &nbsp;·&nbsp; Windows / Mac / Linux / Android</span><a class="browselink" href="https://www.google.com/chrome/" target="_blank" rel="noopener">Download</a></li>
-      <li><span><b>Microsoft Edge</b> &nbsp;·&nbsp; Windows / Mac</span><a class="browselink" href="https://www.microsoft.com/edge" target="_blank" rel="noopener">Download</a></li>
-      <li><span><b>Opera</b> &nbsp;·&nbsp; Windows / Mac / Linux</span><a class="browselink" href="https://www.opera.com/" target="_blank" rel="noopener">Download</a></li>
-    </ul>
-    <p style="font-size:12px;margin-bottom:0;color:var(--text-dim)">Once you've opened this page in a supported browser, everything will just work.</p>
-  </div>
-</div>
-
 <!-- VERSION BADGE — increment on every push so user can confirm fresh load -->
-<div class="version-badge" title="Increment on every change so you can verify your browser isn't loading a cached version">4.9</div>
+<div class="version-badge" title="Increment on every change so you can verify your browser isn't loading a cached version">3.10</div>
 
-<div id="beepDebug" style="position:fixed;bottom:14px;right:14px;z-index:1000;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;color:var(--yellow);box-shadow:0 2px 8px rgba(0,0,0,.3);user-select:none;max-width:380px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Beeps: 0</div>
-
-<div class="app" id="appRoot">
+<div class="app">
 
 <header>
   <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
@@ -312,37 +257,6 @@
 </div>
 
 <script>
-// =========================================================================
-// BROWSER COMPATIBILITY CHECK — run FIRST, before anything else.
-// If SpeechRecognition isn't available, hide the app, show a friendly
-// error with download links for supported browsers, and set a flag
-// the boot function checks to skip loading.
-// =========================================================================
-let BROWSER_SUPPORTED = true;
-(function browserCheck(){
-  const supported = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
-  if(supported) return;  // all good, continue to app code
-
-  BROWSER_SUPPORTED = false;
-
-  // Try to identify which browser they're using so the message is friendlier
-  const ua = navigator.userAgent;
-  let name = 'your browser';
-  if(/Firefox\/\d/i.test(ua))        name = 'Firefox';
-  else if(/Edg\/\d/i.test(ua))       name = 'Microsoft Edge (legacy)';
-  else if(/OPR\/\d/i.test(ua))       name = 'Opera';
-  else if(/Chrome\/\d/i.test(ua))    name = 'a Chrome variant without Speech API';
-  else if(/Safari\/\d/i.test(ua))    name = 'Safari';
-  const nameEl = document.getElementById('beBrowserName');
-  if(nameEl) nameEl.textContent = name;
-
-  // Show the error overlay, hide the app
-  const err = document.getElementById('browserError');
-  if(err) err.classList.remove('hidden');
-  const app = document.getElementById('appRoot');
-  if(app) app.style.display = 'none';
-})();
-
 // =========================================================================
 // SURAH METADATA — name + transliteration + verse count for each of 114.
 // =========================================================================
@@ -479,17 +393,6 @@ const PHONEME_LEVENSHTEIN_RATIO = 0.30;
 let refWords       = [];     // [{text, norm, phoneme, el, surah, ayah, position}]
 let ayahEndIndex   = [];     // [endIdx_in_refWords_of_ayah_1, endIdx_of_ayah_2, ...]
 let pointer        = 0;
-let _lastBeepedPos = -1;       // -1 = no active 'stuck' session.
-                               // Otherwise = the pointer position when
-                               // we last beeped. A session is active
-                               // until the user makes genuine progress
-                               // past this position (max pointer seen
-                               // since the beep >= _lastBeepedPos + 2).
-let _maxPointerSinceBeep = 0;  // highest pointer reached since the
-                               // last beep, so we can tell when the
-                               // user has recovered
-let _beepCount     = 0;        // total beeps this surah (debug)
-let _beepDebugEl   = null;     // visible counter (debug) — set at DOM init
 let consecutiveMisses = 0;
 let stats          = {correct:0, mistake:0, unclear:0};
 let debugLog       = [];     // every mistake/unclear pushed here for the debug panel
@@ -678,27 +581,10 @@ function applyMatch(matchAt, matchInfo, heardWord){
       ts: Date.now(),
     });
   }
-  // If this word was already marked as a mistake, KEEP it red. The
-  // user got it wrong the first time and the mark is permanent until
-  // they change surah. We still advance the pointer so the recitation
-  // can continue, but we don't increment stats.correct (they already
-  // paid the mistake price).
-  if(refWords[matchAt].el.dataset.status !== 'mistake'){
-    refWords[matchAt].el.dataset.status = 'correct';
-    stats.correct++;
-  }
+  refWords[matchAt].el.dataset.status = 'correct';
+  stats.correct++;
   pointer = matchAt + 1;
   consecutiveMisses = 0;
-
-  // Session-end check: if we've reached _lastBeepedPos + 2, the user
-  // has matched at least 2 words past where we last beeped. That's
-  // genuine recovery — end the session so the next wrong word can beep.
-  if(pointer > _maxPointerSinceBeep) _maxPointerSinceBeep = pointer;
-  if(_lastBeepedPos !== -1 && _maxPointerSinceBeep >= _lastBeepedPos + 2){
-    _lastBeepedPos = -1;
-    _maxPointerSinceBeep = 0;
-    console.log(`[SESSION ENDED] pointer=${pointer} reached ${_lastBeepedPos + 2}, ready for next beep`);
-  }
   updateStats();
   highlightCurrent();
   renderDebugPanel();
@@ -796,81 +682,7 @@ function processNewWord(rawWord){
         `Miss #${consecutiveMisses}/${RESYNC_THRESHOLD} before resync. Pointer stays put.`,
     ts: Date.now(),
   });
-
-  // WRONG-WORD DETECTION: if the heard word matches NOTHING anywhere
-  // in the surah, the user is reciting a word that isn't in this
-  // passage. Mark the current word as a MISTAKE (red), play a short
-  // beep, and KEEP THE POINTER where it is. The user must say the
-  // correct word to advance. This is the Tarteel-style flow.
-  const anywhereMatch = findMatch(norm, 0, refWords.length);
-  if(anywhereMatch.idx === -1){
-    expected.el.dataset.status = 'mistake';
-    stats.mistake++;
-    debugLog.push({
-      kind:'mistake',
-      heard:rawWord, heardNorm:norm, heardPhoneme:heardPh,
-      expected:expected.text, expectedNorm:expected.norm, expectedPhoneme,
-      textRatio, phRatio,
-      surah:activeSurah, ayah:expected.ayah, position:expected.position,
-      reason:`Heard "${norm}" but it doesn't match any word in this surah. ` +
-             `Marked "${expected.norm}" as mistake. Pointer stays at ${pointer} — ` +
-             `recite the correct word to continue.`,
-      ts: Date.now(),
-    });
-    // SESSION-BASED BEEP: only beep if no active 'stuck' session.
-    // A session is started on the first beep and stays active until
-    // the user has made genuine progress past the beeping position
-    // (max pointer reached since the beep >= _lastBeepedPos + 2).
-    //
-    // This handles Chrome's interim-result thrash: even if the
-    // matcher bounces the pointer around due to spurious fuzzy
-    // matches at other positions, those bounces don't reach
-    // _lastBeepedPos + 2, so the session stays active and we
-    // don't beep again.
-    if(_lastBeepedPos === -1){
-      playBeep();
-      _lastBeepedPos = pointer;
-      _maxPointerSinceBeep = pointer;
-      _beepCount++;
-      console.log(`[BEEP #${_beepCount}] at pointer=${pointer} heard="${norm}" expected="${expected.norm}" — new session`);
-      _beepDebugEl.textContent = `Beeps: ${_beepCount} | Session: active @ ${pointer} (need ${pointer + 2} to end)`;
-    } else {
-      console.log(`[BEEP SKIPPED] at pointer=${pointer} heard="${norm}" — session active (need ${_lastBeepedPos + 2})`);
-      _beepDebugEl.textContent = `Beeps: ${_beepCount} | Session: active (need ${_lastBeepedPos + 2}, current max ${_maxPointerSinceBeep})`;
-    }
-    statusEl.textContent = `Wrong word — recite "${expected.text}" to continue.`;
-    updateStats();
-    renderDebugPanel();
-    return;
-  }
-
-  // WRONG-ish but matches SOMETHING in the surah: log and keep waiting
-  // (original lenient behavior — the user may have skipped ahead or
-  // is just pausing; we don't mark anything yet).
   renderDebugPanel();
-}
-
-// Short beep when the user says a wrong word — gives the same
-// audio feedback Tarteel uses to signal a mistake.
-function playBeep(){
-  try{
-    const Ctx = window.AudioContext || window.webkitAudioContext;
-    if(!Ctx) return;
-    const ctx = new Ctx();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.frequency.value = 660;        // ~E5, clear and short
-    osc.type = 'sine';
-    gain.gain.setValueAtTime(0.25, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18);
-    osc.start();
-    osc.stop(ctx.currentTime + 0.2);
-    setTimeout(() => ctx.close(), 300);
-  }catch(e){
-    // AudioContext blocked (e.g. autoplay policy) — fail silently
-  }
 }
 
 // =========================================================================
@@ -927,7 +739,6 @@ const micBtn      = document.getElementById('micBtn');
 const micLabel    = document.getElementById('micLabel');
 const statusEl    = document.getElementById('status');
 const playbackRow = document.getElementById('playbackRow');
-_beepDebugEl   = document.getElementById('beepDebug');
 const playBtn     = document.getElementById('playBtn');
 const progressFill= document.getElementById('progressFill');
 const timeLabel   = document.getElementById('timeLabel');
@@ -991,10 +802,6 @@ function resetState(){
   ayahEndIndex = [];
   pointer = 0;
   consecutiveMisses = 0;
-  _lastBeepedPos = -1;
-  _maxPointerSinceBeep = 0;
-  _beepCount = 0;
-  if(_beepDebugEl) _beepDebugEl.textContent = 'Beeps: 0';
   stats = {correct:0, mistake:0, unclear:0};
   debugLog = [];
   committedWordCount = 0;
@@ -1159,15 +966,10 @@ async function startListening(){
     // Re-processing every tick is O(N) per tick. With surahs ≤ 6236 words
     // and Chrome sending <10 ticks/sec, that's <60k matches/sec — fine.
     const words = fullText.length ? fullText.split(/\s+/) : [];
-
-    // Reset marks on ALL refWords (we'll re-derive state from scratch),
-    // EXCEPT for words already marked 'mistake' — those stay red forever
-    // until the user changes surah or hits reset. The user said "the
-    // error word should be red and stay red".
+    
+    // Reset marks on ALL refWords (we'll re-derive state from scratch)
     for(let i = 0; i < refWords.length; i++){
-      if(refWords[i].el.dataset.status !== 'mistake'){
-        refWords[i].el.dataset.status = '';
-      }
+      refWords[i].el.dataset.status = '';
     }
     pointer = 0;
     consecutiveMisses = 0;
@@ -1179,16 +981,6 @@ async function startListening(){
       processNewWord(words[i]);
     }
     committedWordCount = words.length;
-
-    // After re-processing, check if the user has made genuine progress
-    // (final pointer >= _lastBeepedPos + 2). If so, end the session so
-    // a new wrong word can beep.
-    if(pointer > _maxPointerSinceBeep) _maxPointerSinceBeep = pointer;
-    if(_lastBeepedPos !== -1 && _maxPointerSinceBeep >= _lastBeepedPos + 2){
-      _lastBeepedPos = -1;
-      _maxPointerSinceBeep = 0;
-      console.log(`[SESSION ENDED on tick] final pointer=${pointer} reached threshold`);
-    }
     highlightCurrent();
     renderDebugPanel();
     updateStats();
@@ -1385,7 +1177,6 @@ window.__matcher__ = {
 // BOOT — load phoneme data, then render the picker.
 // =========================================================================
 (async function boot(){
-  if(!BROWSER_SUPPORTED) return;  // browser error overlay is showing, skip everything
   try{
     phonemeData = await loadPhonemeData();
     if(!phonemeData){
