@@ -90,7 +90,12 @@
   #ayahContainer .verse{margin-bottom:16px}
   #ayahContainer .verse:last-child{margin-bottom:0}
   #ayahContainer .verse-label{display:inline-block;background:var(--primary-soft);color:var(--primary);font-family:'Inter',sans-serif;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;margin-left:8px;vertical-align:middle}
-  .word{display:inline-block;padding:4px 6px;margin:2px 3px;border-radius:6px;cursor:pointer;transition:all .15s ease;border:2px solid transparent;position:relative}
+  .word{display:inline-block;padding:4px 6px;margin:2px 3px;border-radius:6px;cursor:pointer;transition:background-color .15s ease,color .15s ease,border-color .15s ease,opacity .15s ease;border:2px solid transparent;position:relative}
+  /* Note: NO transition on transform or box-shadow. When the .now class
+     moves to a new word on every Chrome interim tick (5-10x/sec), the
+     scale and box-shadow would animate rapidly, making the page shake
+     visibly on long surahs. The color/bg transitions stay smooth; the
+     transform/box-shadow change instantly. */
   .word[data-status="correct"]{background:var(--green-soft);color:var(--green);border-color:rgba(46,204,113,.3)}
   .word[data-status="correct"].now{box-shadow:0 0 0 3px rgba(46,204,113,.4);transform:scale(1.08)}
   .word[data-status="mistake"]{background:var(--red-soft);color:var(--red);border-color:rgba(231,76,60,.3);text-decoration:line wavy var(--red)}
@@ -178,7 +183,7 @@
 <body>
 
 <!-- VERSION BADGE — increment on every push so user can confirm fresh load -->
-<div class="version-badge" title="Increment on every change so you can verify your browser isn't loading a cached version">3.11</div>
+<div class="version-badge" title="Increment on every change so you can verify your browser isn't loading a cached version">3.12</div>
 
 <div class="app">
 
@@ -394,6 +399,7 @@ let refWords       = [];     // [{text, norm, phoneme, el, surah, ayah, position
 let ayahEndIndex   = [];     // [endIdx_in_refWords_of_ayah_1, endIdx_of_ayah_2, ...]
 let pointer        = 0;
 let consecutiveMisses = 0;
+let _lastHighlightedPointer = -1;  // last pointer value highlightCurrent processed
 let stats          = {correct:0, mistake:0, unclear:0};
 let debugLog       = [];     // every mistake/unclear pushed here for the debug panel
 let recognition    = null;
@@ -890,6 +896,29 @@ function updateStats(){
 }
 
 function highlightCurrent(){
+  // Bail if pointer hasn't changed since last highlight. The onresult
+  // handler calls this on every interim tick, but if the pointer
+  // didn't actually move, re-classing every word is pure DOM thrash
+  // and can re-trigger CSS transitions on .now (transform/box-shadow
+  // animations) — which is what was making the page shake on long
+  // surahs.
+  if(pointer === _lastHighlightedPointer) {
+    // Still need the scroll check, in case the user scrolled the
+    // container manually and the word went off-screen.
+    if(pointer < refWords.length){
+      const el = refWords[pointer].el;
+      const _container = document.getElementById('ayahContainer');
+      if(_container){
+        const _cRect = _container.getBoundingClientRect();
+        const _eRect = el.getBoundingClientRect();
+        const _padding = 40;
+        if(_eRect.top < _cRect.top + _padding || _eRect.bottom > _cRect.bottom - _padding){
+          el.scrollIntoView({behavior:'auto', block:'center'});
+        }
+      }
+    }
+    return;
+  }
   document.querySelectorAll('.word.now, .word.past, .word.future').forEach(el => {
     el.classList.remove('now', 'past', 'future');
   });
@@ -899,20 +928,20 @@ function highlightCurrent(){
     else if(i === pointer) el.classList.add('now');
     else el.classList.add('future');
   }
+  _lastHighlightedPointer = pointer;
   if(pointer < refWords.length){
     const el = refWords[pointer].el;
-    // Only scroll if the current word is OUTSIDE the visible area of the
-    // ayah container. Calling scrollIntoView on every tick (Chrome's
-    // interim results fire many times per second) re-triggers the
-    // smooth-scroll animation repeatedly, which makes the page shake
-    // visibly on long surahs once the pointer leaves the first line.
+    // Only scroll if the current word is OUTSIDE the visible area of
+    // the ayah container. Use instant ('auto') scroll rather than
+    // 'smooth' — smooth scrolling re-triggers on every Chrome interim
+    // tick and visibly shakes the page on long surahs.
     const _container = document.getElementById('ayahContainer');
     if(_container){
       const _cRect = _container.getBoundingClientRect();
       const _eRect = el.getBoundingClientRect();
       const _padding = 40;  // keep some breathing room around the word
       if(_eRect.top < _cRect.top + _padding || _eRect.bottom > _cRect.bottom - _padding){
-        el.scrollIntoView({behavior:'smooth', block:'center'});
+        el.scrollIntoView({behavior:'auto', block:'center'});
       }
     }
   }
@@ -985,6 +1014,7 @@ async function startListening(){
       refWords[i].el.dataset.status = '';
     }
     pointer = 0;
+    _lastHighlightedPointer = -1;
     consecutiveMisses = 0;
     stats = {correct:0, mistake:0, unclear:0};
     debugLog = [];
