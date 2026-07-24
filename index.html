@@ -189,7 +189,7 @@
 <body>
 
 <!-- VERSION BADGE — increment on every push so user can confirm fresh load -->
-<div class="version-badge" title="Increment on every change so you can verify your browser isn't loading a cached version">3.16</div>
+<div class="version-badge" title="Increment on every change so you can verify your browser isn't loading a cached version">3.17</div>
 
 <div class="app">
 
@@ -392,8 +392,8 @@ const SURAH_META = [
 // CONSTANTS — matching thresholds, look-ahead windows.
 // =========================================================================
 const NEAR_WINDOW       = 8;     // normal lookahead
-const FAR_WINDOW        = 40;    // wider lookahead for resync
-const RESYNC_THRESHOLD  = 4;     // misses in a row before we trust a big jump
+const FAR_WINDOW        = 8;     // limited lookahead for resync (was 40 — too aggressive, jumped 4 lines on a single mispronunciation)
+const RESYNC_THRESHOLD  = 6;     // misses in a row before we trust a jump (was 4 — too eager)
 const LEVENSHTEIN_RATIO = 0.30;  // ≤30% edit distance is a match (was absolute 0.34)
 // Phoneme-similarity threshold (used as fallback when text is borderline)
 const PHONEME_LEVENSHTEIN_RATIO = 0.30;
@@ -579,9 +579,11 @@ function applyMatch(matchAt, matchInfo, heardWord){
   // heard word that triggered it so the user can see what caused the jump.
   for(let i = pointer; i < matchAt; i++){
     const w = refWords[i];
-    // Always 'unclear' for skip — mistake is reserved for cases where
-    // the user actively said the wrong word.
-    w.el.dataset.status = 'unclear';
+    // Skip WITHOUT painting the word yellow. A 4-line resync used to
+    // paint 40 yellow 'unclear' tiles, which the user read as a wall
+    // of mistakes. We still count the skip in stats.unclear and log
+    // it to the debug panel, but we leave the word visually clean.
+    // The pointer just jumps silently.
     stats.unclear++;
     debugLog.push({
       kind:'unclear',
