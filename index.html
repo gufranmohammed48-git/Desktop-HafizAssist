@@ -297,16 +297,7 @@
   </div>
 </section>
 
-<section class="debug-panel hidden" id="debugPanel">
-  <h2>③ Debug — words marked as errors</h2>
-  <p class="hint">Each row shows a word that was marked <b style="color:var(--red)">wrong</b> or
-    <b style="color:var(--yellow)">unclear</b>: what the script <i>expected</i> (the Quranic
-    text), what was <i>recited</i> (Chrome's transcription), and <b>why</b> it didn't match.</p>
-  <div class="debug-list" id="debugList">
-    <div class="debug-empty">No errors yet. Start reciting and any mismatches will appear here.</div>
-  </div>
-  <button class="clear-btn" id="clearDebugBtn">Clear debug log</button>
-</section>
+<!-- Debug panel removed for production -->
 
 </div>
 
@@ -752,6 +743,8 @@ function processNewWord(rawWord){
 // DEBUG PANEL — render every mistake/unclear with full context.
 // =========================================================================
 function renderDebugPanel(){
+  // Debug panel removed for production. No-op.
+  return;
   const list = document.getElementById('debugList');
   if(!debugLog.length){
     list.innerHTML = '<div class="debug-empty">No errors yet. Start reciting and any mismatches will appear here.</div>';
