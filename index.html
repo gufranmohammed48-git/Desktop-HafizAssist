@@ -69,6 +69,23 @@
   .lede{margin:0 auto 24px;color:var(--text-dim);font-size:14px;line-height:1.5;max-width:780px;text-align:center}
   .panel{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:18px}
   .panel h2{margin:0 0 12px;font-size:14px;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:.8px}
+  /* The Recite Surah heading gets a bigger, bolder treatment with
+     a soft text-shadow so the user can clearly see which surah
+     they are reciting. */
+  #step2Title{
+    font-size:24px;
+    font-weight:800;
+    letter-spacing:.3px;
+    color:var(--text);
+    text-transform:none;
+    text-shadow:0 1px 0 rgba(255,255,255,.04), 0 2px 8px rgba(0,0,0,.45);
+  }
+  #step2Title .arabic-name{
+    font-family:'Amiri',serif;
+    font-size:28px;
+    color:#2ecc71;
+    margin:0 4px;
+  }
   .searchbar{display:flex;gap:10px;margin-bottom:14px}
   .searchbar input{flex:1;background:var(--card);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;font-size:14px;outline:none}
   .searchbar input:focus{border-color:var(--green)}
@@ -215,7 +232,7 @@
 <body>
 
 <!-- VERSION BADGE — increment on every push so user can confirm fresh load -->
-<div class="version-badge" title="Increment on every change so you can verify your browser isn't loading a cached version">34.0</div>
+<div class="version-badge" title="Increment on every change so you can verify your browser isn't loading a cached version">35.0</div>
 
 <div class="app">
 
@@ -832,7 +849,13 @@ async function selectSurah(num, cardEl){
   document.querySelectorAll('.surah-card').forEach(c => c.classList.toggle('active', c === cardEl));
   resetState();
   step2.classList.remove('hidden');
-  step2Title.textContent = `② Recite Surah ${num}`;
+  // Title: ② Recite Surah <num> — <English> <Arabic>
+  const _meta = SURAH_META.find(s => s.num === num);
+  if(_meta){
+    step2Title.innerHTML = `② Recite Surah ${num} — <span class="arabic-name">${_meta.name}</span> <span style="color:var(--text-dim);font-weight:600">${_meta.translit}</span>`;
+  } else {
+    step2Title.textContent = `② Recite Surah ${num}`;
+  }
   buildSurah(num);
   // Mark every word as 'future' so the Hide Script button has something
   // to blur. Without this, words render without future/past/now classes
