@@ -189,7 +189,7 @@
 <body>
 
 <!-- VERSION BADGE — increment on every push so user can confirm fresh load -->
-<div class="version-badge" title="Increment on every change so you can verify your browser isn't loading a cached version">3.23</div>
+<div class="version-badge" title="Increment on every change so you can verify your browser isn't loading a cached version">3.24</div>
 
 <div class="app">
 
@@ -925,7 +925,19 @@ function highlightCurrent(){
         const _eRect = el.getBoundingClientRect();
         const _padding = 40;
         if(_eRect.top < _cRect.top + _padding || _eRect.bottom > _cRect.bottom - _padding){
-          el.scrollIntoView({behavior:"auto", block:"center"});
+          // SCROLL STRATEGY:
+          //   - Hide Script ON  -> block: 'end'. The current word sits
+          //     at the bottom of the container, all past (recited)
+          //     words stay visible above it, and the first word is
+          //     never scrolled out of view as soon as the pointer
+          //     advances past the first line.
+          //   - Hide Script OFF -> block: 'nearest'. Minimum scroll
+          //     disruption; current word stays in view with context.
+          // The old block:'center' centered the current word and
+          // pushed the first word above the visible area as soon as
+          // the pointer left the first line.
+          const _blockMode = _container.classList.contains('script-hidden') ? 'end' : 'nearest';
+          el.scrollIntoView({behavior:'auto', block: _blockMode});
         }
       }
     }
@@ -974,7 +986,18 @@ function highlightCurrent(){
       const _eRect = el.getBoundingClientRect();
       const _padding = 40;  // keep some breathing room around the word
       if(_eRect.top < _cRect.top + _padding || _eRect.bottom > _cRect.bottom - _padding){
-        el.scrollIntoView({behavior:'auto', block:'center'});
+        // SCROLL STRATEGY:
+        //   - Hide Script ON  -> block: 'end'. Current word sits at
+        //     the bottom of the container, all past (recited) words
+        //     stay visible above it, and the first word is never
+        //     scrolled out of view as soon as the pointer advances.
+        //   - Hide Script OFF -> block: 'nearest'. Minimum scroll
+        //     disruption; current word stays in view with context.
+        // The old block:'center' centered the current word and pushed
+        // the first word above the visible area as soon as the pointer
+        // left the first line.
+        const _blockMode = _container.classList.contains('script-hidden') ? 'end' : 'nearest';
+        el.scrollIntoView({behavior:'auto', block: _blockMode});
       }
     }
   }
