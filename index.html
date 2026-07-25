@@ -127,19 +127,22 @@
      blue background tint, a thick primary-color border, and remove the
      blur on the border itself so the position is obvious. The TEXT
      inside is still blurred so the user can't peek at the answer. */
+  /* .now tile under Hide Script: solid bright marker. The text
+     inside is hidden with color:transparent (not filter:blur) so the
+     box, border, and background stay perfectly sharp and the user
+     can clearly see WHERE they are reciting from, without being able
+     to read the word itself. */
   #ayahContainer.script-hidden .word.now{
-    color:#0a1f12;
-    background:rgba(108,159,235,.55);
-    border:3px solid var(--primary);
-    box-shadow:0 0 0 2px rgba(108,159,235,.35), 0 0 18px rgba(108,159,235,.5);
+    color:transparent;
+    background:var(--primary);
+    border:3px solid #fff;
+    box-shadow:0 0 0 2px var(--primary), 0 0 22px rgba(108,159,235,.7);
     transform:none;
     font-weight:700;
-    /* Blur the WHOLE tile (border + background + text). The text
-       becomes unreadable (the point of Hide Script) but the bright
-       blue tile + thick border + glow are still clearly visible as
-       a "you are here" marker. */
-    filter:blur(4px);
   }
+  /* The phoneme tooltip child must stay invisible too (it inherits
+     color:transparent which is fine since the tooltip only shows on
+     :hover and is also hidden under script-hidden by JS). */
   .word.tajweed-tafkheem{border-bottom:3px solid var(--red)}
   .word.tajweed-qalqala{border-bottom:3px solid var(--yellow)}
   .word.tajweed-madd{border-bottom:3px solid var(--blue)}
@@ -212,7 +215,7 @@
 <body>
 
 <!-- VERSION BADGE — increment on every push so user can confirm fresh load -->
-<div class="version-badge" title="Increment on every change so you can verify your browser isn't loading a cached version">3.27</div>
+<div class="version-badge" title="Increment on every change so you can verify your browser isn't loading a cached version">3.28</div>
 
 <div class="app">
 
@@ -948,19 +951,11 @@ function highlightCurrent(){
         const _eRect = el.getBoundingClientRect();
         const _padding = 40;
         if(_eRect.top < _cRect.top + _padding || _eRect.bottom > _cRect.bottom - _padding){
-          // SCROLL STRATEGY:
-          //   - Hide Script ON  -> block: 'end'. The current word sits
-          //     at the bottom of the container, all past (recited)
-          //     words stay visible above it, and the first word is
-          //     never scrolled out of view as soon as the pointer
-          //     advances past the first line.
-          //   - Hide Script OFF -> block: 'nearest'. Minimum scroll
-          //     disruption; current word stays in view with context.
-          // The old block:'center' centered the current word and
-          // pushed the first word above the visible area as soon as
-          // the pointer left the first line.
+          // See main path for the strategy + page-scroll guard.
           const _blockMode = _container.classList.contains('script-hidden') ? 'end' : 'nearest';
+          const _pageY = window.scrollY;
           el.scrollIntoView({behavior:'auto', block: _blockMode});
+          if(window.scrollY !== _pageY) window.scrollTo(0, _pageY);
         }
       }
     }
@@ -1020,7 +1015,13 @@ function highlightCurrent(){
         // the first word above the visible area as soon as the pointer
         // left the first line.
         const _blockMode = _container.classList.contains('script-hidden') ? 'end' : 'nearest';
+        // PAGE-SCROLL GUARD: scrollIntoView walks every scrollable
+        // ancestor including the document, so on the first interim
+        // tick it can yank the whole page to the top. Snapshot and
+        // restore window.scrollY so only the container scrolls.
+        const _pageY = window.scrollY;
         el.scrollIntoView({behavior:'auto', block: _blockMode});
+        if(window.scrollY !== _pageY) window.scrollTo(0, _pageY);
       }
     }
   }
