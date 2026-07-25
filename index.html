@@ -189,7 +189,7 @@
 <body>
 
 <!-- VERSION BADGE — increment on every push so user can confirm fresh load -->
-<div class="version-badge" title="Increment on every change so you can verify your browser isn't loading a cached version">3.22</div>
+<div class="version-badge" title="Increment on every change so you can verify your browser isn't loading a cached version">3.23</div>
 
 <div class="app">
 
@@ -860,7 +860,7 @@ function buildSurah(num){
     posKeys.forEach(p => {
       const [text, phoneme, tajweedStr] = surah[v][p];
       const span = document.createElement('span');
-      span.className = 'word';
+      span.className = 'word future';
       span.textContent = text;
       // tooltip with phoneme + tajweed rules
       const tooltip = document.createElement('div');
@@ -949,10 +949,14 @@ function highlightCurrent(){
     refWords[_lastHighlightedPointer].el.classList.remove("now");
   }
   for(let i = _prevPastEnd; i < _maxPointerReached; i++){
-    refWords[i].el.classList.add("past");
+    const w = refWords[i].el;
+    w.classList.add("past");
+    w.classList.remove("future");  // no longer a candidate for hide-script blur
   }
   if(pointer < refWords.length){
-    refWords[pointer].el.classList.add("now");
+    const w = refWords[pointer].el;
+    w.classList.add("now");
+    w.classList.remove("future");  // .now has its own (hidden) style under script-hidden
   }
 
   if(pointer > _maxPointerReached) _maxPointerReached = pointer;
