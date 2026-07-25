@@ -240,6 +240,7 @@
   <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
   <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
 </header>
+<div class="version-badge" title="Increment on every change so you can verify your browser isn't loading a cached version">39.0</div>
 
 <p class="lede">
   Pick a surah, hit Start, then recite naturally. The tracker follows along word-by-word and
@@ -297,7 +298,16 @@
   </div>
 </section>
 
-<!-- Debug panel removed for production -->
+<section class="debug-panel" id="debugPanel">
+  <h2>③ Debug — words marked as errors</h2>
+  <p class="hint">Each row shows a word that was marked <b style="color:var(--red)">wrong</b> or
+    <b style="color:var(--yellow)">unclear</b>: what the script <i>expected</i> (the Quranic
+    text), what was <i>recited</i> (Chrome's transcription), and <b>why</b> it didn't match.</p>
+  <div class="debug-list" id="debugList">
+    <div class="debug-empty">No errors yet. Start reciting and any mismatches will appear here.</div>
+  </div>
+  <button class="clear-btn" id="clearDebugBtn">Clear debug log</button>
+</section>
 
 </div>
 
@@ -743,9 +753,8 @@ function processNewWord(rawWord){
 // DEBUG PANEL — render every mistake/unclear with full context.
 // =========================================================================
 function renderDebugPanel(){
-  // Debug panel removed for production. No-op.
-  return;
   const list = document.getElementById('debugList');
+  if(!list) return;
   if(!debugLog.length){
     list.innerHTML = '<div class="debug-empty">No errors yet. Start reciting and any mismatches will appear here.</div>';
     return;
