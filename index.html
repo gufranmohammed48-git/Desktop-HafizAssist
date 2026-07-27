@@ -181,6 +181,9 @@
   .mic-btn.listening .mic-dot{background:#fff;animation:pulse 1s ease-in-out infinite;box-shadow:0 0 12px rgba(255,255,255,.8)}
   /* Larger visual ring on the listening button so the user can SEE it's active */
   .mic-btn.listening{box-shadow:0 0 0 6px rgba(231,76,60,.25),0 6px 20px rgba(231,76,60,.4)}
+  /* "SPEAK NOW" indicator that lights up when the mic is actively capturing audio */
+  .mic-btn.listening.mic-armed{background:linear-gradient(135deg,#2ecc71,#27ae60)!important;box-shadow:0 0 0 8px rgba(46,204,113,.4),0 6px 20px rgba(46,204,113,.5)!important;position:relative}
+  .mic-btn.listening.mic-armed::after{content:'🎤 MIC LIVE — speak now';position:absolute;top:-38px;left:50%;transform:translateX(-50%);background:#2ecc71;color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:4px;white-space:nowrap;letter-spacing:.5px;box-shadow:0 2px 8px rgba(0,0,0,.2)}
   @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.4);opacity:.5}}
   .status{color:var(--text-dim);font-size:13px;margin-left:8px}
   .status.warn{color:var(--yellow)}
@@ -240,7 +243,7 @@
   <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
   <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
 </header>
-<div class="version-badge" title="Increment on every change so you can verify your browser isn't loading a cached version">43.1</div>
+<div class="version-badge" title="Increment on every change so you can verify your browser isn't loading a cached version">43.2</div>
 
 <p class="lede">
   Pick a surah, hit Start, then recite naturally. The tracker follows along word-by-word and
