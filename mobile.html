@@ -40,9 +40,9 @@
 </head>
 <body>
 
-<div class="ver">v1.4</div>
+<div class="ver">v1.5</div>
 <h1>Al-Fatihah Test <span class="ar">الفاتحة</span></h1>
-<div style="text-align:center;color:#888;font-size:12px;margin-bottom:8px">Minimal mobile test — 30 second session</div>
+<div style="text-align:center;color:#888;font-size:12px;margin-bottom:8px">Minimal mobile test — tap Stop when done</div>
 
 <div id="ayahs">Loading…</div>
 
@@ -248,7 +248,19 @@
     recognition.onend = () => {
       log('END', 'session ended');
       if(!running) return;
-      statusEl.textContent = 'Session ended. Press Start to recite again.';
+      // Auto-restart to keep listening. Android Chrome ends the session
+      // after a few seconds of silence. Restart immediately so the user
+      // doesn't have to keep tapping.
+      setTimeout(() => {
+        if(!running) return;
+        try {
+          recognition.start();
+          log('START', 'auto-restarted after silence');
+        } catch(e){
+          log('ERROR', 'auto-restart failed: ' + e.message);
+        }
+      }, 200);
+      statusEl.textContent = '🔁 Listening (tap Stop when done)';
     };
     recognition.onaudiostart = () => log('AUDIO', 'mic live');
     recognition.onaudioend   = () => log('AUDIO', 'mic off');
@@ -261,12 +273,10 @@
       statusEl.classList.add('live');
       statusEl.classList.remove('warn');
       log('START', 'recognition started (lang=ar, continuous=false)');
-      setTimeout(() => {
-        if(running && recognition){
-          try { recognition.stop(); } catch(_){}
-          log('AUTO-STOP', '30 seconds elapsed');
-        }
-      }, 30000);
+      // No auto-stop. The user taps Stop when done. Android Chrome
+      // ends the session naturally after a few seconds of silence
+      // and we restart it ourselves to keep listening.
+      // (no setTimeout)
     }catch(e){
       log('THROW', e.message);
       statusEl.textContent = 'Could not start: ' + e.message;
