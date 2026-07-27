@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Mobile Test — Al-Fatihah</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#0a1f12;color:#e8f5e9;padding:16px;min-height:100vh}
+  h1{font-size:18px;margin-bottom:8px;text-align:center}
+  h1 .ar{color:#2ecc71;font-family:Amiri,serif;font-size:22px;margin-left:8px}
+  .ver{position:fixed;top:8px;right:8px;background:#0a1f12;color:#2ecc71;border:1px solid #2ecc71;padding:2px 6px;border-radius:4px;font-size:11px;font-family:monospace;z-index:10}
+  #ayahs{font-size:24px;line-height:2.2;direction:rtl;text-align:center;margin:20px auto;max-width:600px;padding:16px;background:rgba(255,255,255,.04);border-radius:12px;border:1px solid rgba(46,204,113,.2)}
+  #ayahs .word{display:inline-block;margin:2px 4px;padding:2px 4px;border-radius:4px;transition:all .15s}
+  #ayahs .word.future{color:#888;opacity:.7}
+  #ayahs .word.now{background:#2ecc71;color:#0a1f12;font-weight:700;transform:scale(1.1);box-shadow:0 0 20px rgba(46,204,113,.5)}
+  #ayahs .word.past{color:#2ecc71;opacity:.85}
+  #ayahs .word.wrong{color:#e74c3c;background:rgba(231,76,60,.15);text-decoration:line-through}
+  #ayahs .word.unclear{color:#f1c40f;background:rgba(241,196,15,.15)}
+  .verse-num{color:#666;font-size:14px;margin:0 4px}
+  .controls{margin:20px auto;max-width:600px;display:flex;flex-direction:column;gap:10px;align-items:center}
+  button{font-family:inherit;font-size:16px;padding:14px 24px;border-radius:30px;border:none;cursor:pointer;font-weight:700;min-width:200px}
+  #startBtn{background:#2ecc71;color:#0a1f12}
+  #startBtn.listening{background:#e74c3c;color:#fff;animation:pulse 1s ease-in-out infinite}
+  #stopBtn{background:#555;color:#fff;display:none}
+  .status{text-align:center;font-size:14px;color:#aaa;min-height:24px;margin-top:8px;font-family:monospace}
+  .status.live{color:#2ecc71}
+  .status.warn{color:#e74c3c}
+  .transcript{background:rgba(255,255,255,.04);border:1px solid rgba(46,204,113,.2);border-radius:8px;padding:12px;margin:16px auto;max-width:600px;min-height:60px;font-size:15px;line-height:1.5}
+  .transcript-label{font-size:11px;color:#666;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700}
+  .log{background:#000;color:#2ecc71;font-family:monospace;font-size:11px;padding:8px;border-radius:6px;margin:12px auto;max-width:600px;max-height:200px;overflow:auto;line-height:1.4;white-space:pre-wrap;word-break:break-word}
+  .log-label{font-size:11px;color:#666;text-transform:uppercase;letter-spacing:1px;margin:16px auto 6px;max-width:600px;font-weight:700}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.7}}
+</style>
+</head>
+<body>
+
+<div class="ver">v1.1</div>
+<h1>Al-Fatihah Test <span class="ar">الفاتحة</span></h1>
+<div style="text-align:center;color:#888;font-size:12px;margin-bottom:8px">Minimal mobile test — 30 second session</div>
+
+<div id="ayahs">Loading…</div>
+
+<div class="controls">
+  <button id="startBtn">▶ Start reciting (30s)</button>
+  <button id="stopBtn">⏹ Stop</button>
+  <div class="status" id="status">Tap Start, then speak when the button turns red.</div>
+</div>
+
+<div style="max-width:600px;margin:0 auto">
+  <div class="transcript-label">What the browser heard</div>
+  <div class="transcript" id="transcript">—</div>
+</div>
+
+<div class="log-label">Live event log</div>
+<div class="log" id="log"></div>
+
+<script src="phonemes-data.js"></script>
+<script>
+(function(){
+  // ---------- TINY LOGGER ----------
+  const logEl = document.getElementById('log');
+  const log = (kind, msg) => {
+    const t = new Date().toLocaleTimeString();
+    const line = `[${t}] ${kind}: ${msg}`;
+    logEl.textContent = (logEl.textContent ? logEl.textContent + '\n' : '') + line;
+    logEl.scrollTop = logEl.scrollHeight;
+  };
+
+  // ---------- UI REFS ----------
+  const startBtn = document.getElementById('startBtn');
+  const stopBtn  = document.getElementById('stopBtn');
+  const statusEl = document.getElementById('status');
+  const ayahsEl  = document.getElementById('ayahs');
+  const transcriptEl = document.getElementById('transcript');
+
+  // ---------- BUILD FATIHAH ----------
+  // SURAH_PHONEMES[surah][ayah][position] = [text, phoneme, rules]
+  // We only load Al-Fatihah (surah 1, 7 ayahs).
+  const refWords = []; // [{text, norm, el, surah, ayah, position}]
+  const surahData = window.SURAH_PHONEMES && window.SURAH_PHONEMES['1'];
+  if(!surahData){
+    ayahsEl.textContent = 'ERROR: SURAH_PHONEMES data failed to load';
+    return;
+  }
+  for(let a = 1; a <= 7; a++){
+    const ayahArr = surahData[a];
+    if(!ayahArr) continue;
+    const span = document.createElement('span');
+    span.className = 'ayah';
+    for(let p = 0; p < ayahArr.length; p++){
+      const [text, phoneme, rules] = ayahArr[p];
+      const w = document.createElement('span');
+      w.className = 'word future';
+      w.textContent = text;
+      w.dataset.text = text;
+      span.appendChild(w);
+      refWords.push({text: text, norm: normalize(text), el: w, surah: 1, ayah: a, position: p});
+    }
+    // verse separator
+    const vn = document.createElement('span');
+    vn.className = 'verse-num';
+    vn.textContent = ' ﴿' + a + '﴾ ';
+    span.appendChild(vn);
+    ayahsEl.appendChild(span);
+  }
+  function normalize(s){
+    return (s||'')
+      .replace(/[\u064B-\u0652\u0670\u0640]/g, '') // remove tashkeel
+      .replace(/[إأآا]/g, 'ا')
+      .replace(/ى/g, 'ي')
+      .replace(/ة/g, 'ه')
+      .replace(/[^\u0600-\u06FF\s]/g, '')
+      .trim();
+  }
+
+  // ---------- MATCHING ----------
+  // Simple: take the transcript, split into words, normalize each,
+  // try to match against refWords starting from the current pointer.
+  let pointer = 0;
+  let _stats = {correct:0, mistake:0, unclear:0};
+
+  function matchText(text){
+    const heard = (text||'').split(/\s+/).map(normalize).filter(Boolean);
+    if(!heard.length) return;
+    let p = pointer;
+    for(const w of heard){
+      // Find next match in a small lookahead window
+      const NEAR = 8;
+      let matched = -1;
+      for(let i = p; i < Math.min(refWords.length, p + NEAR); i++){
+        if(refWords[i].norm === w){ matched = i; break; }
+        // Fuzzy: starts-with
+        if(refWords[i].norm.startsWith(w) && w.length >= 2){ matched = i; break; }
+      }
+      if(matched >= 0){
+        // mark all skipped words (p..matched-1) as unclear
+        for(let i = p; i < matched; i++){
+          if(refWords[i].el.dataset.status !== 'correct'){
+            refWords[i].el.dataset.status = 'unclear';
+            refWords[i].el.classList.remove('now','future');
+            refWords[i].el.classList.add('past');
+          }
+        }
+        refWords[matched].el.dataset.status = 'correct';
+        refWords[matched].el.classList.remove('future','unclear','wrong');
+        refWords[matched].el.classList.add('past');
+        _stats.correct++;
+        p = matched + 1;
+      } else {
+        // mark the current word as wrong
+        if(p < refWords.length){
+          refWords[p].el.dataset.status = 'wrong';
+          refWords[p].el.classList.remove('future','correct');
+          refWords[p].el.classList.add('wrong');
+          _stats.mistake++;
+          p++;
+        }
+      }
+    }
+    pointer = Math.min(p, refWords.length);
+    // mark pointer
+    if(pointer < refWords.length){
+      refWords[pointer].el.classList.remove('future');
+      refWords[pointer].el.classList.add('now');
+      // un-mark previous .now
+      if(pointer > 0) refWords[pointer-1].el.classList.remove('now');
+    }
+  }
+
+  // ---------- SPEECH RECOGNITION ----------
+  // This is the EXACT code from the 20s test that worked on Android.
+  const Ctor = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!Ctor){
+    statusEl.textContent = 'This browser does not support the Web Speech API.';
+    statusEl.classList.add('warn');
+    return;
+  }
+
+  let recognition = null;
+  let running = false;
+
+  function startSession(){
+    recognition = new Ctor();
+    recognition.lang = 'ar';
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    recognition.onresult = (e) => {
+      let txt = '';
+      for(let i = 0; i < e.results.length; i++) txt += e.results[i][0].transcript;
+      log('RESULT', '"' + txt + '"');
+      transcriptEl.textContent = txt;
+      matchText(txt);
+    };
+    recognition.onerror = (e) => {
+      log('ERROR', e.error + (e.message ? ' — ' + e.message : ''));
+      statusEl.textContent = 'Error: ' + e.error;
+      statusEl.classList.add('warn');
+    };
+    recognition.onend = () => {
+      log('END', 'session ended');
+      if(!running) return;
+      statusEl.textContent = 'Session ended. Press Start to recite again.';
+    };
+    recognition.onaudiostart = () => log('AUDIO', 'mic live');
+    recognition.onaudioend   = () => log('AUDIO', 'mic off');
+    try{
+      recognition.start();
+      running = true;
+      startBtn.style.display = 'none';
+      stopBtn.style.display = 'inline-block';
+      statusEl.textContent = '🎤 Listening (30s) — speak now!';
+      statusEl.classList.add('live');
+      statusEl.classList.remove('warn');
+      log('START', 'recognition started (lang=ar, continuous=false)');
+      // Auto-stop after 30 seconds
+      setTimeout(() => {
+        if(running && recognition){
+          try { recognition.stop(); } catch(_){}
+          log('AUTO-STOP', '30 seconds elapsed');
+        }
+      }, 30000);
+    }catch(e){
+      log('THROW', e.message);
+      statusEl.textContent = 'Could not start: ' + e.message;
+      statusEl.classList.add('warn');
+    }
+  }
+
+  function stopSession(){
+    running = false;
+    if(recognition){
+      try { recognition.stop(); } catch(_){}
+    }
+    startBtn.style.display = 'inline-block';
+    stopBtn.style.display = 'none';
+    statusEl.textContent = 'Stopped. Press Start to recite again.';
+    statusEl.classList.remove('live');
+  }
+
+  startBtn.addEventListener('click', startSession);
+  stopBtn.addEventListener('click', stopSession);
+
+  // ---------- INIT ----------
+  log('INFO', 'page loaded, ' + refWords.length + ' words in Al-Fatihah');
+  log('INFO', 'SpeechRecognition class: ' + (Ctor.name || 'available'));
+  log('INFO', 'protocol: ' + location.protocol + ', isSecureContext: ' + window.isSecureContext);
+  log('INFO', 'userAgent: ' + navigator.userAgent);
+})();
+</script>
+</body>
+</html>
