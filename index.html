@@ -256,7 +256,7 @@
   <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
   <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
 </header>
-<div class="version-badge" title="Increment on every change so you can verify your browser isn't loading a cached version">44.0</div>
+<div class="version-badge" title="Increment on every change so you can verify your browser isn't loading a cached version">45.0</div>
 
 <p class="lede">
   Pick a surah, hit Start, then recite naturally. The tracker follows along word-by-word and
@@ -346,6 +346,7 @@
       <option value="en-US">en-US — US English (for comparison)</option>
     </select>
     <button class="clear-btn" id="envTestRecBtn" type="button" style="cursor:pointer">▶ Test this language (3s)</button>
+    <button class="clear-btn" id="envTest20Btn" type="button" style="cursor:pointer">⏱ Test this language (20s, same as main app)</button>
     <button class="clear-btn" id="envReqMicBtn" type="button" style="cursor:pointer">🎤 Request microphone permission</button>
     <button class="clear-btn" id="envClearLogBtn" type="button" style="cursor:pointer">🧹 Clear log</button>
   </div>
@@ -471,6 +472,61 @@
         setTimeout(function(){ try { r.stop(); } catch(_){} }, 3000);
       } catch(e){
         out.textContent = 'THREW: ' + e.message;
+        out.style.color = '#e74c3c';
+      }
+    });
+  }
+  // 20s test that mirrors the main app exactly. Uses the same config
+  // (continuous=false, interimResults=false, maxAlternatives=1, lang
+  // from selector). It does NOT restart on onend — it just runs one
+  // 20-second session so we can see if the browser can transcribe for
+  // more than 5 seconds, which is what the main app needs.
+  var test20Btn = document.getElementById('envTest20Btn');
+  if(test20Btn){
+    test20Btn.addEventListener('click', function(){
+      var Ctor = window.SpeechRecognition || window.webkitSpeechRecognition;
+      var out = document.getElementById('envTestResult');
+      if(!Ctor){
+        out.textContent = 'FAIL: no SpeechRecognition constructor.';
+        out.style.color = '#e74c3c';
+        return;
+      }
+      out.textContent = 'Starting 20s test (same config as main app)...';
+      out.style.color = '';
+      try {
+        var r = new Ctor();
+        var sel = document.getElementById('envLangSel');
+        r.lang = sel ? sel.value : 'ar';
+        r.continuous = false;
+        r.interimResults = false;
+        r.maxAlternatives = 1;
+        if(window.__envLog) window.__envLog('TEST20', 'Starting 20s test in ' + r.lang);
+        var allText = '';
+        r.onresult = function(e){
+          var txt = '';
+          for(var i=0;i<e.results.length;i++) txt += e.results[i][0].transcript;
+          allText += txt + ' ';
+          out.textContent = '20s TEST running (' + Math.round((Date.now()-window.__t20start)/1000) + 's) | so far: "' + allText + '"';
+          out.style.color = '#2ecc71';
+        };
+        r.onerror = function(e){
+          if(window.__envLog) window.__envLog('TEST20-ERR', e.error + (e.message ? ' — ' + e.message : ''));
+          out.textContent = '20s TEST ERROR at ' + Math.round((Date.now()-window.__t20start)/1000) + 's: ' + e.error + ' | collected: "' + allText + '"';
+          out.style.color = '#e74c3c';
+        };
+        r.onend = function(){
+          var dur = Math.round((Date.now()-window.__t20start)/1000);
+          if(window.__envLog) window.__envLog('TEST20-END', '20s test ended at ' + dur + 's');
+          out.textContent = '20s TEST ENDED at ' + dur + 's | collected: "' + allText + '"';
+        };
+        r.start();
+        window.__t20start = Date.now();
+        // Auto-stop after 20s
+        setTimeout(function(){
+          try { r.stop(); } catch(_){}
+        }, 20000);
+      } catch(e){
+        out.textContent = '20s TEST THREW: ' + e.message;
         out.style.color = '#e74c3c';
       }
     });
