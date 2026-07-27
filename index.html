@@ -240,7 +240,7 @@
   <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
   <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
 </header>
-<div class="version-badge" title="Increment on every change so you can verify your browser isn't loading a cached version">42.0</div>
+<div class="version-badge" title="Increment on every change so you can verify your browser isn't loading a cached version">43.0</div>
 
 <p class="lede">
   Pick a surah, hit Start, then recite naturally. The tracker follows along word-by-word and
@@ -1272,7 +1272,7 @@ async function startListening(){
   // exactly what the browser is doing on Android. Each line shows the time
   // and the event name. RESULT lines also include the transcript so we
   // can confirm the matcher is getting data.
-  ['onstart','onaudiostart','onaudioend','onspeechstart','onspeechend','onnomatch'].forEach(ev => {
+  ['onstart','onaudiostart','onaudioend','onspeechstart','onspeechend','onnomatch','onsoundstart','onsoundend'].forEach(ev => {
     recognition[ev] = (e) => {
       var tag = ev.slice(2).toUpperCase();
       if(window.__envLog) window.__envLog(tag, 'fired');
@@ -1428,9 +1428,9 @@ async function startListening(){
       }
       catch(e){
         if(window.__envLog) window.__envLog('START', 'restart failed: ' + e.message);
-        setTimeout(() => { if(listening){ try{ recognition.start(); }catch(_){} } }, 400);
+        setTimeout(() => { if(listening){ try{ recognition.start(); }catch(_){} } }, 200);
       }
-    }, 250);
+    }, 100);  // tighter gap for chained single-shot mode
   };
 
   // Diagnostic: surface context info so the user knows if mobile is blocking us.
