@@ -244,7 +244,8 @@
   <div id="speakOverlayBanner" style="display:none;font-size:48px;font-weight:900;color:#fff;background:linear-gradient(135deg,#2ecc71,#27ae60);padding:20px 40px;border-radius:20px;box-shadow:0 0 80px rgba(46,204,113,.5);margin-top:20px;animation:pulse 1s ease-in-out infinite">🎤 SPEAK NOW</div>
   <div id="speakOverlaySub" style="display:none;font-size:18px;color:#fff;margin-top:20px;max-width:600px;line-height:1.5"></div>
   <div id="speakOverlayTimer" style="display:none;font-size:80px;font-weight:900;color:#fff;margin-top:30px;font-variant-numeric:tabular-nums">5</div>
-  <button id="speakOverlayClose" type="button" style="margin-top:30px;padding:12px 24px;background:#fff;color:#0a1f12;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">Stop reciting</button>
+  <button id="speakOverlayContinue" type="button" style="margin-top:30px;padding:14px 28px;background:#2ecc71;color:#0a1f12;border:none;border-radius:8px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;display:none">▶ Continue reciting</button>
+<button id="speakOverlayClose" type="button" style="margin-top:14px;padding:12px 24px;background:transparent;color:#fff;border:2px solid #fff;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">Stop reciting</button>
 </div>
 
 <!-- VERSION BADGE — increment on every push so user can confirm fresh load -->
@@ -256,7 +257,7 @@
   <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
   <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
 </header>
-<div class="version-badge" title="Increment on every change so you can verify your browser isn't loading a cached version">45.0</div>
+<div class="version-badge" title="Increment on every change so you can verify your browser isn't loading a cached version">46.0</div>
 
 <p class="lede">
   Pick a surah, hit Start, then recite naturally. The tracker follows along word-by-word and
@@ -610,6 +611,18 @@ function hideSpeakOverlay(){
   var ov = document.getElementById('speakOverlay');
   if(ov) ov.style.display = 'none';
 }
+function showContinueButton(){
+  var btn = document.getElementById('speakOverlayContinue');
+  if(btn) btn.style.display = 'inline-block';
+  var close = document.getElementById('speakOverlayClose');
+  if(close) close.textContent = 'Done';
+  var ban = document.getElementById('speakOverlayBanner');
+  if(ban){ ban.textContent = '✓ Session ended'; ban.style.background = 'linear-gradient(135deg,#3498db,#2980b9)'; ban.style.animation = 'none'; }
+  var sub = document.getElementById('speakOverlaySub');
+  if(sub) sub.textContent = 'Press Continue for the next verse, or Done to stop.';
+  var tmr = document.getElementById('speakOverlayTimer');
+  if(tmr) tmr.style.display = 'none';
+}
 // Wire the "Stop reciting" button on the overlay so the user can manually
 // stop the recognition loop without hunting for the mic button behind the overlay.
 document.addEventListener('DOMContentLoaded', function(){
@@ -618,6 +631,37 @@ document.addEventListener('DOMContentLoaded', function(){
     hideSpeakOverlay();
     var mic = document.querySelector('.mic-btn');
     if(mic) mic.click();
+  });
+  var cont = document.getElementById('speakOverlayContinue');
+  if(cont) cont.addEventListener('click', function(){
+    // Start a new recognition session directly
+    try {
+      if(window.__envLog) window.__envLog('CONTINUE', 'user pressed Continue — starting new session');
+      // Hide Continue button, show SPEAK NOW again
+      cont.style.display = 'none';
+      var ban = document.getElementById('speakOverlayBanner');
+      if(ban){ ban.textContent = '🎤 SPEAK NOW'; ban.style.background = 'linear-gradient(135deg,#2ecc71,#27ae60)'; ban.style.animation = 'pulse 1s ease-in-out infinite'; }
+      var sub = document.getElementById('speakOverlaySub');
+      if(sub) sub.textContent = '🔁 New session — keep reciting.';
+      var tmr = document.getElementById('speakOverlayTimer');
+      if(tmr){ tmr.style.display = 'block'; tmr.textContent = '∞'; }
+      // Start a new recognition
+      var Ctor = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if(!Ctor) return;
+      var r = new Ctor();
+      var sel = document.getElementById('envLangSel');
+      r.lang = sel ? sel.value : 'ar';
+      r.continuous = false;
+      r.interimResults = false;
+      r.maxAlternatives = 1;
+      r.onresult = recognition.onresult;
+      r.onerror = recognition.onerror;
+      r.onend = recognition.onend;
+      recognition = r;
+      recognition.start();
+    } catch(e){
+      if(window.__envLog) window.__envLog('CONTINUE', 'failed: ' + e.message);
+    }
   });
 });
 </script>
@@ -1558,23 +1602,47 @@ async function startListening(){
 
   recognition.onend = () => {
     if(window.__envLog) window.__envLog('END', 'recognition session ended');
-    // If user manually stopped, hide overlay permanently
+    // Auto-restart ONLY if the session ended because of the browser's
+    // 5s-of-silence limit (no transcript was collected) AND we haven't
+    // been silent for too long. If we got transcripts, the user is
+    // actively reciting — just let the session end naturally and the
+    // user can press Continue to start a new one.
+    //
+    // This fixes the "infinite NOMATCH cycle" on Android Chrome where
+    // the user is briefly silent and the browser kills the session.
     if(!listening){ hideSpeakOverlay(); return; }
-    // Chrome sometimes fires onend even with continuous=true; restart with a small delay
-    // (well-known race condition documented in the original code, kept here).
+    var _gotTranscript = (finalizedText && finalizedText.trim().length > 0);
+    if(_gotTranscript){
+      // Session ended naturally with a transcript. User is reciting.
+      // Don't auto-restart — let them see the result and continue.
+      if(window.__envLog) window.__envLog('END', 'session ended with transcript — waiting for user to continue');
+      // Reset restart counter on a successful session
+      window.__restartCount = 0;
+      // Show the Continue button on the overlay
+      showContinueButton();
+      return;
+    }
+    // Empty session (NOMATCH / no-speech). The user is silent. Restart
+    // after a short delay, but only up to 3 times in a row, so we don't
+    // loop forever if the user walked away.
+    if(!window.__restartCount) window.__restartCount = 0;
+    window.__restartCount++;
+    if(window.__restartCount > 3){
+      if(window.__envLog) window.__envLog('END', 'giving up auto-restart after 3 empty sessions — user must be away');
+      return;
+    }
     setTimeout(() => {
       if(!listening) return;
       try {
-        // Re-apply the currently selected language in case the user changed it
         var _sel2 = document.getElementById('envLangSel');
         if(_sel2) recognition.lang = _sel2.value;
+        if(window.__envLog) window.__envLog('START', 'auto-restart ' + window.__restartCount + '/3 (previous session was empty)');
         recognition.start();
       }
       catch(e){
         if(window.__envLog) window.__envLog('START', 'restart failed: ' + e.message);
-        setTimeout(() => { if(listening){ try{ recognition.start(); }catch(_){} } }, 200);
       }
-    }, 100);  // tighter gap for chained single-shot mode
+    }, 300);
   };
 
   // Diagnostic: surface context info so the user knows if mobile is blocking us.
@@ -1795,6 +1863,18 @@ function hideSpeakOverlay(){
   var ov = document.getElementById('speakOverlay');
   if(ov) ov.style.display = 'none';
 }
+function showContinueButton(){
+  var btn = document.getElementById('speakOverlayContinue');
+  if(btn) btn.style.display = 'inline-block';
+  var close = document.getElementById('speakOverlayClose');
+  if(close) close.textContent = 'Done';
+  var ban = document.getElementById('speakOverlayBanner');
+  if(ban){ ban.textContent = '✓ Session ended'; ban.style.background = 'linear-gradient(135deg,#3498db,#2980b9)'; ban.style.animation = 'none'; }
+  var sub = document.getElementById('speakOverlaySub');
+  if(sub) sub.textContent = 'Press Continue for the next verse, or Done to stop.';
+  var tmr = document.getElementById('speakOverlayTimer');
+  if(tmr) tmr.style.display = 'none';
+}
 // Wire the "Stop reciting" button on the overlay so the user can manually
 // stop the recognition loop without hunting for the mic button behind the overlay.
 document.addEventListener('DOMContentLoaded', function(){
@@ -1803,6 +1883,37 @@ document.addEventListener('DOMContentLoaded', function(){
     hideSpeakOverlay();
     var mic = document.querySelector('.mic-btn');
     if(mic) mic.click();
+  });
+  var cont = document.getElementById('speakOverlayContinue');
+  if(cont) cont.addEventListener('click', function(){
+    // Start a new recognition session directly
+    try {
+      if(window.__envLog) window.__envLog('CONTINUE', 'user pressed Continue — starting new session');
+      // Hide Continue button, show SPEAK NOW again
+      cont.style.display = 'none';
+      var ban = document.getElementById('speakOverlayBanner');
+      if(ban){ ban.textContent = '🎤 SPEAK NOW'; ban.style.background = 'linear-gradient(135deg,#2ecc71,#27ae60)'; ban.style.animation = 'pulse 1s ease-in-out infinite'; }
+      var sub = document.getElementById('speakOverlaySub');
+      if(sub) sub.textContent = '🔁 New session — keep reciting.';
+      var tmr = document.getElementById('speakOverlayTimer');
+      if(tmr){ tmr.style.display = 'block'; tmr.textContent = '∞'; }
+      // Start a new recognition
+      var Ctor = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if(!Ctor) return;
+      var r = new Ctor();
+      var sel = document.getElementById('envLangSel');
+      r.lang = sel ? sel.value : 'ar';
+      r.continuous = false;
+      r.interimResults = false;
+      r.maxAlternatives = 1;
+      r.onresult = recognition.onresult;
+      r.onerror = recognition.onerror;
+      r.onend = recognition.onend;
+      recognition = r;
+      recognition.start();
+    } catch(e){
+      if(window.__envLog) window.__envLog('CONTINUE', 'failed: ' + e.message);
+    }
   });
 });
 </script>
