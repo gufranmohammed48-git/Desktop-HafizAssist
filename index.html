@@ -240,7 +240,7 @@
   <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
   <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
 </header>
-<div class="version-badge" title="Increment on every change so you can verify your browser isn't loading a cached version">39.0</div>
+<div class="version-badge" title="Increment on every change so you can verify your browser isn't loading a cached version">40.0</div>
 
 <p class="lede">
   Pick a surah, hit Start, then recite naturally. The tracker follows along word-by-word and
@@ -308,6 +308,154 @@
   </div>
   <button class="clear-btn" id="clearDebugBtn">Clear debug log</button>
 </section>
+
+<!-- ============================================================
+     BROWSER & API DIAGNOSTICS — answers "why does this not work on
+     my phone?". Always visible so the user can see what the
+     browser is reporting, regardless of how the actual recognition
+     is going. Updated once on page load.
+     ============================================================ -->
+<section class="debug-panel" id="envPanel" style="margin-top:14px">
+  <h2>④ Browser &amp; API diagnostics</h2>
+  <p class="hint">What your browser reports about itself and about whether
+    it can do live speech recognition. If something here looks wrong, that
+    is why recitation isn't starting.</p>
+  <div id="envInfo" style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;line-height:1.6;background:#0a1220;border:1px solid var(--border);border-radius:8px;padding:12px;white-space:pre-wrap;word-break:break-word">Loading diagnostics…</div>
+  <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+    <button class="clear-btn" id="envTestRecBtn" type="button" style="cursor:pointer">▶ Test speech recognition (3s)</button>
+    <button class="clear-btn" id="envReqMicBtn" type="button" style="cursor:pointer">🎤 Request microphone permission</button>
+  </div>
+  <div id="envTestResult" style="margin-top:10px;font-family:ui-monospace,monospace;font-size:12px;color:var(--text-dim);white-space:pre-wrap;word-break:break-word"></div>
+</section>
+
+<script>
+(function(){
+  function parseUA(ua){
+    var browser = 'unknown', os = 'unknown';
+    if(/Edg\//.test(ua)) browser = 'Microsoft Edge';
+    else if(/OPR\//.test(ua)) browser = 'Opera';
+    else if(/Chrome\//.test(ua)) browser = 'Google Chrome';
+    else if(/Safari\//.test(ua) && /Version\//.test(ua)) browser = 'Safari';
+    else if(/Firefox\//.test(ua)) browser = 'Firefox';
+    if(/Android/.test(ua)) os = 'Android';
+    else if(/iPhone|iPad|iPod/.test(ua)) os = 'iOS';
+    else if(/Windows/.test(ua)) os = 'Windows';
+    else if(/Mac OS X|macOS/.test(ua)) os = 'macOS';
+    else if(/Linux/.test(ua)) os = 'Linux';
+    return {browser:browser, os:os};
+  }
+  function boolStr(v){return v ? 'YES' : 'NO';}
+  function showEnv(){
+    var ua = navigator.userAgent;
+    var p = parseUA(ua);
+    var hasSR  = !!(window.SpeechRecognition);
+    var hasWSR = !!(window.webkitSpeechRecognition);
+    var proto = location.protocol;
+    var host  = location.host;
+    var isSecure = window.isSecureContext;
+    var online = navigator.onLine;
+    var langs = [];
+    if(hasSR || hasWSR){
+      try {
+        var tmpCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
+        // probe languages by trying to construct (no actual recognition yet)
+        langs.push('(SpeechRecognition constructor available — language is set at recognition time)');
+      } catch(e){ langs.push('error probing: ' + e.message); }
+    }
+    var rec = hasSR ? 'SpeechRecognition' : (hasWSR ? 'webkitSpeechRecognition' : 'NOT AVAILABLE');
+    var out = [];
+    out.push('Browser:        ' + p.browser);
+    out.push('OS / device:    ' + p.os);
+    out.push('User agent:     ' + ua);
+    out.push('');
+    out.push('Page URL:       ' + location.href);
+    out.push('Protocol:       ' + proto + (proto === 'https:' ? '  (secure ✓)' : '  (NOT SECURE — speech API will be BLOCKED)'));
+    out.push('isSecureContext:' + boolStr(isSecure));
+    out.push('Online:         ' + boolStr(online));
+    out.push('');
+    out.push('SpeechRecognition:         ' + boolStr(hasSR));
+    out.push('webkitSpeechRecognition:   ' + boolStr(hasWSR));
+    out.push('Effective class: ' + rec);
+    out.push('');
+    out.push('Notes: ' + (hasSR || hasWSR
+      ? 'Recognition API is exposed. If recitation still fails, the most likely cause is the protocol above (must be https or localhost), or the browser has not been granted microphone access at the OS level.'
+      : 'No SpeechRecognition class exists in this window. The page will not be able to do live recognition. The browser may be too old, the page may be served over an insecure origin, or the API may be disabled.'));
+    document.getElementById('envInfo').textContent = out.join('\n');
+  }
+  showEnv();
+  // Re-show if user comes back to the tab (some browsers change state)
+  document.addEventListener('visibilitychange', () => { if(!document.hidden) showEnv(); });
+  // Test button: try to actually start recognition for 3s
+  var testBtn = document.getElementById('envTestRecBtn');
+  if(testBtn){
+    testBtn.addEventListener('click', function(){
+      var Ctor = window.SpeechRecognition || window.webkitSpeechRecognition;
+      var out = document.getElementById('envTestResult');
+      if(!Ctor){
+        out.textContent = 'FAIL: no SpeechRecognition constructor. The API is not available in this window.';
+        out.style.color = '#e74c3c';
+        return;
+      }
+      out.textContent = 'Starting test recognition for 3s...';
+      out.style.color = '';
+      try {
+        var r = new Ctor();
+        r.lang = 'ar-SA';
+        r.continuous = false;
+        r.interimResults = false;
+        r.maxAlternatives = 1;
+        var got = false;
+        r.onresult = function(e){
+          got = true;
+          var txt = '';
+          for(var i=0;i<e.results.length;i++) txt += e.results[i][0].transcript;
+          out.textContent = 'SUCCESS: got transcript: ' + JSON.stringify(txt);
+          out.style.color = '#2ecc71';
+          try { r.stop(); } catch(_){}
+        };
+        r.onerror = function(e){
+          out.textContent = 'ERROR: ' + e.error + (e.message ? ' — ' + e.message : '');
+          out.style.color = '#e74c3c';
+        };
+        r.onend = function(){
+          if(!got){
+            out.textContent = 'ENDED: no transcript returned in 3s. Try the mic permission button first, then speak immediately after pressing test.';
+            out.style.color = '#e74c3c';
+          }
+        };
+        r.start();
+        setTimeout(function(){ try { r.stop(); } catch(_){} }, 3000);
+      } catch(e){
+        out.textContent = 'THREW: ' + e.message;
+        out.style.color = '#e74c3c';
+      }
+    });
+  }
+  // Mic permission button
+  var micBtn = document.getElementById('envReqMicBtn');
+  if(micBtn){
+    micBtn.addEventListener('click', async function(){
+      var out = document.getElementById('envTestResult');
+      if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+        out.textContent = 'FAIL: navigator.mediaDevices.getUserMedia is not available. The browser is not exposing microphone access to this page.';
+        out.style.color = '#e74c3c';
+        return;
+      }
+      out.textContent = 'Requesting microphone permission...';
+      out.style.color = '';
+      try {
+        var stream = await navigator.mediaDevices.getUserMedia({audio:true});
+        out.textContent = 'SUCCESS: microphone permission granted. Stream has ' + stream.getAudioTracks().length + ' audio track(s).';
+        out.style.color = '#2ecc71';
+        stream.getTracks().forEach(t => t.stop());
+      } catch(e){
+        out.textContent = 'DENIED / FAILED: ' + (e.name || '') + ' — ' + (e.message || e);
+        out.style.color = '#e74c3c';
+      }
+    });
+  }
+})();
+</script>
 
 </div>
 
