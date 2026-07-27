@@ -240,7 +240,7 @@
   <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
   <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
 </header>
-<div class="version-badge" title="Increment on every change so you can verify your browser isn't loading a cached version">41.0</div>
+<div class="version-badge" title="Increment on every change so you can verify your browser isn't loading a cached version">42.0</div>
 
 <p class="lede">
   Pick a surah, hit Start, then recite naturally. The tracker follows along word-by-word and
@@ -322,7 +322,14 @@
     is why recitation isn't starting.</p>
   <div id="envInfo" style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;line-height:1.6;background:#0a1220;border:1px solid var(--border);border-radius:8px;padding:12px;white-space:pre-wrap;word-break:break-word">Loading diagnostics…</div>
   <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
-    <button class="clear-btn" id="envTestRecBtn" type="button" style="cursor:pointer">▶ Test speech recognition (3s)</button>
+    <select id="envLangSel" style="background:#0a1220;color:var(--text);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-family:inherit;font-size:13px;cursor:pointer">
+      <option value="ar">ar — generic Arabic</option>
+      <option value="ar-SA">ar-SA — Saudi Arabic</option>
+      <option value="ar-EG">ar-EG — Egyptian Arabic</option>
+      <option value="ar-AE">ar-AE — Emirati Arabic</option>
+      <option value="en-US">en-US — US English (for comparison)</option>
+    </select>
+    <button class="clear-btn" id="envTestRecBtn" type="button" style="cursor:pointer">▶ Test this language (3s)</button>
     <button class="clear-btn" id="envReqMicBtn" type="button" style="cursor:pointer">🎤 Request microphone permission</button>
     <button class="clear-btn" id="envClearLogBtn" type="button" style="cursor:pointer">🧹 Clear log</button>
   </div>
@@ -421,7 +428,7 @@
       out.style.color = '';
       try {
         var r = new Ctor();
-        r.lang = 'ar-SA';
+        r.lang = 'ar';
         r.continuous = false;
         r.interimResults = false;
         r.maxAlternatives = 1;
@@ -1252,7 +1259,12 @@ async function startListening(){
   }
 
   recognition = new Ctor();
-  recognition.lang = 'ar-SA';
+  // Try multiple Arabic variants in order. The first that actually
+  // produces a non-empty result wins. Different Android builds ship
+  // different Arabic packs (ar, ar-SA, ar-EG), so this beats guessing.
+  var _envLangSel = document.getElementById('envLangSel');
+  recognition.lang = _envLangSel ? _envLangSel.value : 'ar';
+  if(window.__envLog) window.__envLog('START', 'language=' + recognition.lang);
   recognition.continuous = true;
   recognition.interimResults = true;
 
@@ -1408,7 +1420,12 @@ async function startListening(){
     // (well-known race condition documented in the original code, kept here).
     setTimeout(() => {
       if(!listening) return;
-      try { recognition.start(); }
+      try {
+        // Re-apply the currently selected language in case the user changed it
+        var _sel2 = document.getElementById('envLangSel');
+        if(_sel2) recognition.lang = _sel2.value;
+        recognition.start();
+      }
       catch(e){
         if(window.__envLog) window.__envLog('START', 'restart failed: ' + e.message);
         setTimeout(() => { if(listening){ try{ recognition.start(); }catch(_){} } }, 400);
