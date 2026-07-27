@@ -240,7 +240,7 @@
   <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
   <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
 </header>
-<div class="version-badge" title="Increment on every change so you can verify your browser isn't loading a cached version">43.0</div>
+<div class="version-badge" title="Increment on every change so you can verify your browser isn't loading a cached version">43.1</div>
 
 <p class="lede">
   Pick a surah, hit Start, then recite naturally. The tracker follows along word-by-word and
@@ -1265,8 +1265,14 @@ async function startListening(){
   var _envLangSel = document.getElementById('envLangSel');
   recognition.lang = _envLangSel ? _envLangSel.value : 'ar';
   if(window.__envLog) window.__envLog('START', 'language=' + recognition.lang);
-  recognition.continuous = true;
+  // Use SINGLE-SHOT mode and chain sessions manually via onend. Android
+  // Chrome's continuous=true is broken (sits ~5s, fires NOMATCH, ends).
+  // The test button (which uses continuous=false) works perfectly on
+  // the same phone, so we run the main app the same way and rely on
+  // the onend → restart loop to keep listening.
+  recognition.continuous = false;
   recognition.interimResults = true;
+  recognition.maxAlternatives = 1;
 
   // Diagnostic: wire every recognition event into __envLog so we can see
   // exactly what the browser is doing on Android. Each line shows the time
