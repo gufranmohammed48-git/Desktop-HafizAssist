@@ -240,7 +240,7 @@
   <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
   <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
 </header>
-<div class="version-badge" title="Increment on every change so you can verify your browser isn't loading a cached version">40.0</div>
+<div class="version-badge" title="Increment on every change so you can verify your browser isn't loading a cached version">41.0</div>
 
 <p class="lede">
   Pick a surah, hit Start, then recite naturally. The tracker follows along word-by-word and
@@ -324,8 +324,9 @@
   <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
     <button class="clear-btn" id="envTestRecBtn" type="button" style="cursor:pointer">▶ Test speech recognition (3s)</button>
     <button class="clear-btn" id="envReqMicBtn" type="button" style="cursor:pointer">🎤 Request microphone permission</button>
+    <button class="clear-btn" id="envClearLogBtn" type="button" style="cursor:pointer">🧹 Clear log</button>
   </div>
-  <div id="envTestResult" style="margin-top:10px;font-family:ui-monospace,monospace;font-size:12px;color:var(--text-dim);white-space:pre-wrap;word-break:break-word"></div>
+  <div id="envTestResult" style="margin-top:10px;font-family:ui-monospace,monospace;font-size:12px;color:var(--text-dim);white-space:pre-wrap;word-break:break-word;max-height:240px;overflow:auto;background:#0a1220;border:1px solid var(--border);border-radius:6px;padding:8px"></div>
 </section>
 
 <script>
@@ -385,7 +386,27 @@
   showEnv();
   // Re-show if user comes back to the tab (some browsers change state)
   document.addEventListener('visibilitychange', () => { if(!document.hidden) showEnv(); });
+  // Live event log that the main recognition flow calls into so the user can see
+  // what's happening. Renders into #envTestResult.
+  window.__envLog = function(kind, msg){
+    try {
+      var out = document.getElementById('envTestResult');
+      if(!out) return;
+      var line = '[' + new Date().toLocaleTimeString() + '] ' + kind + ': ' + msg;
+      out.textContent = (out.textContent ? out.textContent + '\n' : '') + line;
+      out.style.color = (kind === 'ERROR' || kind === 'END') ? '#e74c3c'
+                       : (kind === 'START' || kind === 'AUDIO_START' || kind === 'SPEECH_START' || kind === 'RESULT') ? '#2ecc71'
+                       : '';
+      // auto-scroll the log to the bottom
+      out.scrollTop = out.scrollHeight;
+    } catch(_){}
+  };
   // Test button: try to actually start recognition for 3s
+  var clearBtn = document.getElementById('envClearLogBtn');
+  if(clearBtn) clearBtn.addEventListener('click', function(){
+    var out = document.getElementById('envTestResult');
+    if(out) out.textContent = '';
+  });
   var testBtn = document.getElementById('envTestRecBtn');
   if(testBtn){
     testBtn.addEventListener('click', function(){
@@ -1235,9 +1256,21 @@ async function startListening(){
   recognition.continuous = true;
   recognition.interimResults = true;
 
+  // Diagnostic: wire every recognition event into __envLog so we can see
+  // exactly what the browser is doing on Android. Each line shows the time
+  // and the event name. RESULT lines also include the transcript so we
+  // can confirm the matcher is getting data.
+  ['onstart','onaudiostart','onaudioend','onspeechstart','onspeechend','onnomatch'].forEach(ev => {
+    recognition[ev] = (e) => {
+      var tag = ev.slice(2).toUpperCase();
+      if(window.__envLog) window.__envLog(tag, 'fired');
+    };
+  });
+
   recognition.onresult = (event) => {
     let interim = '';
-    for(let i = event.resultIndex; i < event.results.length; i++){
+    let resultCount = event.results.length;
+    for(let i = event.resultIndex; i < resultCount; i++){
       const res = event.results[i];
       if(res.isFinal){
         finalizedText += res[0].transcript + ' ';
@@ -1247,6 +1280,10 @@ async function startListening(){
       }
     }
     const fullText = (finalizedText + interim).trim();
+    if(window.__envLog){
+      var preview = fullText.length > 80 ? fullText.slice(0,80) + '…' : fullText;
+      window.__envLog('RESULT', resultCount + ' items | final=' + (finalizedText.trim().length) + 'ch, interim=' + (interim.trim().length) + 'ch | "' + preview + '"');
+    }
     if(fullText){
       transcriptBox.classList.remove('hidden');
       transcriptText.textContent = fullText;
@@ -1329,6 +1366,7 @@ async function startListening(){
   }
 
   recognition.onerror = (e) => {
+    if(window.__envLog) window.__envLog('ERROR', e.error + (e.message ? ' — ' + e.message : ''));
     // Show a clear status for every error so the user knows what's wrong.
     if(e.error === 'no-speech'){
       // Don't disable — Chrome's continuous mode just had a quiet moment.
@@ -1364,6 +1402,7 @@ async function startListening(){
   };
 
   recognition.onend = () => {
+    if(window.__envLog) window.__envLog('END', 'recognition session ended');
     if(!listening) return;
     // Chrome sometimes fires onend even with continuous=true; restart with a small delay
     // (well-known race condition documented in the original code, kept here).
@@ -1371,6 +1410,7 @@ async function startListening(){
       if(!listening) return;
       try { recognition.start(); }
       catch(e){
+        if(window.__envLog) window.__envLog('START', 'restart failed: ' + e.message);
         setTimeout(() => { if(listening){ try{ recognition.start(); }catch(_){} } }, 400);
       }
     }, 250);
@@ -1383,6 +1423,7 @@ async function startListening(){
     statusEl.classList.add('warn');
   }
 
+  if(window.__envLog) window.__envLog('START', 'recognition.start() called (continuous=' + recognition.continuous + ', lang=' + recognition.lang + ')');
   try{
     recognition.start();
     listening = true;
