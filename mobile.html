@@ -35,7 +35,7 @@
 </head>
 <body>
 
-<div class="ver">v1.1</div>
+<div class="ver">v1.2</div>
 <h1>Al-Fatihah Test <span class="ar">الفاتحة</span></h1>
 <div style="text-align:center;color:#888;font-size:12px;margin-bottom:8px">Minimal mobile test — 30 second session</div>
 
@@ -75,21 +75,27 @@
   const transcriptEl = document.getElementById('transcript');
 
   // ---------- BUILD FATIHAH ----------
-  // SURAH_PHONEMES[surah][ayah][position] = [text, phoneme, rules]
-  // We only load Al-Fatihah (surah 1, 7 ayahs).
+  // SURAH_PHONEMES[surah_str][ayah_str][position_str] = [text, phoneme, rules]
+  // THREE LEVELS OF STRING-KEYED OBJECTS, not arrays. The keys are
+  // "1", "2", "3" at every level.
   const refWords = []; // [{text, norm, el, surah, ayah, position}]
   const surahData = window.SURAH_PHONEMES && window.SURAH_PHONEMES['1'];
   if(!surahData){
     ayahsEl.textContent = 'ERROR: SURAH_PHONEMES data failed to load';
+    log('ERROR', 'SURAH_PHONEMES[1] is ' + typeof window.SURAH_PHONEMES);
     return;
   }
   for(let a = 1; a <= 7; a++){
-    const ayahArr = surahData[a];
-    if(!ayahArr) continue;
+    const ayahObj = surahData[String(a)];
+    if(!ayahObj) continue;
     const span = document.createElement('span');
     span.className = 'ayah';
-    for(let p = 0; p < ayahArr.length; p++){
-      const [text, phoneme, rules] = ayahArr[p];
+    // Iterate over string keys "1", "2", "3" in the ayah object
+    const positions = Object.keys(ayahObj).map(Number).sort((x,y)=>x-y);
+    for(const p of positions){
+      const wordArr = ayahObj[String(p)];
+      if(!Array.isArray(wordArr)) continue;
+      const text = wordArr[0];
       const w = document.createElement('span');
       w.className = 'word future';
       w.textContent = text;
