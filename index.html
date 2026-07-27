@@ -234,6 +234,19 @@
 </head>
 <body>
 
+<!-- ============================================================
+     BIG "SPEAK NOW" OVERLAY — fires after the user clicks Start,
+     counts down 3..2..1..GO! then shows a huge unmissable banner
+     during the 5-second audio capture window on every restart.
+     ============================================================ -->
+<div id="speakOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;align-items:center;justify-content:center;flex-direction:column;padding:20px;text-align:center">
+  <div id="speakOverlayCountdown" style="font-size:180px;font-weight:900;color:#2ecc71;text-shadow:0 0 60px rgba(46,204,113,.6);line-height:1">3</div>
+  <div id="speakOverlayBanner" style="display:none;font-size:48px;font-weight:900;color:#fff;background:linear-gradient(135deg,#2ecc71,#27ae60);padding:20px 40px;border-radius:20px;box-shadow:0 0 80px rgba(46,204,113,.5);margin-top:20px;animation:pulse 1s ease-in-out infinite">🎤 SPEAK NOW</div>
+  <div id="speakOverlaySub" style="display:none;font-size:18px;color:#fff;margin-top:20px;max-width:600px;line-height:1.5"></div>
+  <div id="speakOverlayTimer" style="display:none;font-size:80px;font-weight:900;color:#fff;margin-top:30px;font-variant-numeric:tabular-nums">5</div>
+  <button id="speakOverlayClose" type="button" style="margin-top:30px;padding:12px 24px;background:#fff;color:#0a1f12;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">Stop reciting</button>
+</div>
+
 <!-- VERSION BADGE — increment on every push so user can confirm fresh load -->
 
 
@@ -243,7 +256,7 @@
   <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
   <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
 </header>
-<div class="version-badge" title="Increment on every change so you can verify your browser isn't loading a cached version">43.2</div>
+<div class="version-badge" title="Increment on every change so you can verify your browser isn't loading a cached version">44.0</div>
 
 <p class="lede">
   Pick a surah, hit Start, then recite naturally. The tracker follows along word-by-word and
@@ -486,6 +499,71 @@
     });
   }
 })();
+
+// Fullscreen "speak now" overlay control. Called from startListening and
+// from onaudiostart/onaudioend events.
+function showSpeakOverlay(isFirstStart){
+  var ov = document.getElementById('speakOverlay');
+  var cd = document.getElementById('speakOverlayCountdown');
+  var ban = document.getElementById('speakOverlayBanner');
+  var sub = document.getElementById('speakOverlaySub');
+  var tmr = document.getElementById('speakOverlayTimer');
+  if(!ov) return;
+  if(isFirstStart){
+    ov.style.display = 'flex';
+    cd.style.display = 'block';
+    cd.textContent = '3';
+    ban.style.display = 'none';
+    sub.style.display = 'none';
+    tmr.style.display = 'none';
+    // Countdown 3, 2, 1, then "speak now" banner
+    setTimeout(function(){ cd.textContent = '2'; }, 1000);
+    setTimeout(function(){ cd.textContent = '1'; }, 2000);
+    setTimeout(function(){
+      cd.style.display = 'none';
+      ban.style.display = 'block';
+      sub.style.display = 'block';
+      sub.textContent = 'The mic is live for 5 seconds. Recite whatever you\'d like to test, then we\'ll restart automatically.';
+      tmr.style.display = 'block';
+      tmr.textContent = '5';
+      var n = 4;
+      var iv = setInterval(function(){
+        n--;
+        tmr.textContent = String(n);
+        if(n <= 0) clearInterval(iv);
+      }, 1000);
+    }, 3000);
+  } else {
+    // Quick flash on each restart so the user knows the mic is live again
+    ov.style.display = 'flex';
+    cd.style.display = 'none';
+    ban.style.display = 'block';
+    sub.style.display = 'block';
+    sub.textContent = '🔁 Mic restarted — keep reciting.';
+    tmr.style.display = 'block';
+    tmr.textContent = '5';
+    var n2 = 4;
+    var iv2 = setInterval(function(){
+      n2--;
+      tmr.textContent = String(n2);
+      if(n2 <= 0){ clearInterval(iv2); hideSpeakOverlay(); }
+    }, 1000);
+  }
+}
+function hideSpeakOverlay(){
+  var ov = document.getElementById('speakOverlay');
+  if(ov) ov.style.display = 'none';
+}
+// Wire the "Stop reciting" button on the overlay so the user can manually
+// stop the recognition loop without hunting for the mic button behind the overlay.
+document.addEventListener('DOMContentLoaded', function(){
+  var btn = document.getElementById('speakOverlayClose');
+  if(btn) btn.addEventListener('click', function(){
+    hideSpeakOverlay();
+    var mic = document.querySelector('.mic-btn');
+    if(mic) mic.click();
+  });
+});
 </script>
 
 </div>
@@ -1424,7 +1502,8 @@ async function startListening(){
 
   recognition.onend = () => {
     if(window.__envLog) window.__envLog('END', 'recognition session ended');
-    if(!listening) return;
+    // If user manually stopped, hide overlay permanently
+    if(!listening){ hideSpeakOverlay(); return; }
     // Chrome sometimes fires onend even with continuous=true; restart with a small delay
     // (well-known race condition documented in the original code, kept here).
     setTimeout(() => {
@@ -1453,6 +1532,13 @@ async function startListening(){
   try{
     recognition.start();
     listening = true;
+    // Show the big "speak now" overlay on first start only
+    if(!window.__speakOverlayShown){
+      window.__speakOverlayShown = true;
+      showSpeakOverlay(true);
+    } else {
+      showSpeakOverlay(false);
+    }
     micBtn.classList.add('listening');
     micLabel.textContent = 'Listening… tap to stop';
     statusEl.classList.remove('warn');
@@ -1598,6 +1684,71 @@ window.__matcher__ = {
     statusEl.textContent = 'Failed to load phoneme data: ' + e.message;
   }
 })();
+
+// Fullscreen "speak now" overlay control. Called from startListening and
+// from onaudiostart/onaudioend events.
+function showSpeakOverlay(isFirstStart){
+  var ov = document.getElementById('speakOverlay');
+  var cd = document.getElementById('speakOverlayCountdown');
+  var ban = document.getElementById('speakOverlayBanner');
+  var sub = document.getElementById('speakOverlaySub');
+  var tmr = document.getElementById('speakOverlayTimer');
+  if(!ov) return;
+  if(isFirstStart){
+    ov.style.display = 'flex';
+    cd.style.display = 'block';
+    cd.textContent = '3';
+    ban.style.display = 'none';
+    sub.style.display = 'none';
+    tmr.style.display = 'none';
+    // Countdown 3, 2, 1, then "speak now" banner
+    setTimeout(function(){ cd.textContent = '2'; }, 1000);
+    setTimeout(function(){ cd.textContent = '1'; }, 2000);
+    setTimeout(function(){
+      cd.style.display = 'none';
+      ban.style.display = 'block';
+      sub.style.display = 'block';
+      sub.textContent = 'The mic is live for 5 seconds. Recite whatever you\'d like to test, then we\'ll restart automatically.';
+      tmr.style.display = 'block';
+      tmr.textContent = '5';
+      var n = 4;
+      var iv = setInterval(function(){
+        n--;
+        tmr.textContent = String(n);
+        if(n <= 0) clearInterval(iv);
+      }, 1000);
+    }, 3000);
+  } else {
+    // Quick flash on each restart so the user knows the mic is live again
+    ov.style.display = 'flex';
+    cd.style.display = 'none';
+    ban.style.display = 'block';
+    sub.style.display = 'block';
+    sub.textContent = '🔁 Mic restarted — keep reciting.';
+    tmr.style.display = 'block';
+    tmr.textContent = '5';
+    var n2 = 4;
+    var iv2 = setInterval(function(){
+      n2--;
+      tmr.textContent = String(n2);
+      if(n2 <= 0){ clearInterval(iv2); hideSpeakOverlay(); }
+    }, 1000);
+  }
+}
+function hideSpeakOverlay(){
+  var ov = document.getElementById('speakOverlay');
+  if(ov) ov.style.display = 'none';
+}
+// Wire the "Stop reciting" button on the overlay so the user can manually
+// stop the recognition loop without hunting for the mic button behind the overlay.
+document.addEventListener('DOMContentLoaded', function(){
+  var btn = document.getElementById('speakOverlayClose');
+  if(btn) btn.addEventListener('click', function(){
+    hideSpeakOverlay();
+    var mic = document.querySelector('.mic-btn');
+    if(mic) mic.click();
+  });
+});
 </script>
 
 </body>
