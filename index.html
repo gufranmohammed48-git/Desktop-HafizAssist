@@ -243,7 +243,7 @@
   <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
   <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
 </header>
-<div class="version-badge" title="Increment on every change so you can verify your browser isn't loading a cached version">47.3</div>
+<div class="version-badge" title="Increment on every change so you can verify your browser isn't loading a cached version">47.4</div>
 
 <p class="lede">
   Pick a surah, hit Start, then recite naturally. The tracker follows along word-by-word and
@@ -1557,7 +1557,6 @@ async function startListening(){
     _maxPointerReached = 0;
     _prevPastEnd = 0;
     consecutiveMisses = 0;
-    stats = {correct:0, mistake:0, unclear:0};
     debugLog = [];
 
     // Re-process every word
@@ -1566,6 +1565,18 @@ async function startListening(){
     }
     committedWordCount = words.length;
     highlightCurrent();
+    // Count stats from the ACTUAL DOM state of refWords (not from
+    // processNewWord's per-call counter, which would double-count
+    // across rAF ticks). Each refWord has el.dataset.status = 'correct',
+    // 'mistake', 'unclear', or '' (unreached).
+    var newStats = {correct:0, mistake:0, unclear:0};
+    for(let i = 0; i < refWords.length; i++){
+      const s = refWords[i].el.dataset.status;
+      if(s === 'correct') newStats.correct++;
+      else if(s === 'mistake') newStats.mistake++;
+      else if(s === 'unclear') newStats.unclear++;
+    }
+    stats = newStats;
     renderDebugPanel();
     updateStats();
   }
@@ -1669,6 +1680,7 @@ async function startListening(){
     } else {
       showSpeakOverlay(false);
     }
+    window.__statsInitialized = false;  // reset cumulative stats for new session
     micBtn.classList.add('listening');
     micLabel.textContent = 'Listening… tap to stop';
     statusEl.classList.remove('warn');
