@@ -257,7 +257,7 @@
   <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
   <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
 </header>
-<div class="version-badge" title="Increment on every change so you can verify your browser isn't loading a cached version">47.1</div>
+<div class="version-badge" title="Increment on every change so you can verify your browser isn't loading a cached version">47.2</div>
 
 <p class="lede">
   Pick a surah, hit Start, then recite naturally. The tracker follows along word-by-word and
@@ -412,18 +412,30 @@
   // Re-show if user comes back to the tab (some browsers change state)
   document.addEventListener('visibilitychange', () => { if(!document.hidden) showEnv(); });
   // Live event log that the main recognition flow calls into so the user can see
-  // what's happening. Renders into #envTestResult.
+  // what's happening. Renders into #envTestResult (full diagnostics) AND into
+  // #compactLog (right under the mic button, so it's visible on a phone
+  // without scrolling down to the full panel).
   window.__envLog = function(kind, msg){
     try {
-      var out = document.getElementById('envTestResult');
-      if(!out) return;
       var line = '[' + new Date().toLocaleTimeString() + '] ' + kind + ': ' + msg;
-      out.textContent = (out.textContent ? out.textContent + '\n' : '') + line;
-      out.style.color = (kind === 'ERROR' || kind === 'END') ? '#e74c3c'
-                       : (kind === 'START' || kind === 'AUDIO_START' || kind === 'SPEECH_START' || kind === 'RESULT') ? '#2ecc71'
-                       : '';
-      // auto-scroll the log to the bottom
-      out.scrollTop = out.scrollHeight;
+      var out = document.getElementById('envTestResult');
+      if(out){
+        out.textContent = (out.textContent ? out.textContent + '\n' : '') + line;
+        out.scrollTop = out.scrollHeight;
+      }
+      var compact = document.getElementById('compactLog');
+      if(compact){
+        var existing = compact.textContent.split('\n');
+        existing.push(line);
+        if(existing.length > 8) existing = existing.slice(-8);
+        compact.textContent = existing.join('\n');
+      }
+      // Color both
+      var color = (kind === 'ERROR' || kind === 'END') ? '#e74c3c'
+                : (kind === 'START' || kind === 'AUDIO_START' || kind === 'SPEECH_START' || kind === 'RESULT') ? '#2ecc71'
+                : '#2ecc71';
+      if(out) out.style.color = color;
+      if(compact) compact.style.color = color;
     } catch(_){}
   };
   // Test button: try to actually start recognition for 3s
