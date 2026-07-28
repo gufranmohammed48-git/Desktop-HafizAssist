@@ -869,10 +869,105 @@ function normalize(word){
 }
 
 // =========================================================================
+// SIMPLE MATCHER (port from mobile-simple.html, which works on Android)
+// Replaces the complex processNewWord matcher that's not working in the
+// main app. Strategy: exact → starts-with → Levenshtein fuzzy, in a
+// 12-word lookahead window. Always advances the pointer, so a wrong
+// word gets marked as 'wrong' and we move on (instead of stalling).
+// =========================================================================
+function levenshtein(a, b){
+  const m = a.length, n = b.length;
+  if(!m) return n; if(!n) return m;
+  const dp = Array.from({length:m+1}, () => new Array(n+1).fill(0));
+  for(let i=0;i<=m;i++) dp[i][0] = i;
+  for(let j=0;j<=n;j++) dp[0][j] = j;
+  for(let i=1;i<=m;i++){
+    for(let j=1;j<=n;j++){
+      dp[i][j] = a[i-1] === b[j-1]
+        ? dp[i-1][j-1]
+        : 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
+    }
+  }
+  return dp[m][n];
+}
+function _simpleFindMatch(w, p){
+  const NEAR = 12;
+  const end = Math.min(refWords.length, p + NEAR);
+  // 1) exact
+  for(let i = p; i < end; i++){
+    if(refWords[i].norm === w) return {idx:i, kind:'exact'};
+  }
+  // 2) prefix
+  for(let i = p; i < end; i++){
+    if(refWords[i].norm.startsWith(w) && w.length >= 2) return {idx:i, kind:'prefix'};
+    if(w.startsWith(refWords[i].norm) && refWords[i].norm.length >= 2) return {idx:i, kind:'prefix'};
+  }
+  // 3) fuzzy (Levenshtein)
+  for(let i = p; i < end; i++){
+    const d = levenshtein(refWords[i].norm, w);
+    const tol = Math.max(1, Math.floor(Math.max(refWords[i].norm.length, w.length) * 0.25));
+    if(d <= tol) return {idx:i, kind:'fuzzy', dist:d};
+  }
+  return {idx:-1, kind:'none'};
+}
+function _simpleMatch(text){
+  const heard = (text||'').split(/\s+/).map(normalize).filter(Boolean);
+  if(!heard.length) return;
+  if(window.__envLog) window.__envLog('MATCH', 'heard=' + JSON.stringify(heard) + ' from p=' + pointer);
+  let p = pointer;
+  for(const w of heard){
+    const m = _simpleFindMatch(w, p);
+    if(m.idx >= 0){
+      // mark skipped words as unclear
+      for(let i = p; i < m.idx; i++){
+        if(refWords[i].el.dataset.status !== 'correct'){
+          refWords[i].el.dataset.status = 'unclear';
+          refWords[i].el.classList.remove('now','future','past','wrong');
+          refWords[i].el.classList.add('past');
+        }
+      }
+      refWords[m.idx].el.dataset.status = 'correct';
+      refWords[m.idx].el.classList.remove('now','future','unclear','wrong');
+      refWords[m.idx].el.classList.add('past');
+      if(window.__envLog) window.__envLog('MATCH', '"' + w + '" → refWords[' + m.idx + ']="' + refWords[m.idx].norm + '" (' + m.kind + (m.dist?', d='+m.dist:'') + ')');
+      p = m.idx + 1;
+    } else {
+      if(p < refWords.length){
+        refWords[p].el.dataset.status = 'wrong';
+        refWords[p].el.classList.remove('now','future','past','unclear');
+        refWords[p].el.classList.add('wrong');
+        if(window.__envLog) window.__envLog('MATCH', '"' + w + '" → WRONG at refWords[' + p + ']="' + refWords[p].norm + '"');
+        p++;
+      }
+    }
+  }
+  pointer = Math.min(p, refWords.length);
+  if(pointer < refWords.length){
+    refWords[pointer].el.classList.remove('future');
+    refWords[pointer].el.classList.add('now');
+  }
+  if(pointer > 0 && refWords[pointer-1].el.classList.contains('now')){
+    refWords[pointer-1].el.classList.remove('now');
+    refWords[pointer-1].el.classList.add('past');
+  }
+  // Count stats from DOM state
+  const newStats = {correct:0, mistake:0, unclear:0};
+  for(let i = 0; i < refWords.length; i++){
+    const s = refWords[i].el.dataset.status;
+    if(s === 'correct') newStats.correct++;
+    else if(s === 'mistake') newStats.mistake++;
+    else if(s === 'unclear') newStats.unclear++;
+  }
+  stats = newStats;
+  if(typeof updateStats === 'function') updateStats();
+  if(typeof renderDebugPanel === 'function') renderDebugPanel();
+}
+
+// =========================================================================
 // PHONETIC NORMALIZER — quick JS approximation of the Qur'anic Phonemizer.
 // The full phonemizer is Python; this is a good-enough fallback so the
 // browser-only path can still do phonetic matching. Used as a secondary
-// check when text-Levenshtein is borderline.
+// check when text-Levenstein is borderline.
 // =========================================================================
 const AR_TO_IPA = {
   'ا':'aː','إ':'ʔ','أ':'ʔ','آ':'aː','ٱ':'ʔ','ب':'b','ت':'t','ث':'θ',
@@ -1500,25 +1595,19 @@ async function startListening(){
       _maxPointerReached = 0;
       _prevPastEnd = 0;
       consecutiveMisses = 0;
-      // Process every word
-      for(let i = 0; i < words.length; i++){
-        processNewWord(words[i]);
+      // Use the SIMPLE matcher from mobile-simple.html (works on Android).
+      // The complex processNewWord matcher was stalling on Android.
+      if(typeof _simpleMatch === 'function'){
+        _simpleMatch(txt);
+      } else {
+        // Fallback to old matcher if _simpleMatch isn't loaded
+        for(let i = 0; i < words.length; i++){
+          processNewWord(words[i]);
+        }
       }
       committedWordCount = words.length;
       highlightCurrent();
-      // Count stats from DOM state
-      if(typeof stats !== 'undefined'){
-        const newStats = {correct:0, mistake:0, unclear:0};
-        for(let i = 0; i < refWords.length; i++){
-          const s = refWords[i].el.dataset.status;
-          if(s === 'correct') newStats.correct++;
-          else if(s === 'mistake') newStats.mistake++;
-          else if(s === 'unclear') newStats.unclear++;
-        }
-        stats = newStats;
-        updateStats();
-      }
-      renderDebugPanel();
+      if(typeof renderDebugPanel === 'function') renderDebugPanel();
     }
   };
 
