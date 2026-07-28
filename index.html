@@ -234,20 +234,6 @@
 </head>
 <body>
 
-<!-- ============================================================
-     BIG "SPEAK NOW" OVERLAY — fires after the user clicks Start,
-     counts down 3..2..1..GO! then shows a huge unmissable banner
-     during the 5-second audio capture window on every restart.
-     ============================================================ -->
-<div id="speakOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;align-items:center;justify-content:center;flex-direction:column;padding:20px;text-align:center">
-  <div id="speakOverlayCountdown" style="font-size:180px;font-weight:900;color:#2ecc71;text-shadow:0 0 60px rgba(46,204,113,.6);line-height:1">3</div>
-  <div id="speakOverlayBanner" style="display:none;font-size:48px;font-weight:900;color:#fff;background:linear-gradient(135deg,#2ecc71,#27ae60);padding:20px 40px;border-radius:20px;box-shadow:0 0 80px rgba(46,204,113,.5);margin-top:20px;animation:pulse 1s ease-in-out infinite">🎤 SPEAK NOW</div>
-  <div id="speakOverlaySub" style="display:none;font-size:18px;color:#fff;margin-top:20px;max-width:600px;line-height:1.5"></div>
-  <div id="speakOverlayTimer" style="display:none;font-size:80px;font-weight:900;color:#fff;margin-top:30px;font-variant-numeric:tabular-nums">5</div>
-  <button id="speakOverlayContinue" type="button" style="margin-top:30px;padding:14px 28px;background:#2ecc71;color:#0a1f12;border:none;border-radius:8px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;display:none">▶ Continue reciting</button>
-<button id="speakOverlayClose" type="button" style="margin-top:14px;padding:12px 24px;background:transparent;color:#fff;border:2px solid #fff;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">Stop reciting</button>
-</div>
-
 <!-- VERSION BADGE — increment on every push so user can confirm fresh load -->
 
 
@@ -257,7 +243,7 @@
   <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
   <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
 </header>
-<div class="version-badge" title="Increment on every change so you can verify your browser isn't loading a cached version">47.2</div>
+<div class="version-badge" title="Increment on every change so you can verify your browser isn't loading a cached version">47.3</div>
 
 <p class="lede">
   Pick a surah, hit Start, then recite naturally. The tracker follows along word-by-word and
@@ -572,6 +558,10 @@
 // Fullscreen "speak now" overlay control. Called from startListening and
 // from onaudiostart/onaudioend events.
 function showSpeakOverlay(isFirstStart){
+  // Overlay removed. The small compact log under the mic button
+  // is the new "speak now" indicator. The surah text and the log
+  // are always visible.
+  return;
   var ov = document.getElementById('speakOverlay');
   var cd = document.getElementById('speakOverlayCountdown');
   var ban = document.getElementById('speakOverlayBanner');
@@ -1828,6 +1818,10 @@ window.__matcher__ = {
 // Fullscreen "speak now" overlay control. Called from startListening and
 // from onaudiostart/onaudioend events.
 function showSpeakOverlay(isFirstStart){
+  // Overlay removed. The small compact log under the mic button
+  // is the new "speak now" indicator. The surah text and the log
+  // are always visible.
+  return;
   var ov = document.getElementById('speakOverlay');
   var cd = document.getElementById('speakOverlayCountdown');
   var ban = document.getElementById('speakOverlayBanner');
