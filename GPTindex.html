@@ -58,7 +58,7 @@
       <button id="reset" class="secondary" type="button">Reset progress</button>
     </div>
     <p id="status" role="status" aria-live="polite">Load a chapter, then tap “Start reciting.”</p>
-    <p class="muted">If Chrome pauses after a long silence, tap Start again. HafizAssist will not repeatedly restart the microphone.</p>
+    <p class="muted">On Android, HafizAssist keeps one microphone stream open while listening so Chrome does not repeatedly close and reopen the device.</p>
     <p class="muted">Recognized speech:</p><p id="heard" lang="ar" aria-live="polite">—</p>
   </section>
 
@@ -80,14 +80,21 @@
   const $ = selector => document.querySelector(selector);
   const els = { surah:$("#surah"),load:$("#load"),start:$("#start"),stop:$("#stop"),reset:$("#reset"),quran:$("#quran"),status:$("#status"),heard:$("#heard"),support:$("#support"),title:$("#chapterTitle"),matched:$("#matched"),errors:$("#errors"),accuracy:$("#accuracy"),percent:$("#percent"),progress:$("#progress"),mistakes:$("#mistakes"),mistakeTable:$("#mistakeTable"),noMistakes:$("#noMistakes") };
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  let words=[],targets=[],cursor=0,errorCount=0,recognition=null,running=false,stopReason="",mistakeLog=[];
+  let words=[],targets=[],cursor=0,errorCount=0,recognition=null,running=false,desiredListening=false,micStream=null,restartTimer=0,stopReason="",mistakeLog=[];
 
   chapters.forEach((chapter,index) => { const [english,arabic]=chapter.split("|"); const option=document.createElement("option"); option.value=String(index+1); option.textContent=`${index+1}. ${english} — ${arabic}`; els.surah.append(option); });
 
   const normalize = value => value.normalize("NFKD").replace(/[\u064B-\u065F\u0670\u06D6-\u06ED\u0640]/g,"").replace(/[ٱأإآ]/g,"ا").replace(/ى/g,"ي").replace(/ؤ/g,"و").replace(/ئ/g,"ي").replace(/ة/g,"ه").replace(/[^\u0621-\u064A\s]/g," ").replace(/\s+/g," ").trim();
   const similar = (a,b) => a===b || (a.length>2 && b.length>2 && (a.includes(b)||b.includes(a)));
 
-  function stopRecognition(reason="user"){ stopReason=reason; if(recognition && running) recognition.stop(); }
+  function releaseMicrophone(){
+    clearTimeout(restartTimer); restartTimer=0;
+    if(micStream){ micStream.getTracks().forEach(track=>track.stop()); micStream=null; }
+  }
+  function stopRecognition(reason="user"){
+    desiredListening=false; stopReason=reason; releaseMicrophone();
+    if(recognition && running) recognition.stop();
+  }
   function resetProgress(){ stopRecognition("reset"); cursor=0; errorCount=0; mistakeLog=[]; els.heard.textContent="—"; els.status.textContent="Ready to recite."; render(); }
   function render(){
     const fragment=document.createDocumentFragment();
@@ -114,14 +121,37 @@
   }
 
   function makeRecognition(){
-    // Keep one continuous session. Repeatedly stopping and starting recognition makes
-    // Android play its microphone notification sound every few seconds.
+    // Android may end Web Speech sessions even when continuous is true. A separate,
+    // long-lived getUserMedia stream keeps the physical microphone from cycling.
     const instance=new SpeechRecognition(); instance.lang="ar-SA"; instance.continuous=true; instance.interimResults=true; instance.maxAlternatives=1;
     instance.onstart=()=>{running=true;els.start.disabled=true;els.stop.disabled=false;els.status.textContent="Listening…";};
     instance.onresult=event=>{let preview="";for(let i=event.resultIndex;i<event.results.length;i+=1){const text=event.results[i][0].transcript;preview+=`${text} `;if(event.results[i].isFinal)consume(text);}els.heard.textContent=preview.trim()||"—";};
-    instance.onerror=event=>{els.status.textContent=`Microphone error: ${event.error}. Check Chrome site permissions.`;};
-    instance.onend=()=>{running=false;els.start.disabled=!words.length;els.stop.disabled=true;if(stopReason==="user")els.status.textContent="Listening stopped.";else if(!stopReason&&cursor<words.length)els.status.textContent="Chrome paused listening. Tap Start to continue from the highlighted word.";stopReason="";};
+    instance.onerror=event=>{if(["not-allowed","service-not-allowed","audio-capture"].includes(event.error)){desiredListening=false;releaseMicrophone();}els.status.textContent=`Microphone error: ${event.error}. Check Chrome site permissions.`;};
+    instance.onend=()=>{
+      running=false;
+      if(desiredListening&&cursor<words.length&&micStream?.active){
+        els.start.disabled=true; els.stop.disabled=false; els.status.textContent="Listening…";
+        restartTimer=setTimeout(()=>{if(desiredListening){try{instance.start();}catch{desiredListening=false;releaseMicrophone();els.start.disabled=false;els.stop.disabled=true;}}},500);
+      }else{
+        els.start.disabled=!words.length; els.stop.disabled=true;
+        if(stopReason==="user")els.status.textContent="Listening stopped.";
+      }
+      stopReason="";
+    };
     return instance;
+  }
+
+  async function startListening(){
+    if(!SpeechRecognition||!words.length||desiredListening)return;
+    stopReason=""; els.start.disabled=true; els.status.textContent="Opening microphone…";
+    try{
+      if(!navigator.mediaDevices?.getUserMedia)throw new Error("Microphone capture is unavailable");
+      micStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
+      recognition??=makeRecognition(); desiredListening=true; recognition.start();
+    }catch(error){
+      desiredListening=false; releaseMicrophone(); els.start.disabled=false; els.stop.disabled=true;
+      els.status.textContent=`Could not start the microphone: ${error.message||error}.`;
+    }
   }
 
   async function loadChapter(){
@@ -139,7 +169,7 @@
 
   els.load.addEventListener("click",loadChapter);
   els.surah.addEventListener("change",loadChapter);
-  els.start.addEventListener("click",()=>{if(!SpeechRecognition||!words.length)return;recognition??=makeRecognition();stopReason="";try{recognition.start();}catch{els.status.textContent=running?"Already listening.":"Could not start the microphone.";}});
+  els.start.addEventListener("click",startListening);
   els.stop.addEventListener("click",()=>{stopRecognition("user");els.status.textContent="Listening stopped.";});
   els.reset.addEventListener("click",resetProgress);
   if(!SpeechRecognition){els.support.textContent="Speech Recognition is unavailable. Open this page in current Chrome on Android or desktop.";els.support.classList.remove("hidden");els.start.disabled=true;}
