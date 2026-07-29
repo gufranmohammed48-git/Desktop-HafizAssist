@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Step 2: Continuous render + pagination</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,-apple-system,sans-serif;background:#0a1f12;color:#e8f5e9;padding:12px;min-height:100vh}
+  .ver{position:fixed;top:8px;right:8px;background:#0a1f12;color:#2ecc71;border:1px solid #2ecc71;padding:2px 6px;border-radius:4px;font-size:11px;font-family:monospace;z-index:10}
+  h1{font-size:16px;color:#2ecc71;margin-bottom:6px;text-align:center}
+  .sub{font-size:11px;color:#888;text-align:center;margin-bottom:12px}
+
+  /* The PAGE — fixed height showing ~12-15 lines of words */
+  #page{
+    background:rgba(255,255,255,.04);
+    border:1px solid rgba(46,204,113,.2);
+    border-radius:12px;
+    padding:14px;
+    margin:0 auto 16px;
+    max-width:700px;
+    /* Height = roughly 13 lines. font-size:22px, line-height:2.0 = 44px per line.
+       13 lines = 572px. Slightly larger so we get 12-15 lines comfortably. */
+    height:580px;
+    overflow:hidden;
+    position:relative;
+  }
+  /* Words flow inline. LTR so DOM order = visual order */
+  #page-inner{
+    direction:ltr;
+    text-align:left;
+    font-family:Amiri,serif;
+    font-size:22px;
+    line-height:2.1;
+  }
+  .word{display:inline-block;padding:2px 5px;border-radius:5px;margin:0 1px;transition:all .15s}
+  .word.future{color:#7a8a7a;opacity:.75}
+  .word.now{background:#2ecc71;color:#0a1f12;font-weight:700;transform:scale(1.08);box-shadow:0 0 14px rgba(46,204,113,.55);position:relative;z-index:2}
+  .word.past{color:#2ecc71;opacity:.9}
+  .word.wrong{color:#e74c3c;background:rgba(231,76,60,.18);text-decoration:line-through}
+  .word.unclear{color:#f1c40f;background:rgba(241,196,15,.18)}
+
+  /* Bismillah word — highlighted as a soft yellow pre-chapter marker */
+  .word.bismillah{color:#f1c40f;font-weight:600}
+  .word.bismillah.now{background:#f1c40f;color:#0a1f12}
+
+  /* Inline verse marker */
+  .verse-marker{
+    display:inline-block;
+    color:#2ecc71;
+    background:rgba(46,204,113,.15);
+    border:1px solid rgba(46,204,113,.3);
+    border-radius:50%;
+    width:24px;height:24px;
+    line-height:22px;
+    text-align:center;
+    font-size:11px;
+    font-weight:700;
+    margin:0 6px 0 4px;
+    vertical-align:middle;
+    font-family:system-ui,sans-serif;
+  }
+  /* Surah header — bigger, more prominent, marks a new chapter */
+  .surah-header{
+    display:block;
+    color:#2ecc71;
+    font-family:system-ui,sans-serif;
+    font-size:11px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:1.5px;
+    margin:14px 0 4px;
+    padding-bottom:2px;
+    border-bottom:1px solid rgba(46,204,113,.2);
+  }
+  .surah-header.first{margin-top:0}
+
+  /* Controls */
+  .controls{
+    display:flex;gap:8px;justify-content:center;flex-wrap:wrap;max-width:700px;margin:0 auto 12px;
+  }
+  button{
+    font-family:inherit;font-size:14px;padding:8px 14px;border-radius:8px;border:1px solid #2ecc71;background:transparent;color:#2ecc71;cursor:pointer;font-weight:600;
+  }
+  button:hover{background:#2ecc71;color:#0a1f12}
+  button.primary{background:#2ecc71;color:#0a1f12}
+  button:disabled{opacity:.4;cursor:not-allowed}
+
+  /* Stats */
+  .stats{
+    max-width:700px;margin:0 auto;font-family:monospace;font-size:11px;color:#2ecc71;text-align:center;
+    background:rgba(0,0,0,.3);padding:8px;border-radius:6px;
+  }
+  .stats span{color:#f1c40f}
+  .info{
+    max-width:700px;margin:0 auto 12px;background:rgba(0,0,0,.2);border:1px solid rgba(46,204,113,.15);border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.6
+  }
+  .info b{color:#2ecc71}
+  .info code{background:rgba(46,204,113,.15);padding:1px 5px;border-radius:3px;font-size:11px}
+</style>
+</head>
+<body>
+
+<div class="ver">v1.0</div>
+<h1>Step 2: Continuous render + pagination</h1>
+<div class="sub">All 114 surahs in one scrollable page, ~12-15 lines visible at a time</div>
+
+<div class="info">
+  <b>How to use:</b> Click <code>▶ Advance pointer</code> to simulate the user reciting. Words turn green (past), the pointer word is bright green with glow (now). When the pointer reaches near the bottom of the visible page, the page auto-loads the next chunk. Click <code>⏪ Prev page</code> or <code>Next page ⏩</code> to manually page. Try advancing the pointer 50+ times to see the page pagination in action.
+</div>
+
+<div class="controls">
+  <button id="prevPageBtn">⏪ Prev page</button>
+  <button id="advanceBtn" class="primary">▶ Advance pointer (+1 word)</button>
+  <button id="advanceFarBtn">⏩ Advance 30 words</button>
+  <button id="nextPageBtn">Next page ⏩</button>
+  <button id="resetBtn">↺ Reset to start</button>
+  <button id="jumpToS2Btn">→ Jump to surah 2</button>
+  <button id="jumpToS9Btn">→ Jump to surah 9</button>
+  <button id="jumpToS114Btn">→ Jump to surah 114</button>
+</div>
+
+<div class="stats" id="stats">Loading…</div>
+
+<div id="page"><div id="page-inner"></div></div>
+
+<div style="max-width:700px;margin:0 auto;font-size:11px;color:#888;text-align:center;padding:8px">
+  Words 1–<span id="rangeStart">0</span> of <span id="rangeTotal">0</span> shown
+  · pointer at <span id="ptrDisplay">0</span>
+</div>
+
+<script src="phonemes-data.js"></script>
+<script>
+(function(){
+  // ====== Same data build as global-words.html ======
+  function normalize(s){
+    return (s||'')
+      .replace(/[\u064B-\u0652\u0670\u0640]/g, '')
+      .replace(/[إأآاٱ]/g, 'ا')
+      .replace(/ى/g, 'ي')
+      .replace(/ة/g, 'ه')
+      .replace(/[^\u0600-\u06FF\s]/g, '')
+      .trim();
+  }
+  const BISMILLAH = [
+    {text:'بِسْمِ',  norm:'بسم',   phoneme:'bismi',  surah:0, ayah:'bismillah', position:1},
+    {text:'ٱللَّهِ', norm:'الله',   phoneme:'lla:hi', surah:0, ayah:'bismillah', position:2},
+    {text:'ٱلرَّحْمَـٰنِ', norm:'الرحن', surah:'',   surah:0, ayah:'bismillah', position:3},
+    {text:'ٱلرَّحِيمِ', norm:'الرحيم', phoneme:'',    surah:0, ayah:'bismillah', position:4}
+  ];
+  function buildGlobalRefWords(){
+    const all = [];
+    for(let s = 1; s <= 114; s++){
+      if(s !== 1 && s !== 9){
+        for(const w of BISMILLAH){
+          all.push({...w, globalIndex:all.length, surah:s});
+        }
+      }
+      const surah = window.SURAH_PHONEMES[String(s)];
+      if(!surah) continue;
+      const ayahKeys = Object.keys(surah).map(Number).sort((a,b)=>a-b);
+      for(const a of ayahKeys){
+        const ayah = surah[String(a)];
+        const posKeys = Object.keys(ayah).map(Number).sort((a,b)=>a-b);
+        for(const p of posKeys){
+          const [text, phoneme, rules] = ayah[String(p)];
+          all.push({text, norm:normalize(text), phoneme, rules, surah:s, ayah:a, position:p, globalIndex:all.length});
+        }
+      }
+    }
+    return all;
+  }
+  const refWords = buildGlobalRefWords();
+  let pointer = 0;
+
+  // ====== Pagination state ======
+  // The "page" shows words in [pageStart, pageEnd). When pointer is near
+  // pageEnd, we extend pageEnd. When pointer is more than PAGE_KEEP_BEHIND
+  // past pageStart, we move pageStart forward.
+  const PAGE_SIZE = 50;          // words to show in the visible page
+  const PAGE_KEEP_BEHIND = 20;   // keep this many words behind the pointer
+  const PAGE_KEEP_AHEAD = 30;    // and this many ahead
+  let pageStart = 0;
+  let pageEnd = Math.min(PAGE_SIZE, refWords.length);
+
+  // ====== Render ======
+  function renderPage(){
+    const inner = document.getElementById('page-inner');
+    inner.innerHTML = '';
+    // Track current surah so we only emit a surah-header when the surah changes
+    let lastSurah = null;
+    for(let i = pageStart; i < pageEnd; i++){
+      const w = refWords[i];
+      // Emit a surah header whenever the surah changes
+      if(w.surah !== lastSurah){
+        if(w.ayah === 'bismillah'){
+          // Bismillah is its own "ayah" — emit a header that introduces the surah
+          const h = document.createElement('span');
+          h.className = 'surah-header first';
+          h.textContent = 'Surah ' + w.surah;
+          inner.appendChild(h);
+        } else {
+          // Regular ayah start (e.g. word 0 of a new surah) — emit a header
+          const h = document.createElement('span');
+          h.className = 'surah-header' + (lastSurah === null ? ' first' : '');
+          h.textContent = 'Surah ' + w.surah;
+          inner.appendChild(h);
+        }
+        lastSurah = w.surah;
+      }
+      // Emit a verse marker at the start of each ayah (except bismillah which
+      // is its own marker)
+      if(w.position === 1 && w.ayah !== 'bismillah'){
+        const m = document.createElement('span');
+        m.className = 'verse-marker';
+        m.textContent = w.ayah;
+        inner.appendChild(m);
+      }
+      // Emit the word
+      const span = document.createElement('span');
+      span.className = 'word';
+      if(w.ayah === 'bismillah') span.classList.add('bismillah');
+      if(i < pointer) span.classList.add('past');
+      else if(i === pointer) span.classList.add('now');
+      else span.classList.add('future');
+      span.textContent = w.text;
+      inner.appendChild(span);
+    }
+    // Update range display
+    document.getElementById('rangeStart').textContent = pageStart;
+    document.getElementById('rangeTotal').textContent = refWords.length;
+    document.getElementById('ptrDisplay').textContent = pointer;
+    updateStats();
+  }
+
+  function updateStats(){
+    const w = refWords[pointer] || refWords[0];
+    const s = w.surah;
+    const a = w.ayah;
+    const p = w.position;
+    const surahName = s ? ('Surah ' + s) : '?';
+    const ayahName = a === 'bismillah' ? 'Bismillah' : ('Ayah ' + a);
+    document.getElementById('stats').innerHTML =
+      'Pointer at global index <span>' + pointer + '</span> of <span>' + refWords.length + '</span> · ' +
+      'Currently at <span>' + surahName + '</span> · <span>' + ayahName + '</span> · position <span>' + p + '</span><br>' +
+      'Page shows <span>' + pageStart + '</span>–<span>' + (pageEnd-1) + '</span> · word at top of page is <span>' + (refWords[pageStart] ? refWords[pageStart].text : '—') + '</span>';
+  }
+
+  function maybePaginate(){
+    // If pointer is within PAGE_KEEP_AHEAD of pageEnd, extend the page
+    if(pointer >= pageEnd - PAGE_KEEP_AHEAD){
+      pageEnd = Math.min(pointer + PAGE_KEEP_AHEAD, refWords.length);
+    }
+    // If pointer is more than PAGE_KEEP_BEHIND past pageStart, advance pageStart
+    if(pointer > pageStart + PAGE_KEEP_BEHIND){
+      pageStart = pointer - PAGE_KEEP_BEHIND;
+    }
+  }
+
+  // ====== Controls ======
+  function advance(n){
+    pointer = Math.min(pointer + n, refWords.length - 1);
+    maybePaginate();
+    renderPage();
+  }
+  function goTo(idx){
+    pointer = Math.max(0, Math.min(idx, refWords.length - 1));
+    // Center the page around the pointer
+    pageStart = Math.max(0, pointer - 10);
+    pageEnd = Math.min(refWords.length, pageStart + PAGE_SIZE);
+    renderPage();
+  }
+  function prevPage(){
+    pageStart = Math.max(0, pageStart - PAGE_SIZE);
+    pageEnd = Math.min(refWords.length, pageStart + PAGE_SIZE);
+    renderPage();
+  }
+  function nextPage(){
+    pageEnd = Math.min(refWords.length, pageEnd + PAGE_SIZE);
+    pageStart = Math.max(0, pageEnd - PAGE_SIZE);
+    renderPage();
+  }
+  function reset(){
+    pointer = 0;
+    pageStart = 0;
+    pageEnd = Math.min(PAGE_SIZE, refWords.length);
+    renderPage();
+  }
+
+  document.getElementById('advanceBtn').addEventListener('click', () => advance(1));
+  document.getElementById('advanceFarBtn').addEventListener('click', () => advance(30));
+  document.getElementById('prevPageBtn').addEventListener('click', prevPage);
+  document.getElementById('nextPageBtn').addEventListener('click', nextPage);
+  document.getElementById('resetBtn').addEventListener('click', reset);
+  document.getElementById('jumpToS2Btn').addEventListener('click', () => {
+    const idx = refWords.findIndex(w => w.surah === 2 && w.ayah === 'bismillah');
+    if(idx >= 0) goTo(idx);
+  });
+  document.getElementById('jumpToS9Btn').addEventListener('click', () => {
+    const idx = refWords.findIndex(w => w.surah === 9 && w.ayah === 1);
+    if(idx >= 0) goTo(idx);
+  });
+  document.getElementById('jumpToS114Btn').addEventListener('click', () => {
+    const idx = refWords.findIndex(w => w.surah === 114 && w.ayah === 'bismillah');
+    if(idx >= 0) goTo(idx);
+  });
+
+  // Initial render
+  renderPage();
+
+  // Expose for debugging
+  window.__refWords = refWords;
+  window.__getPointer = () => pointer;
+})();
+</script>
+</body>
+</html>
