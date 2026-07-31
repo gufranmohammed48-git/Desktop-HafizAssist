@@ -3,18 +3,119 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Step 2: Continuous render + pagination</title>
+<title>Live Recitation Tracker — مُتَتَبِّع التلاوة</title>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:system-ui,-apple-system,sans-serif;background:#0a1f12;color:#e8f5e9;padding:12px;min-height:100vh}
-  .ver{position:fixed;top:8px;right:8px;background:#0a1f12;color:#2ecc71;border:1px solid #2ecc71;padding:2px 6px;border-radius:4px;font-size:11px;font-family:monospace;z-index:10}
+  /* === THEME VARIABLES — switchable via .theme-* classes on <body> === */
+  body{
+    font-family:system-ui,-apple-system,sans-serif;
+    padding:12px;min-height:100vh;
+    transition:background-color .3s ease, color .3s ease;
+  }
+  /* Default = dark theme */
+  body{--bg:#0a1f12;--card:rgba(255,255,255,.04);--border:rgba(46,204,113,.2);--text:#e8f5e9;--text-dim:#7a8a7a;--primary:#2ecc71;--primary-soft:rgba(46,204,113,.18);--yellow:#f1c40f;--yellow-soft:rgba(241,196,15,.15);--accent:#5dade2;--now-glow:rgba(46,204,113,.55);--shadow:rgba(0,0,0,.4);--bismillah-bg:rgba(30,132,73,.10);--bismillah-border:rgba(30,132,73,.30);--bismillah-color:#1e8449;--header-bg:transparent;--header-border:rgba(46,204,113,.25);--bismillah-header-color:#2ecc71}
+  body{background:var(--bg);color:var(--text)}
+
+  /* Light theme */
+  body.theme-light{
+    --bg:#fafaf5;--card:rgba(0,0,0,.03);--border:rgba(46,125,50,.2);--text:#1a3a1a;--text-dim:#6a7a6a;--primary:#2e7d32;--primary-soft:rgba(46,125,50,.12);--yellow:#b8860b;--yellow-soft:rgba(184,134,11,.10);--accent:#1565c0;--now-glow:rgba(46,125,50,.45);--shadow:rgba(0,0,0,.15);--bismillah-bg:rgba(46,125,50,.08);--bismillah-border:rgba(46,125,50,.30);--bismillah-color:#2e7d32;--header-bg:transparent;--header-border:rgba(46,125,50,.30);--bismillah-header-color:#2e7d32;
+  }
+
+  /* Sepia theme — easier on eyes, like a real mushaf */
+  body.theme-sepia{
+    --bg:#f4ecd8;--card:rgba(120,80,40,.06);--border:rgba(120,80,40,.25);--text:#3d2817;--text-dim:#8a6f4a;--primary:#8b4513;--primary-soft:rgba(139,69,19,.15);--yellow:#b8860b;--yellow-soft:rgba(184,134,11,.15);--accent:#a0522d;--now-glow:rgba(139,69,19,.5);--shadow:rgba(60,40,20,.25);--bismillah-bg:rgba(139,69,19,.10);--bismillah-border:rgba(139,69,19,.30);--bismillah-color:#8b4513;--header-bg:transparent;--header-border:rgba(139,69,19,.25);--bismillah-header-color:#8b4513;
+  }
+
+  /* Royal blue — premium / Quran.com inspired */
+  body.theme-royal{
+    --bg:#0d1b2a;--card:rgba(255,255,255,.05);--border:rgba(202,165,84,.25);--text:#f0e6d2;--text-dim:#8a9aae;--primary:#caa554;--primary-soft:rgba(202,165,84,.15);--yellow:#e0a92e;--yellow-soft:rgba(224,169,46,.15);--accent:#5dade2;--now-glow:rgba(202,165,84,.5);--shadow:rgba(0,0,0,.5);--bismillah-bg:rgba(202,165,84,.10);--bismillah-border:rgba(202,165,84,.30);--bismillah-color:#caa554;--header-bg:transparent;--header-border:rgba(202,165,84,.25);--bismillah-header-color:#caa554;
+  }
+
+  /* === HEADER (bismillah image + title) === */
+  .app-header{
+    max-width:700px;margin:0 auto 14px;text-align:center;
+  }
+  .app-header .bismillah-img{
+    display:block;max-width:340px;height:auto;margin:0 auto 8px;
+    /* In light/sepia themes the dark green bismillah looks too dark; invert
+       it via CSS filter to make it visible. */
+    filter:brightness(.9) contrast(1.1);
+  }
+  body.theme-light .app-header .bismillah-img,
+  body.theme-sepia .app-header .bismillah-img{
+    /* In light backgrounds, dark green is fine — keep it readable */
+    filter:none;opacity:.85;
+  }
+  .app-header .app-title{
+    font-family:system-ui,-apple-system,sans-serif;
+    font-size:18px;font-weight:700;letter-spacing:.3px;
+    color:var(--primary);
+    margin-top:6px;
+  }
+  .app-header .app-title .arabic{
+    font-family:Amiri,serif;
+    font-size:22px;font-weight:600;
+    color:var(--primary);
+    margin-left:8px;direction:rtl;display:inline-block;
+  }
+  .app-header .app-sub{
+    font-size:12px;color:var(--text-dim);
+    margin-top:4px;
+  }
+
+  /* === VERSION BADGE (top right) === */
+  .ver{
+    position:fixed;top:8px;right:8px;
+    background:var(--card);color:var(--primary);
+    border:1px solid var(--primary);
+    padding:2px 6px;border-radius:4px;
+    font-size:11px;font-family:monospace;z-index:10;
+  }
+
+  /* === SETTINGS ICON (top left) === */
+  .settings-btn{
+    position:fixed;top:8px;left:8px;
+    background:var(--card);color:var(--primary);
+    border:1px solid var(--primary);
+    padding:4px 8px;border-radius:6px;
+    font-size:16px;cursor:pointer;z-index:11;
+    line-height:1;
+  }
+  .settings-btn:hover{background:var(--primary);color:var(--bg)}
+  /* Settings dropdown */
+  .settings-menu{
+    position:fixed;top:44px;left:8px;
+    background:var(--bg);border:1px solid var(--primary);
+    border-radius:8px;padding:8px;z-index:11;
+    min-width:180px;
+    box-shadow:0 4px 12px var(--shadow);
+    display:none;
+  }
+  .settings-menu.open{display:block}
+  .settings-menu h3{
+    font-size:11px;color:var(--text-dim);
+    text-transform:uppercase;letter-spacing:1px;
+    margin:0 0 6px 4px;
+  }
+  .theme-option{
+    display:flex;align-items:center;gap:8px;
+    padding:6px 8px;border-radius:4px;cursor:pointer;
+    font-size:13px;color:var(--text);
+  }
+  .theme-option:hover{background:var(--primary-soft)}
+  .theme-option.active{background:var(--primary-soft);font-weight:600}
+  .theme-option .swatch{
+    display:inline-block;width:14px;height:14px;border-radius:50%;
+    border:1px solid var(--text-dim);
+  }
+
   h1{font-size:16px;color:#2ecc71;margin-bottom:6px;text-align:center}
-  .sub{font-size:11px;color:#888;text-align:center;margin-bottom:12px}
+  .sub{font-size:11px;color:var(--text-dim);text-align:center;margin-bottom:12px}
 
   /* The PAGE — fixed height showing ~12-15 lines of words */
   #page{
-    background:rgba(255,255,255,.04);
-    border:1px solid rgba(46,204,113,.2);
+    background:var(--card);
+    border:1px solid var(--border);
     border-radius:12px;
     padding:14px;
     margin:0 auto 16px;
@@ -81,11 +182,11 @@
   }
   .surah-header.first{margin-top:0}
   .word{display:inline-block;padding:2px 5px;border-radius:5px;margin:0 1px;transition:all .15s}
-  .word.future{color:#7a8a7a;opacity:.75}
-  .word.now{background:#2ecc71;color:#0a1f12;font-weight:700;transform:scale(1.08);box-shadow:0 0 14px rgba(46,204,113,.55);position:relative;z-index:2}
-  .word.past{color:#2ecc71;opacity:.9}
+  .word.future{color:var(--text-dim);opacity:.75}
+  .word.now{background:var(--primary);color:var(--bg);font-weight:700;transform:scale(1.08);box-shadow:0 0 14px var(--now-glow);position:relative;z-index:2}
+  .word.past{color:var(--primary);opacity:.9}
   .word.wrong{color:#e74c3c;background:rgba(231,76,60,.18);text-decoration:line-through}
-  .word.unclear{color:#f1c40f;background:rgba(241,196,15,.18)}
+  .word.unclear{color:var(--yellow);background:var(--yellow-soft)}
 
   /* Bismillah word — highlighted as a soft yellow pre-chapter marker */
   /* Bismillah words: darker green (matches the surah script's green
@@ -128,7 +229,7 @@
   .surah-ar{
     font-family:Amiri,serif;
     font-size:38px;
-    color:#2ecc71;
+    color:var(--primary);
     line-height:1;
     direction:rtl;
   }
@@ -140,12 +241,12 @@
   .surah-info .num-name{
     font-size:20px;
     font-weight:700;
-    color:#e8f5e9;
+    color:var(--text);
   }
-  .surah-info .num-name .num{color:#2ecc71;margin-right:4px}
+  .surah-info .num-name .num{color:var(--primary);margin-right:4px}
   .surah-info .meaning{
     font-size:13px;
-    color:#2ecc71;
+    color:var(--primary);
     font-weight:500;
     margin-top:2px;
   }
@@ -160,8 +261,8 @@
     flex-basis:100%;
     margin:8px 0 16px;
     padding:12px 14px;
-    background:rgba(30,132,73,.10);
-    border:1px solid rgba(30,132,73,.30);
+    background:var(--bismillah-bg);
+    border:1px solid var(--bismillah-border);
     border-radius:8px;
     direction:rtl;
   }
@@ -173,7 +274,7 @@
      darker green to match the surah script's green family. */
   .bismillah-block .word{
     font-family:'Amiri Quran','Scheherazade New','Noto Naskh Arabic',Amiri,serif;
-    color:#1e8449;
+    color:var(--bismillah-color);
     font-weight:600;
   }
 
@@ -182,10 +283,10 @@
     display:flex;gap:8px;justify-content:center;flex-wrap:wrap;max-width:700px;margin:0 auto 12px;
   }
   button{
-    font-family:inherit;font-size:14px;padding:8px 14px;border-radius:8px;border:1px solid #2ecc71;background:transparent;color:#2ecc71;cursor:pointer;font-weight:600;
+    font-family:inherit;font-size:14px;padding:8px 14px;border-radius:8px;border:1px solid var(--primary);background:transparent;color:var(--primary);cursor:pointer;font-weight:600;
   }
-  button:hover{background:#2ecc71;color:#0a1f12}
-  button.primary{background:#2ecc71;color:#0a1f12}
+  button:hover{background:var(--primary);color:var(--bg)}
+  button.primary{background:var(--primary);color:var(--bg)}
   button:disabled{opacity:.4;cursor:not-allowed}
 
   /* Stats */
@@ -203,7 +304,7 @@
 </head>
 <body>
 
-<div class="ver">v1.8</div>
+<div class="ver">v2.0</div>
 <h1>Step 2: Continuous render + pagination</h1>
 <div class="sub">All 114 surahs in one scrollable page, ~12-15 lines visible at a time</div>
 
@@ -222,14 +323,10 @@
   <button id="jumpToS114Btn">→ Jump to surah 114</button>
 </div>
 
-<div class="stats" id="stats">Loading…</div>
 
 <div id="page"><div id="page-inner"></div></div>
 
-<div style="max-width:700px;margin:0 auto;font-size:11px;color:#888;text-align:center;padding:8px">
-  Words 1–<span id="rangeStart">0</span> of <span id="rangeTotal">0</span> shown
-  · pointer at <span id="ptrDisplay">0</span>
-</div>
+
 
 <script src="phonemes-data.js"></script>
 <script>
@@ -535,24 +632,16 @@
         inner.appendChild(m);
       }
     }
-    // Update range display
-    document.getElementById('rangeStart').textContent = pageStart;
-    document.getElementById('rangeTotal').textContent = refWords.length;
-    document.getElementById('ptrDisplay').textContent = pointer;
+    // Update the page info display
     updateStats();
   }
 
   function updateStats(){
-    const w = refWords[pointer] || refWords[0];
-    const s = w.surah;
-    const a = w.ayah;
-    const p = w.position;
-    const surahName = s ? ('Surah ' + s) : '?';
-    const ayahName = a === 'bismillah' ? 'Bismillah' : ('Ayah ' + a);
-    document.getElementById('stats').innerHTML =
-      'Pointer at global index <span>' + pointer + '</span> of <span>' + refWords.length + '</span> · ' +
-      'Currently at <span>' + surahName + '</span> · <span>' + ayahName + '</span> · position <span>' + p + '</span><br>' +
-      'Page shows <span>' + pageStart + '</span>–<span>' + (pageEnd-1) + '</span> · word at top of page is <span>' + (refWords[pageStart] ? refWords[pageStart].text : '—') + '</span>';
+    // Compute the current page number and total pages
+    const currentPageNum = Math.floor(pageStart / PAGE_SIZE) + 1;
+    const totalPages = Math.max(1, Math.ceil(refWords.length / PAGE_SIZE));
+    const el = document.getElementById('pageInfo');
+    if(el) el.textContent = 'Page ' + currentPageNum + ' of ' + totalPages;
   }
 
   function maybePaginate(){
@@ -596,23 +685,45 @@
     renderPage();
   }
 
-  document.getElementById('advanceBtn').addEventListener('click', () => advance(1));
-  document.getElementById('advanceFarBtn').addEventListener('click', () => advance(30));
   document.getElementById('prevPageBtn').addEventListener('click', prevPage);
   document.getElementById('nextPageBtn').addEventListener('click', nextPage);
-  document.getElementById('resetBtn').addEventListener('click', reset);
-  document.getElementById('jumpToS2Btn').addEventListener('click', () => {
-    const idx = refWords.findIndex(w => w.surah === 2 && w.ayah === 'bismillah');
-    if(idx >= 0) goTo(idx);
+
+  // === THEME SWITCHER ===
+  const settingsBtn = document.getElementById('settingsBtn');
+  const settingsMenu = document.getElementById('settingsMenu');
+  settingsBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    settingsMenu.classList.toggle('open');
   });
-  document.getElementById('jumpToS9Btn').addEventListener('click', () => {
-    const idx = refWords.findIndex(w => w.surah === 9 && w.ayah === 1);
-    if(idx >= 0) goTo(idx);
+  document.addEventListener('click', (e) => {
+    if(!settingsMenu.contains(e.target) && e.target !== settingsBtn){
+      settingsMenu.classList.remove('open');
+    }
   });
-  document.getElementById('jumpToS114Btn').addEventListener('click', () => {
-    const idx = refWords.findIndex(w => w.surah === 114 && w.ayah === 'bismillah');
-    if(idx >= 0) goTo(idx);
+  function setTheme(themeName){
+    document.body.classList.remove('theme-dark','theme-light','theme-sepia','theme-royal');
+    document.body.classList.add('theme-' + themeName);
+    try{ localStorage.setItem('hifzapp-theme', themeName); }catch(e){}
+    document.querySelectorAll('.theme-option').forEach(o => {
+      o.classList.toggle('active', o.dataset.theme === themeName);
+    });
+  }
+  document.querySelectorAll('.theme-option').forEach(o => {
+    o.addEventListener('click', () => {
+      setTheme(o.dataset.theme);
+      settingsMenu.classList.remove('open');
+    });
   });
+  // Load saved theme
+  let _savedTheme = null;
+  try{ _savedTheme = localStorage.getItem('hifzapp-theme'); }catch(e){}
+  if(_savedTheme && ['dark','light','sepia','royal'].includes(_savedTheme)){
+    setTheme(_savedTheme);
+  } else {
+    // First visit — check system preference
+    const _prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+    setTheme(_prefersLight ? 'light' : 'dark');
+  }
 
   // Initial render
   renderPage();
