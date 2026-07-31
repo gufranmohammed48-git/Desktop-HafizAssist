@@ -148,7 +148,7 @@
 </head>
 <body>
 
-<div class="ver">v1.3</div>
+<div class="ver">v1.4</div>
 <h1>Step 2: Continuous render + pagination</h1>
 <div class="sub">All 114 surahs in one scrollable page, ~12-15 lines visible at a time</div>
 
@@ -179,6 +179,126 @@
 <script src="phonemes-data.js"></script>
 <script>
 (function(){
+  // ====== Surah metadata (Arabic name, English transliteration, meaning) ======
+  const SURAH_META = [
+    {num:1,name:"الفاتحة",translit:"Al-Fatihah",meaning:"The Opening"},
+    {num:2,name:"البقرة",translit:"Al-Baqarah",meaning:"The Cow"},
+    {num:3,name:"آل عمران",translit:"Aal-i-Imraan",meaning:"The Family of Imraan"},
+    {num:4,name:"النساء",translit:"An-Nisaa",meaning:"The Women"},
+    {num:5,name:"المائدة",translit:"Al-Maaida",meaning:"The Table"},
+    {num:6,name:"الأنعام",translit:"Al-An'aam",meaning:"The Cattle"},
+    {num:7,name:"الأعراف",translit:"Al-A'raaf",meaning:"The Heights"},
+    {num:8,name:"الأنفال",translit:"Al-Anfaal",meaning:"The Spoils of War"},
+    {num:9,name:"التوبة",translit:"At-Tawbah",meaning:"The Repentance"},
+    {num:10,name:"يونس",translit:"Yunus",meaning:"Jonas"},
+    {num:11,name:"هود",translit:"Hud",meaning:"Hud"},
+    {num:12,name:"يوسف",translit:"Yusuf",meaning:"Joseph"},
+    {num:13,name:"الرعد",translit:"Ar-Ra'd",meaning:"The Thunder"},
+    {num:14,name:"إبراهيم",translit:"Ibrahim",meaning:"Abraham"},
+    {num:15,name:"الحجر",translit:"Al-Hijr",meaning:"The Rocky Tract"},
+    {num:16,name:"النحل",translit:"An-Nahl",meaning:"The Bee"},
+    {num:17,name:"الإسراء",translit:"Al-Israa",meaning:"The Night Journey"},
+    {num:18,name:"الكهف",translit:"Al-Kahf",meaning:"The Cave"},
+    {num:19,name:"مريم",translit:"Maryam",meaning:"Mary"},
+    {num:20,name:"طه",translit:"Taa-Haa",meaning:"Taa-Haa"},
+    {num:21,name:"الأنبياء",translit:"Al-Anbiyaa",meaning:"The Prophets"},
+    {num:22,name:"الحج",translit:"Al-Hajj",meaning:"The Pilgrimage"},
+    {num:23,name:"المؤمنون",translit:"Al-Mu'minoon",meaning:"The Believers"},
+    {num:24,name:"النور",translit:"An-Noor",meaning:"The Light"},
+    {num:25,name:"الفرقان",translit:"Al-Furqaan",meaning:"The Criterion"},
+    {num:26,name:"الشعراء",translit:"Ash-Shu'araa",meaning:"The Poets"},
+    {num:27,name:"النمل",translit:"An-Naml",meaning:"The Ant"},
+    {num:28,name:"القصص",translit:"Al-Qasas",meaning:"The Stories"},
+    {num:29,name:"العنكبوت",translit:"Al-Ankaboot",meaning:"The Spider"},
+    {num:30,name:"الروم",translit:"Ar-Room",meaning:"The Romans"},
+    {num:31,name:"لقمان",translit:"Luqman",meaning:"Luqman"},
+    {num:32,name:"السجدة",translit:"As-Sajdah",meaning:"The Prostration"},
+    {num:33,name:"الأحزاب",translit:"Al-Ahzaab",meaning:"The Clans"},
+    {num:34,name:"سبإ",translit:"Saba",meaning:"Sheba"},
+    {num:35,name:"فاطر",translit:"Faatir",meaning:"The Originator"},
+    {num:36,name:"يس",translit:"Yaseen",meaning:"Yaseen"},
+    {num:37,name:"الصافات",translit:"As-Saaffaat",meaning:"Those Ranged in Ranks"},
+    {num:38,name:"ص",translit:"Saad",meaning:"The Letter Saad"},
+    {num:39,name:"الزمر",translit:"Az-Zumar",meaning:"The Groups"},
+    {num:40,name:"غافر",translit:"Ghafir",meaning:"The Forgiver"},
+    {num:41,name:"فصلت",translit:"Fussilat",meaning:"Explained in Detail"},
+    {num:42,name:"الشورى",translit:"Ash-Shura",meaning:"The Consultation"},
+    {num:43,name:"الزخرف",translit:"Az-Zukhruf",meaning:"The Gold Adornments"},
+    {num:44,name:"الدخان",translit:"Ad-Dukhaan",meaning:"The Smoke"},
+    {num:45,name:"الجاثية",translit:"Al-Jaathiyah",meaning:"The Kneeling"},
+    {num:46,name:"الأحقاف",translit:"Al-Ahqaf",meaning:"The Curved Sand Tracts"},
+    {num:47,name:"محمد",translit:"Muhammad",meaning:"Muhammad"},
+    {num:48,name:"الفتح",translit:"Al-Fath",meaning:"The Victory"},
+    {num:49,name:"الحجرات",translit:"Al-Hujuraat",meaning:"The Rooms"},
+    {num:50,name:"ق",translit:"Qaaf",meaning:"The Letter Qaaf"},
+    {num:51,name:"الذاريات",translit:"Adh-Dhaariyaat",meaning:"The Winnowing Winds"},
+    {num:52,name:"الطور",translit:"At-Tur",meaning:"The Mount"},
+    {num:53,name:"النجم",translit:"An-Najm",meaning:"The Star"},
+    {num:54,name:"القمر",translit:"Al-Qamar",meaning:"The Moon"},
+    {num:55,name:"الرحمن",translit:"Ar-Rahmaan",meaning:"The Most Gracious"},
+    {num:56,name:"الواقعة",translit:"Al-Waaqia",meaning:"The Inevitable"},
+    {num:57,name:"الحديد",translit:"Al-Hadeed",meaning:"The Iron"},
+    {num:58,name:"المجادلة",translit:"Al-Mujaadila",meaning:"The Woman Who Disputes"},
+    {num:59,name:"الحشر",translit:"Al-Hashr",meaning:"The Gathering"},
+    {num:60,name:"الممتحنة",translit:"Al-Mumtahana",meaning:"The Woman to be Examined"},
+    {num:61,name:"الصف",translit:"As-Saff",meaning:"The Ranks"},
+    {num:62,name:"الجمعة",translit:"Al-Jumu'ah",meaning:"The Friday"},
+    {num:63,name:"المنافقون",translit:"Al-Munaafiqoon",meaning:"The Hypocrites"},
+    {num:64,name:"التغابن",translit:"At-Taghaabun",meaning:"Mutual Disillusion"},
+    {num:65,name:"الطلاق",translit:"At-Talaaq",meaning:"Divorce"},
+    {num:66,name:"التحريم",translit:"At-Tahreem",meaning:"The Prohibition"},
+    {num:67,name:"الملك",translit:"Al-Mulk",meaning:"The Kingdom"},
+    {num:68,name:"القلم",translit:"Al-Qalam",meaning:"The Pen"},
+    {num:69,name:"الحاقة",translit:"Al-Haaqqa",meaning:"The Reality"},
+    {num:70,name:"المعارج",translit:"Al-Ma'aarij",meaning:"The Ways of Ascent"},
+    {num:71,name:"نوح",translit:"Nooh",meaning:"Noah"},
+    {num:72,name:"الجن",translit:"Al-Jinn",meaning:"The Jinn"},
+    {num:73,name:"المزمل",translit:"Al-Muzzammil",meaning:"The Enshrouded One"},
+    {num:74,name:"المدثر",translit:"Al-Muddaththir",meaning:"The Cloaked One"},
+    {num:75,name:"القيامة",translit:"Al-Qiyaamah",meaning:"The Resurrection"},
+    {num:76,name:"الإنسان",translit:"Al-Insaan",meaning:"Man"},
+    {num:77,name:"المرسلات",translit:"Al-Mursalaat",meaning:"The Emissaries"},
+    {num:78,name:"النبأ",translit:"An-Naba",meaning:"The Announcement"},
+    {num:79,name:"النازعات",translit:"An-Naazi'aat",meaning:"Those Who Pull Out"},
+    {num:80,name:"عبس",translit:"Abasa",meaning:"He Frowned"},
+    {num:81,name:"التكوير",translit:"At-Takweer",meaning:"The Folding Up"},
+    {num:82,name:"الإنفطار",translit:"Al-Infitaar",meaning:"The Cleaving"},
+    {num:83,name:"المطففين",translit:"Al-Mutaffifeen",meaning:"The Defrauders"},
+    {num:84,name:"الإنشقاق",translit:"Al-Inshiqaaq",meaning:"The Splitting Open"},
+    {num:85,name:"البروج",translit:"Al-Burooj",meaning:"The Constellations"},
+    {num:86,name:"الطارق",translit:"At-Taariq",meaning:"The Night-Comer"},
+    {num:87,name:"الأعلى",translit:"Al-A'laa",meaning:"The Most High"},
+    {num:88,name:"الغاشية",translit:"Al-Ghaashiya",meaning:"The Overwhelming"},
+    {num:89,name:"الفجر",translit:"Al-Fajr",meaning:"The Dawn"},
+    {num:90,name:"البلد",translit:"Al-Balad",meaning:"The City"},
+    {num:91,name:"الشمس",translit:"Ash-Shams",meaning:"The Sun"},
+    {num:92,name:"الليل",translit:"Al-Lail",meaning:"The Night"},
+    {num:93,name:"الضحى",translit:"Ad-Dhuhaa",meaning:"The Forenoon"},
+    {num:94,name:"الشرح",translit:"Ash-Sharh",meaning:"The Opening Forth"},
+    {num:95,name:"التين",translit:"At-Teen",meaning:"The Fig"},
+    {num:96,name:"العلق",translit:"Al-Alaq",meaning:"The Clot"},
+    {num:97,name:"القدر",translit:"Al-Qadr",meaning:"The Power"},
+    {num:98,name:"البينة",translit:"Al-Bayyinah",meaning:"The Clear Proof"},
+    {num:99,name:"الزلزلة",translit:"Az-Zalzalah",meaning:"The Earthquake"},
+    {num:100,name:"العاديات",translit:"Al-Aadiyaat",meaning:"The Coursers"},
+    {num:101,name:"القارعة",translit:"Al-Qaari'ah",meaning:"The Striking Hour"},
+    {num:102,name:"التكاثر",translit:"At-Takaathur",meaning:"The Piling Up"},
+    {num:103,name:"العصر",translit:"Al-Asr",meaning:"The Time"},
+    {num:104,name:"الهمزة",translit:"Al-Humazah",meaning:"The Slanderer"},
+    {num:105,name:"الفيل",translit:"Al-Feel",meaning:"The Elephant"},
+    {num:106,name:"قريش",translit:"Quraish",meaning:"Quraish"},
+    {num:107,name:"الماعون",translit:"Al-Maa'un",meaning:"The Small Kindness"},
+    {num:108,name:"الكوثر",translit:"Al-Kawthar",meaning:"The Abundance"},
+    {num:109,name:"الكافرون",translit:"Al-Kaafiroon",meaning:"The Disbelievers"},
+    {num:110,name:"النصر",translit:"An-Nasr",meaning:"The Help"},
+    {num:111,name:"المسد",translit:"Al-Masad",meaning:"The Palm Fibre"},
+    {num:112,name:"الإخلاص",translit:"Al-Ikhlaas",meaning:"The Sincerity"},
+    {num:113,name:"الفلق",translit:"Al-Falaq",meaning:"The Daybreak"},
+    {num:114,name:"الناس",translit:"An-Naas",meaning:"Mankind"},
+  ];
+  const SURAH_BY_NUM = {};
+  for(const s of SURAH_META) SURAH_BY_NUM[s.num] = s;
+
   // ====== Same data build as global-words.html ======
   function normalize(s){
     return (s||'')
@@ -231,47 +351,135 @@
   let pageEnd = Math.min(PAGE_SIZE, refWords.length);
 
   // ====== Render ======
+  function emitSurahHeader(surahNum, isFirst){
+    const meta = SURAH_BY_NUM[surahNum];
+    if(!meta) return;
+    const h = document.createElement('div');
+    h.className = 'surah-header' + (isFirst ? ' first' : '');
+    const ar = document.createElement('div');
+    ar.className = 'surah-ar';
+    ar.textContent = meta.name;
+    h.appendChild(ar);
+    const info = document.createElement('div');
+    info.className = 'surah-info';
+    info.innerHTML = '<div class="num-name"><span class="num">' + meta.num + '.</span>Surah ' + meta.translit + '</div><div class="meaning">' + meta.meaning + '</div>';
+    h.appendChild(info);
+    document.getElementById('page-inner').appendChild(h);
+  }
+  function emitBismillahBlock(startIdx, endIdx){
+    // The user wants Bismillah shown ABOVE the surah content as a
+    // separate recitable block. It is still part of the global
+    // refWords (so the matcher highlights it as the user recites),
+    // but visually it's in its own yellow-tinted block with a label.
+    const block = document.createElement('div');
+    block.className = 'bismillah-block';
+    const label = document.createElement('span');
+    label.className = 'label';
+    label.textContent = 'Bismillah';
+    block.appendChild(label);
+    const words = document.createElement('span');
+    words.className = 'words';
+    for(let i = startIdx; i < endIdx; i++){
+      const w = refWords[i];
+      const span = document.createElement('span');
+      span.className = 'word bismillah';
+      if(i < pointer) span.classList.add('past');
+      else if(i === pointer) span.classList.add('now');
+      else span.classList.add('future');
+      span.textContent = w.text;
+      words.appendChild(span);
+    }
+    block.appendChild(words);
+    document.getElementById('page-inner').appendChild(block);
+  }
   function renderPage(){
     const inner = document.getElementById('page-inner');
     inner.innerHTML = '';
-    // Track current surah so we only emit a surah-header when the surah changes
+    // Walk words in [pageStart, pageEnd). Group:
+    //   - surah headers: when surah changes
+    //   - bismillah blocks: when the first 4 words of a surah (except 1 and 9) are Bismillah
+    //   - verse markers: AFTER the last word of each ayah (not before the first)
     let lastSurah = null;
+    let ayahEndIdx = -1;  // index of the last word of the current ayah
+    let ayahNum = null;
+    let isFirstSurah = true;
+    // Pre-compute which words are Bismillah runs at the start of each surah
+    function isBismillahRun(s, e){
+      if(e - s !== 4) return false;
+      for(let i = s; i < e; i++){
+        if(refWords[i].ayah !== 'bismillah') return false;
+      }
+      return true;
+    }
     for(let i = pageStart; i < pageEnd; i++){
       const w = refWords[i];
-      // Emit a surah header whenever the surah changes
+      // === Surah transition ===
       if(w.surah !== lastSurah){
-        if(w.ayah === 'bismillah'){
-          // Bismillah is its own "ayah" — emit a header that introduces the surah
-          const h = document.createElement('span');
-          h.className = 'surah-header first';
-          h.textContent = 'Surah ' + w.surah;
-          inner.appendChild(h);
-        } else {
-          // Regular ayah start (e.g. word 0 of a new surah) — emit a header
-          const h = document.createElement('span');
-          h.className = 'surah-header' + (lastSurah === null ? ' first' : '');
-          h.textContent = 'Surah ' + w.surah;
-          inner.appendChild(h);
+        // Close out the previous ayah's marker (if any)
+        if(ayahNum !== null && lastSurah !== null){
+          // (handled at ayah-end below)
         }
+        ayahNum = null;
+        // Check if the next 4 words are Bismillah (for surahs 2-114)
+        // If yes, emit surah header first, THEN bismillah block
+        if(isBismillahRun(i, Math.min(i+4, refWords.length))){
+          emitSurahHeader(w.surah, isFirstSurah);
+          isFirstSurah = false;
+          emitBismillahBlock(i, i+4);
+          lastSurah = w.surah;
+          // Skip the 4 Bismillah words in the regular word loop — they're
+          // already rendered inside the bismillah block.
+          // We need to advance the verse-marker for the Bismillah "ayah"
+          // AFTER the bismillah block, so the next word in DOM is the
+          // marker for the Bismillah.
+          // The bismillah ayah is "ayah 1" of the surah, so marker is "1".
+          // Per the user's request, the Bismillah's marker should appear
+          // AFTER the Bismillah words (i.e. just before ayah 2).
+          // We'll emit it after the bismillah block, before the next word.
+          const m = document.createElement('span');
+          m.className = 'verse-marker';
+          m.textContent = '1';
+          document.getElementById('page-inner').appendChild(m);
+          // Now skip past the 4 Bismillah words
+          i += 3;  // (i++ in the loop will move to i+4)
+          continue;
+        }
+        // For surah 1 (Al-Fatihah): the first 4 words ARE its ayah 1
+        // (Bismillah). Don't emit a bismillah block. Just emit the surah
+        // header and let the word loop render the Bismillah as the first
+        // 4 words of ayah 1.
+        emitSurahHeader(w.surah, isFirstSurah);
+        isFirstSurah = false;
         lastSurah = w.surah;
       }
-      // Emit a verse marker at the start of each ayah (except bismillah which
-      // is its own marker)
-      if(w.position === 1 && w.ayah !== 'bismillah'){
-        const m = document.createElement('span');
-        m.className = 'verse-marker';
-        m.textContent = w.ayah;
-        inner.appendChild(m);
-      }
-      // Emit the word
+      // === Detect end of current ayah (for verse marker) ===
+      // We emit the verse marker AFTER the last word of an ayah, not
+      // before. So we need to peek ahead: if the next word is in a
+      // different ayah (or there is no next word), this word is the
+      // last word of the current ayah.
+      const isLastWordOfAyah = (i === pageEnd - 1) ||
+        (refWords[i+1].ayah !== w.ayah) ||
+        (refWords[i+1].surah !== w.surah);
+      // === Emit the word ===
       const span = document.createElement('span');
       span.className = 'word';
-      if(w.ayah === 'bismillah') span.classList.add('bismillah');
+      // Bismillah words: rendered inside the bismillah block, so they
+      // shouldn't reach here for surahs 2-114. But Al-Fatihah's
+      // ayah 1 IS Bismillah and is NOT in a bismillah block — it
+      // gets the regular bismillah color.
+      if(w.ayah === 'bismillah' && w.surah === 1) span.classList.add('bismillah');
       if(i < pointer) span.classList.add('past');
       else if(i === pointer) span.classList.add('now');
       else span.classList.add('future');
       span.textContent = w.text;
       inner.appendChild(span);
+      // === If this is the last word of the ayah, emit the verse marker ===
+      if(isLastWordOfAyah && w.ayah !== 'bismillah'){
+        const m = document.createElement('span');
+        m.className = 'verse-marker';
+        m.textContent = w.ayah;
+        inner.appendChild(m);
+      }
     }
     // Update range display
     document.getElementById('rangeStart').textContent = pageStart;
