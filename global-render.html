@@ -428,7 +428,7 @@
 </head>
 <body class="theme-dark">
 
-<div class="ver" id="ver">v2.2</div>
+<div class="ver" id="ver">v2.3</div>
 
 <button class="settings-btn" id="settingsBtn" title="Settings">⚙</button>
 <div class="settings-menu" id="settingsMenu">
@@ -775,11 +775,18 @@
   }
 
   function updateStats(){
-    // Compute the current page number and total pages
-    const currentPageNum = Math.floor(pageStart / PAGE_SIZE) + 1;
-    const totalPages = Math.max(1, Math.ceil(refWords.length / PAGE_SIZE));
+    // Show the surah currently at the top of the page + the word range
+    // being displayed. No "Page X of Y" — the prev/next buttons are
+    // self-explanatory and the user doesn't need a confusing total page
+    // count across all 77,877 words.
+    const firstWord = refWords[pageStart] || {};
+    const lastWord  = refWords[Math.max(pageStart, pageEnd - 1)] || firstWord;
+    const meta = SURAH_META.find(s => s.num === firstWord.surah);
+    const surahLabel = meta ? (meta.translit + ' (' + firstWord.surah + '/114)') : 'Surah ?';
     const el = document.getElementById('pageInfo');
-    if(el) el.textContent = 'Page ' + currentPageNum + ' of ' + totalPages;
+    if(el){
+      el.textContent = surahLabel + '  ·  words ' + (pageStart + 1) + '–' + pageEnd;
+    }
   }
 
   function maybePaginate(){
