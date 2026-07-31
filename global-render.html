@@ -88,8 +88,10 @@
   .word.unclear{color:#f1c40f;background:rgba(241,196,15,.18)}
 
   /* Bismillah word — highlighted as a soft yellow pre-chapter marker */
-  .word.bismillah{color:#f1c40f;font-weight:600}
-  .word.bismillah.now{background:#f1c40f;color:#0a1f12}
+  /* Bismillah words: darker green (matches the surah script's green
+     family but visually distinct from the standard past/future words). */
+  .word.bismillah{color:#1e8449;font-weight:600}
+  .word.bismillah.now{background:#1e8449;color:#0a1f12}
 
   /* Inline verse marker */
   .verse-marker{
@@ -148,8 +150,9 @@
     margin-top:2px;
   }
   /* Bismillah block — just the Arabic text, no English label. Uses a
-     different (more decorative) Arabic font but the same yellow color
-     as the rest of the Arabic script. */
+     different (more decorative) Arabic font. Color is a DARKER GREEN
+     so it matches the surah script's green family but stands out as
+     a header element. */
   .bismillah-block{
     display:flex;
     align-items:center;
@@ -157,8 +160,8 @@
     flex-basis:100%;
     margin:8px 0 16px;
     padding:12px 14px;
-    background:rgba(241,196,15,.08);
-    border:1px solid rgba(241,196,15,.25);
+    background:rgba(30,132,73,.10);
+    border:1px solid rgba(30,132,73,.30);
     border-radius:8px;
     direction:rtl;
   }
@@ -166,11 +169,11 @@
     display:inline-flex;
     gap:2px;
   }
-  /* Different (more decorative) Arabic font for the Bismillah, but
-     keep the same yellow color as the rest of the Arabic text. */
+  /* Different (more decorative) Arabic font for the Bismillah, in a
+     darker green to match the surah script's green family. */
   .bismillah-block .word{
     font-family:'Amiri Quran','Scheherazade New','Noto Naskh Arabic',Amiri,serif;
-    color:#f1c40f;
+    color:#1e8449;
     font-weight:600;
   }
 
@@ -200,7 +203,7 @@
 </head>
 <body>
 
-<div class="ver">v1.7</div>
+<div class="ver">v1.8</div>
 <h1>Step 2: Continuous render + pagination</h1>
 <div class="sub">All 114 surahs in one scrollable page, ~12-15 lines visible at a time</div>
 
