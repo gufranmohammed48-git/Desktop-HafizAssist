@@ -126,17 +126,25 @@
     transition:all .15s ease;
   }
   .reset-btn:hover{border-color:var(--primary);color:var(--primary)}
-  /* Surah grid */
+  /* Surah grid — fixed height with internal scroll, matches index.html */
   .surah-grid{
     display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
-    gap:12px;
+    grid-template-columns:repeat(auto-fill,minmax(170px,1fr));
+    gap:8px;
+    max-height:250px;
+    overflow-y:auto;
+    padding:4px;
+    scrollbar-width:thin;
+    scrollbar-color:var(--primary) transparent;
   }
+  .surah-grid::-webkit-scrollbar{width:6px}
+  .surah-grid::-webkit-scrollbar-track{background:transparent}
+  .surah-grid::-webkit-scrollbar-thumb{background:var(--primary);border-radius:3px}
   .surah-card{
     background:var(--card);
     border:1px solid var(--border);
-    border-radius:12px;
-    padding:14px 16px;
+    border-radius:10px;
+    padding:10px 12px;
     cursor:pointer;
     transition:all .15s ease;
     text-align:left;
@@ -156,28 +164,28 @@
   }
   .surah-card.hidden{display:none}
   .surah-card .num{
-    font-size:12px;font-weight:700;
+    font-size:11px;font-weight:600;
     color:var(--text-dim);
-    text-transform:uppercase;letter-spacing:1px;
+    letter-spacing:.5px;
   }
   .surah-card .ar-name{
     font-family:Amiri,serif;
-    font-size:34px;
+    font-size:18px;
     color:var(--text);
-    line-height:1.1;
+    margin-top:2px;
+    line-height:1.2;
     direction:rtl;
-    margin:4px 0;
   }
   .surah-card.active .ar-name{color:var(--primary)}
   .surah-card .translit{
-    font-size:13px;
+    font-size:11px;
     color:var(--text-dim);
-    margin-top:4px;
+    margin-top:1px;
   }
   .surah-card .ayahs{
-    font-size:12px;
+    font-size:10px;
     color:var(--text-dim);
-    margin-top:2px;
+    margin-top:1px;
   }
 
   /* === VERSION BADGE (top right) === */
@@ -420,7 +428,7 @@
 </head>
 <body class="theme-dark">
 
-<div class="ver" id="ver">v2.1</div>
+<div class="ver" id="ver">v2.2</div>
 
 <button class="settings-btn" id="settingsBtn" title="Settings">⚙</button>
 <div class="settings-menu" id="settingsMenu">
