@@ -19,9 +19,10 @@
     padding:14px;
     margin:0 auto 16px;
     max-width:700px;
-    /* Height = roughly 13 lines. font-size:22px, line-height:2.0 = 44px per line.
-       13 lines = 572px. Slightly larger so we get 12-15 lines comfortably. */
-    height:580px;
+    /* Height = ~18-20 lines. font-size:22px, line-height:2.1 = 46.2px/line.
+       20 lines = 924px. The page scrolls internally if content overflows
+       but mostly the user sees 15-18 lines at once on a phone. */
+    min-height:900px;
     overflow:hidden;
     position:relative;
   }
@@ -147,7 +148,7 @@
 </head>
 <body>
 
-<div class="ver">v1.2</div>
+<div class="ver">v1.3</div>
 <h1>Step 2: Continuous render + pagination</h1>
 <div class="sub">All 114 surahs in one scrollable page, ~12-15 lines visible at a time</div>
 
@@ -223,9 +224,9 @@
   // The "page" shows words in [pageStart, pageEnd). When pointer is near
   // pageEnd, we extend pageEnd. When pointer is more than PAGE_KEEP_BEHIND
   // past pageStart, we move pageStart forward.
-  const PAGE_SIZE = 50;          // words to show in the visible page
-  const PAGE_KEEP_BEHIND = 20;   // keep this many words behind the pointer
-  const PAGE_KEEP_AHEAD = 30;    // and this many ahead
+  const PAGE_SIZE = 100;         // words to show in the visible page (~18-20 lines)
+  const PAGE_KEEP_BEHIND = 30;   // keep this many words behind the pointer
+  const PAGE_KEEP_AHEAD = 70;    // and this many ahead
   let pageStart = 0;
   let pageEnd = Math.min(PAGE_SIZE, refWords.length);
 
