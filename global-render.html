@@ -147,36 +147,29 @@
     font-weight:500;
     margin-top:2px;
   }
-  /* Bismillah block — shown ABOVE the surah content (for surahs 2-114)
-     as a separate recitable visual block. The user recites this every
-     time before starting the surah. */
+  /* Bismillah block — just the Arabic text, no English label. Uses a
+     different (more decorative) Arabic font but the same yellow color
+     as the rest of the Arabic script. */
   .bismillah-block{
     display:flex;
     align-items:center;
     justify-content:center;
     flex-basis:100%;
     margin:8px 0 16px;
-    padding:10px 14px;
+    padding:12px 14px;
     background:rgba(241,196,15,.08);
     border:1px solid rgba(241,196,15,.25);
     border-radius:8px;
     direction:rtl;
   }
-  .bismillah-block .label{
-    font-family:system-ui,sans-serif;
-    font-size:10px;
-    color:#f1c40f;
-    text-transform:uppercase;
-    letter-spacing:1px;
-    margin-left:12px;
-    direction:ltr;
-    opacity:.7;
-  }
   .bismillah-block .words{
     display:inline-flex;
     gap:2px;
   }
+  /* Different (more decorative) Arabic font for the Bismillah, but
+     keep the same yellow color as the rest of the Arabic text. */
   .bismillah-block .word{
+    font-family:'Amiri Quran','Scheherazade New','Noto Naskh Arabic',Amiri,serif;
     color:#f1c40f;
     font-weight:600;
   }
@@ -207,7 +200,7 @@
 </head>
 <body>
 
-<div class="ver">v1.5</div>
+<div class="ver">v1.6</div>
 <h1>Step 2: Continuous render + pagination</h1>
 <div class="sub">All 114 surahs in one scrollable page, ~12-15 lines visible at a time</div>
 
