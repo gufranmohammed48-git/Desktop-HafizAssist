@@ -305,30 +305,32 @@
   .info code{background:rgba(46,204,113,.15);padding:1px 5px;border-radius:3px;font-size:11px}
 </style>
 </head>
-<body>
+<body class="theme-dark">
 
-<div class="ver">v2.0</div>
-<h1>Step 2: Continuous render + pagination</h1>
-<div class="sub">All 114 surahs in one scrollable page, ~12-15 lines visible at a time</div>
+<div class="ver" id="ver">v2.0</div>
 
-<div class="info">
-  <b>How to use:</b> Click <code>▶ Advance pointer</code> to simulate the user reciting. Words turn green (past), the pointer word is bright green with glow (now). When the pointer reaches near the bottom of the visible page, the page auto-loads the next chunk. Click <code>⏪ Prev page</code> or <code>Next page ⏩</code> to manually page. Try advancing the pointer 50+ times to see the page pagination in action.
+<button class="settings-btn" id="settingsBtn" title="Settings">⚙</button>
+<div class="settings-menu" id="settingsMenu">
+  <h3>Theme</h3>
+  <div class="theme-option" data-theme="dark"><span class="swatch" style="background:#0a1f12"></span>Dark Green</div>
+  <div class="theme-option" data-theme="light"><span class="swatch" style="background:#fafaf5"></span>Light</div>
+  <div class="theme-option" data-theme="sepia"><span class="swatch" style="background:#f4ecd8"></span>Sepia (Mushaf)</div>
+  <div class="theme-option" data-theme="royal"><span class="swatch" style="background:#0d1b2a"></span>Royal Blue</div>
 </div>
 
-<div class="controls">
-  <button id="prevPageBtn">⏪ Prev page</button>
-  <button id="advanceBtn" class="primary">▶ Advance pointer (+1 word)</button>
-  <button id="advanceFarBtn">⏩ Advance 30 words</button>
-  <button id="nextPageBtn">Next page ⏩</button>
-  <button id="resetBtn">↺ Reset to start</button>
-  <button id="jumpToS2Btn">→ Jump to surah 2</button>
-  <button id="jumpToS9Btn">→ Jump to surah 9</button>
-  <button id="jumpToS114Btn">→ Jump to surah 114</button>
-</div>
+<header class="app-header">
+  <img class="bismillah-img" src="assets/bismillah.png" alt="Bismillah">
+  <div class="app-title">Live Recitation Tracker <span class="arabic">مُتَتَبِّع التَّلَاوَة</span></div>
+  <div class="app-sub">Recite the Quran and watch each word light up as you speak</div>
+</header>
 
+<div style="max-width:700px;margin:0 auto 12px;display:flex;justify-content:space-between;gap:8px">
+  <button id="prevPageBtn" style="flex:1;background:var(--card);color:var(--primary);border:1px solid var(--primary);padding:10px 16px;border-radius:8px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer">← Previous page</button>
+  <button id="nextPageBtn" style="flex:1;background:var(--card);color:var(--primary);border:1px solid var(--primary);padding:10px 16px;border-radius:8px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer">Next page →</button>
+</div>
+<div id="pageInfo" style="max-width:700px;margin:0 auto 12px;text-align:center;font-size:12px;color:var(--text-dim)">Page 1 of 1</div>
 
 <div id="page"><div id="page-inner"></div></div>
-
 
 
 <script src="phonemes-data.js"></script>
