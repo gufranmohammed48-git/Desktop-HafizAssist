@@ -66,6 +66,120 @@
     margin-top:4px;
   }
 
+  /* === SURAH PICKER SECTION === */
+  .surah-picker{
+    max-width:900px;margin:0 auto 16px;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:18px 18px 22px;
+  }
+  .picker-header{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-bottom:14px;flex-wrap:wrap;gap:10px;
+  }
+  .picker-title{
+    font-family:system-ui,-apple-system,sans-serif;
+    font-size:13px;font-weight:700;
+    color:var(--text-dim);
+    text-transform:uppercase;letter-spacing:1.5px;
+    margin:0;
+  }
+  /* Contact Support button — green */
+  .contact-support{
+    display:inline-flex;align-items:center;gap:6px;
+    background:linear-gradient(135deg,var(--primary),var(--primary));
+    color:#fff;font-weight:700;font-size:14px;
+    padding:10px 20px;border-radius:30px;
+    text-decoration:none;
+    box-shadow:0 2px 8px var(--now-glow);
+    transition:all .15s ease;
+  }
+  .contact-support:hover{transform:translateY(-1px);box-shadow:0 4px 12px var(--now-glow)}
+  body.theme-light .contact-support{color:#fff}
+  body.theme-sepia .contact-support{color:#fff}
+  /* Search row */
+  .search-row{
+    display:flex;gap:10px;margin-bottom:16px;
+  }
+  #searchInput{
+    flex:1;
+    background:var(--card);
+    color:var(--text);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:11px 14px;
+    font-family:inherit;font-size:15px;
+    outline:none;
+    transition:border-color .15s ease;
+  }
+  #searchInput::placeholder{color:var(--text-dim)}
+  #searchInput:focus{border-color:var(--primary)}
+  .reset-btn{
+    background:var(--card);
+    color:var(--text);
+    border:1px solid var(--border);
+    padding:10px 18px;
+    border-radius:10px;
+    font-family:inherit;font-size:14px;font-weight:600;
+    cursor:pointer;
+    transition:all .15s ease;
+  }
+  .reset-btn:hover{border-color:var(--primary);color:var(--primary)}
+  /* Surah grid */
+  .surah-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+    gap:12px;
+  }
+  .surah-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:14px 16px;
+    cursor:pointer;
+    transition:all .15s ease;
+    text-align:left;
+    font-family:inherit;
+    color:var(--text);
+    user-select:none;
+  }
+  .surah-card:hover{
+    border-color:var(--primary);
+    background:var(--primary-soft);
+    transform:translateY(-1px);
+  }
+  .surah-card.active{
+    border-color:var(--primary);
+    background:var(--primary-soft);
+    box-shadow:0 0 0 1px var(--primary) inset;
+  }
+  .surah-card.hidden{display:none}
+  .surah-card .num{
+    font-size:12px;font-weight:700;
+    color:var(--text-dim);
+    text-transform:uppercase;letter-spacing:1px;
+  }
+  .surah-card .ar-name{
+    font-family:Amiri,serif;
+    font-size:34px;
+    color:var(--text);
+    line-height:1.1;
+    direction:rtl;
+    margin:4px 0;
+  }
+  .surah-card.active .ar-name{color:var(--primary)}
+  .surah-card .translit{
+    font-size:13px;
+    color:var(--text-dim);
+    margin-top:4px;
+  }
+  .surah-card .ayahs{
+    font-size:12px;
+    color:var(--text-dim);
+    margin-top:2px;
+  }
+
   /* === VERSION BADGE (top right) === */
   .ver{
     position:fixed;top:8px;right:8px;
@@ -324,6 +438,18 @@
   <div class="app-sub">Recite the Quran and watch each word light up as you speak</div>
 </header>
 
+<section class="surah-picker">
+  <div class="picker-header">
+    <h2 class="picker-title">① Choose a surah</h2>
+    <a href="https://docs.google.com/forms/d/e/1FAIpQLScSSIYxlRbuN6gofwRA2J69Ucueqnl14LVZIv0vjnpIvtHXUA/viewform" target="_blank" rel="noopener" class="contact-support">💬 Contact Support</a>
+  </div>
+  <div class="search-row">
+    <input type="text" id="searchInput" placeholder="Search by number, transliteration, or Arabic name…" autocomplete="off">
+    <button class="reset-btn" id="resetBtn" type="button">Reset</button>
+  </div>
+  <div class="surah-grid" id="surahGrid"></div>
+</section>
+
 <div style="max-width:700px;margin:0 auto 12px;display:flex;justify-content:space-between;gap:8px">
   <button id="prevPageBtn" style="flex:1;background:var(--card);color:var(--primary);border:1px solid var(--primary);padding:10px 16px;border-radius:8px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer">← Previous page</button>
   <button id="nextPageBtn" style="flex:1;background:var(--card);color:var(--primary);border:1px solid var(--primary);padding:10px 16px;border-radius:8px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer">Next page →</button>
@@ -338,120 +464,120 @@
 (function(){
   // ====== Surah metadata (Arabic name, English transliteration, meaning) ======
   const SURAH_META = [
-    {num:1,name:"الفاتحة",translit:"Al-Fatihah",meaning:"The Opening"},
-    {num:2,name:"البقرة",translit:"Al-Baqarah",meaning:"The Cow"},
-    {num:3,name:"آل عمران",translit:"Aal-i-Imraan",meaning:"The Family of Imraan"},
-    {num:4,name:"النساء",translit:"An-Nisaa",meaning:"The Women"},
-    {num:5,name:"المائدة",translit:"Al-Maaida",meaning:"The Table"},
-    {num:6,name:"الأنعام",translit:"Al-An'aam",meaning:"The Cattle"},
-    {num:7,name:"الأعراف",translit:"Al-A'raaf",meaning:"The Heights"},
-    {num:8,name:"الأنفال",translit:"Al-Anfaal",meaning:"The Spoils of War"},
-    {num:9,name:"التوبة",translit:"At-Tawbah",meaning:"The Repentance"},
-    {num:10,name:"يونس",translit:"Yunus",meaning:"Jonas"},
-    {num:11,name:"هود",translit:"Hud",meaning:"Hud"},
-    {num:12,name:"يوسف",translit:"Yusuf",meaning:"Joseph"},
-    {num:13,name:"الرعد",translit:"Ar-Ra'd",meaning:"The Thunder"},
-    {num:14,name:"إبراهيم",translit:"Ibrahim",meaning:"Abraham"},
-    {num:15,name:"الحجر",translit:"Al-Hijr",meaning:"The Rocky Tract"},
-    {num:16,name:"النحل",translit:"An-Nahl",meaning:"The Bee"},
-    {num:17,name:"الإسراء",translit:"Al-Israa",meaning:"The Night Journey"},
-    {num:18,name:"الكهف",translit:"Al-Kahf",meaning:"The Cave"},
-    {num:19,name:"مريم",translit:"Maryam",meaning:"Mary"},
-    {num:20,name:"طه",translit:"Taa-Haa",meaning:"Taa-Haa"},
-    {num:21,name:"الأنبياء",translit:"Al-Anbiyaa",meaning:"The Prophets"},
-    {num:22,name:"الحج",translit:"Al-Hajj",meaning:"The Pilgrimage"},
-    {num:23,name:"المؤمنون",translit:"Al-Mu'minoon",meaning:"The Believers"},
-    {num:24,name:"النور",translit:"An-Noor",meaning:"The Light"},
-    {num:25,name:"الفرقان",translit:"Al-Furqaan",meaning:"The Criterion"},
-    {num:26,name:"الشعراء",translit:"Ash-Shu'araa",meaning:"The Poets"},
-    {num:27,name:"النمل",translit:"An-Naml",meaning:"The Ant"},
-    {num:28,name:"القصص",translit:"Al-Qasas",meaning:"The Stories"},
-    {num:29,name:"العنكبوت",translit:"Al-Ankaboot",meaning:"The Spider"},
-    {num:30,name:"الروم",translit:"Ar-Room",meaning:"The Romans"},
-    {num:31,name:"لقمان",translit:"Luqman",meaning:"Luqman"},
-    {num:32,name:"السجدة",translit:"As-Sajdah",meaning:"The Prostration"},
-    {num:33,name:"الأحزاب",translit:"Al-Ahzaab",meaning:"The Clans"},
-    {num:34,name:"سبإ",translit:"Saba",meaning:"Sheba"},
-    {num:35,name:"فاطر",translit:"Faatir",meaning:"The Originator"},
-    {num:36,name:"يس",translit:"Yaseen",meaning:"Yaseen"},
-    {num:37,name:"الصافات",translit:"As-Saaffaat",meaning:"Those Ranged in Ranks"},
-    {num:38,name:"ص",translit:"Saad",meaning:"The Letter Saad"},
-    {num:39,name:"الزمر",translit:"Az-Zumar",meaning:"The Groups"},
-    {num:40,name:"غافر",translit:"Ghafir",meaning:"The Forgiver"},
-    {num:41,name:"فصلت",translit:"Fussilat",meaning:"Explained in Detail"},
-    {num:42,name:"الشورى",translit:"Ash-Shura",meaning:"The Consultation"},
-    {num:43,name:"الزخرف",translit:"Az-Zukhruf",meaning:"The Gold Adornments"},
-    {num:44,name:"الدخان",translit:"Ad-Dukhaan",meaning:"The Smoke"},
-    {num:45,name:"الجاثية",translit:"Al-Jaathiyah",meaning:"The Kneeling"},
-    {num:46,name:"الأحقاف",translit:"Al-Ahqaf",meaning:"The Curved Sand Tracts"},
-    {num:47,name:"محمد",translit:"Muhammad",meaning:"Muhammad"},
-    {num:48,name:"الفتح",translit:"Al-Fath",meaning:"The Victory"},
-    {num:49,name:"الحجرات",translit:"Al-Hujuraat",meaning:"The Rooms"},
-    {num:50,name:"ق",translit:"Qaaf",meaning:"The Letter Qaaf"},
-    {num:51,name:"الذاريات",translit:"Adh-Dhaariyaat",meaning:"The Winnowing Winds"},
-    {num:52,name:"الطور",translit:"At-Tur",meaning:"The Mount"},
-    {num:53,name:"النجم",translit:"An-Najm",meaning:"The Star"},
-    {num:54,name:"القمر",translit:"Al-Qamar",meaning:"The Moon"},
-    {num:55,name:"الرحمن",translit:"Ar-Rahmaan",meaning:"The Most Gracious"},
-    {num:56,name:"الواقعة",translit:"Al-Waaqia",meaning:"The Inevitable"},
-    {num:57,name:"الحديد",translit:"Al-Hadeed",meaning:"The Iron"},
-    {num:58,name:"المجادلة",translit:"Al-Mujaadila",meaning:"The Woman Who Disputes"},
-    {num:59,name:"الحشر",translit:"Al-Hashr",meaning:"The Gathering"},
-    {num:60,name:"الممتحنة",translit:"Al-Mumtahana",meaning:"The Woman to be Examined"},
-    {num:61,name:"الصف",translit:"As-Saff",meaning:"The Ranks"},
-    {num:62,name:"الجمعة",translit:"Al-Jumu'ah",meaning:"The Friday"},
-    {num:63,name:"المنافقون",translit:"Al-Munaafiqoon",meaning:"The Hypocrites"},
-    {num:64,name:"التغابن",translit:"At-Taghaabun",meaning:"Mutual Disillusion"},
-    {num:65,name:"الطلاق",translit:"At-Talaaq",meaning:"Divorce"},
-    {num:66,name:"التحريم",translit:"At-Tahreem",meaning:"The Prohibition"},
-    {num:67,name:"الملك",translit:"Al-Mulk",meaning:"The Kingdom"},
-    {num:68,name:"القلم",translit:"Al-Qalam",meaning:"The Pen"},
-    {num:69,name:"الحاقة",translit:"Al-Haaqqa",meaning:"The Reality"},
-    {num:70,name:"المعارج",translit:"Al-Ma'aarij",meaning:"The Ways of Ascent"},
-    {num:71,name:"نوح",translit:"Nooh",meaning:"Noah"},
-    {num:72,name:"الجن",translit:"Al-Jinn",meaning:"The Jinn"},
-    {num:73,name:"المزمل",translit:"Al-Muzzammil",meaning:"The Enshrouded One"},
-    {num:74,name:"المدثر",translit:"Al-Muddaththir",meaning:"The Cloaked One"},
-    {num:75,name:"القيامة",translit:"Al-Qiyaamah",meaning:"The Resurrection"},
-    {num:76,name:"الإنسان",translit:"Al-Insaan",meaning:"Man"},
-    {num:77,name:"المرسلات",translit:"Al-Mursalaat",meaning:"The Emissaries"},
-    {num:78,name:"النبأ",translit:"An-Naba",meaning:"The Announcement"},
-    {num:79,name:"النازعات",translit:"An-Naazi'aat",meaning:"Those Who Pull Out"},
-    {num:80,name:"عبس",translit:"Abasa",meaning:"He Frowned"},
-    {num:81,name:"التكوير",translit:"At-Takweer",meaning:"The Folding Up"},
-    {num:82,name:"الإنفطار",translit:"Al-Infitaar",meaning:"The Cleaving"},
-    {num:83,name:"المطففين",translit:"Al-Mutaffifeen",meaning:"The Defrauders"},
-    {num:84,name:"الإنشقاق",translit:"Al-Inshiqaaq",meaning:"The Splitting Open"},
-    {num:85,name:"البروج",translit:"Al-Burooj",meaning:"The Constellations"},
-    {num:86,name:"الطارق",translit:"At-Taariq",meaning:"The Night-Comer"},
-    {num:87,name:"الأعلى",translit:"Al-A'laa",meaning:"The Most High"},
-    {num:88,name:"الغاشية",translit:"Al-Ghaashiya",meaning:"The Overwhelming"},
-    {num:89,name:"الفجر",translit:"Al-Fajr",meaning:"The Dawn"},
-    {num:90,name:"البلد",translit:"Al-Balad",meaning:"The City"},
-    {num:91,name:"الشمس",translit:"Ash-Shams",meaning:"The Sun"},
-    {num:92,name:"الليل",translit:"Al-Lail",meaning:"The Night"},
-    {num:93,name:"الضحى",translit:"Ad-Dhuhaa",meaning:"The Forenoon"},
-    {num:94,name:"الشرح",translit:"Ash-Sharh",meaning:"The Opening Forth"},
-    {num:95,name:"التين",translit:"At-Teen",meaning:"The Fig"},
-    {num:96,name:"العلق",translit:"Al-Alaq",meaning:"The Clot"},
-    {num:97,name:"القدر",translit:"Al-Qadr",meaning:"The Power"},
-    {num:98,name:"البينة",translit:"Al-Bayyinah",meaning:"The Clear Proof"},
-    {num:99,name:"الزلزلة",translit:"Az-Zalzalah",meaning:"The Earthquake"},
-    {num:100,name:"العاديات",translit:"Al-Aadiyaat",meaning:"The Coursers"},
-    {num:101,name:"القارعة",translit:"Al-Qaari'ah",meaning:"The Striking Hour"},
-    {num:102,name:"التكاثر",translit:"At-Takaathur",meaning:"The Piling Up"},
-    {num:103,name:"العصر",translit:"Al-Asr",meaning:"The Time"},
-    {num:104,name:"الهمزة",translit:"Al-Humazah",meaning:"The Slanderer"},
-    {num:105,name:"الفيل",translit:"Al-Feel",meaning:"The Elephant"},
-    {num:106,name:"قريش",translit:"Quraish",meaning:"Quraish"},
-    {num:107,name:"الماعون",translit:"Al-Maa'un",meaning:"The Small Kindness"},
-    {num:108,name:"الكوثر",translit:"Al-Kawthar",meaning:"The Abundance"},
-    {num:109,name:"الكافرون",translit:"Al-Kaafiroon",meaning:"The Disbelievers"},
-    {num:110,name:"النصر",translit:"An-Nasr",meaning:"The Help"},
-    {num:111,name:"المسد",translit:"Al-Masad",meaning:"The Palm Fibre"},
-    {num:112,name:"الإخلاص",translit:"Al-Ikhlaas",meaning:"The Sincerity"},
-    {num:113,name:"الفلق",translit:"Al-Falaq",meaning:"The Daybreak"},
-    {num:114,name:"الناس",translit:"An-Naas",meaning:"Mankind"},
+    {num:1,name:"الفاتحة",translit:"Al-Fatihah",meaning:"The Opening",verses:7},
+    {num:2,name:"البقرة",translit:"Al-Baqarah",meaning:"The Cow",verses:286},
+    {num:3,name:"آل عمران",translit:"Aal-i-Imraan",meaning:"The Family of Imraan",verses:200},
+    {num:4,name:"النساء",translit:"An-Nisaa",meaning:"The Women",verses:176},
+    {num:5,name:"المائدة",translit:"Al-Maaida",meaning:"The Table",verses:120},
+    {num:6,name:"الأنعام",translit:"Al-An'aam",meaning:"The Cattle",verses:165},
+    {num:7,name:"الأعراف",translit:"Al-A'raaf",meaning:"The Heights",verses:206},
+    {num:8,name:"الأنفال",translit:"Al-Anfaal",meaning:"The Spoils of War",verses:75},
+    {num:9,name:"التوبة",translit:"At-Tawbah",meaning:"The Repentance",verses:129},
+    {num:10,name:"يونس",translit:"Yunus",meaning:"Jonas",verses:109},
+    {num:11,name:"هود",translit:"Hud",meaning:"Hud",verses:123},
+    {num:12,name:"يوسف",translit:"Yusuf",meaning:"Joseph",verses:111},
+    {num:13,name:"الرعد",translit:"Ar-Ra'd",meaning:"The Thunder",verses:43},
+    {num:14,name:"إبراهيم",translit:"Ibrahim",meaning:"Abraham",verses:52},
+    {num:15,name:"الحجر",translit:"Al-Hijr",meaning:"The Rocky Tract",verses:99},
+    {num:16,name:"النحل",translit:"An-Nahl",meaning:"The Bee",verses:128},
+    {num:17,name:"الإسراء",translit:"Al-Israa",meaning:"The Night Journey",verses:111},
+    {num:18,name:"الكهف",translit:"Al-Kahf",meaning:"The Cave",verses:110},
+    {num:19,name:"مريم",translit:"Maryam",meaning:"Mary",verses:98},
+    {num:20,name:"طه",translit:"Taa-Haa",meaning:"Taa-Haa",verses:135},
+    {num:21,name:"الأنبياء",translit:"Al-Anbiyaa",meaning:"The Prophets",verses:112},
+    {num:22,name:"الحج",translit:"Al-Hajj",meaning:"The Pilgrimage",verses:78},
+    {num:23,name:"المؤمنون",translit:"Al-Mu'minoon",meaning:"The Believers",verses:118},
+    {num:24,name:"النور",translit:"An-Noor",meaning:"The Light",verses:64},
+    {num:25,name:"الفرقان",translit:"Al-Furqaan",meaning:"The Criterion",verses:77},
+    {num:26,name:"الشعراء",translit:"Ash-Shu'araa",meaning:"The Poets",verses:227},
+    {num:27,name:"النمل",translit:"An-Naml",meaning:"The Ant",verses:93},
+    {num:28,name:"القصص",translit:"Al-Qasas",meaning:"The Stories",verses:88},
+    {num:29,name:"العنكبوت",translit:"Al-Ankaboot",meaning:"The Spider",verses:69},
+    {num:30,name:"الروم",translit:"Ar-Room",meaning:"The Romans",verses:60},
+    {num:31,name:"لقمان",translit:"Luqman",meaning:"Luqman",verses:34},
+    {num:32,name:"السجدة",translit:"As-Sajdah",meaning:"The Prostration",verses:30},
+    {num:33,name:"الأحزاب",translit:"Al-Ahzaab",meaning:"The Clans",verses:73},
+    {num:34,name:"سبإ",translit:"Saba",meaning:"Sheba",verses:54},
+    {num:35,name:"فاطر",translit:"Faatir",meaning:"The Originator",verses:45},
+    {num:36,name:"يس",translit:"Yaseen",meaning:"Yaseen",verses:83},
+    {num:37,name:"الصافات",translit:"As-Saaffaat",meaning:"Those Ranged in Ranks",verses:182},
+    {num:38,name:"ص",translit:"Saad",meaning:"The Letter Saad",verses:88},
+    {num:39,name:"الزمر",translit:"Az-Zumar",meaning:"The Groups",verses:75},
+    {num:40,name:"غافر",translit:"Ghafir",meaning:"The Forgiver",verses:85},
+    {num:41,name:"فصلت",translit:"Fussilat",meaning:"Explained in Detail",verses:54},
+    {num:42,name:"الشورى",translit:"Ash-Shura",meaning:"The Consultation",verses:53},
+    {num:43,name:"الزخرف",translit:"Az-Zukhruf",meaning:"The Gold Adornments",verses:89},
+    {num:44,name:"الدخان",translit:"Ad-Dukhaan",meaning:"The Smoke",verses:59},
+    {num:45,name:"الجاثية",translit:"Al-Jaathiyah",meaning:"The Kneeling",verses:37},
+    {num:46,name:"الأحقاف",translit:"Al-Ahqaf",meaning:"The Curved Sand Tracts",verses:35},
+    {num:47,name:"محمد",translit:"Muhammad",meaning:"Muhammad",verses:38},
+    {num:48,name:"الفتح",translit:"Al-Fath",meaning:"The Victory",verses:29},
+    {num:49,name:"الحجرات",translit:"Al-Hujuraat",meaning:"The Rooms",verses:18},
+    {num:50,name:"ق",translit:"Qaaf",meaning:"The Letter Qaaf",verses:45},
+    {num:51,name:"الذاريات",translit:"Adh-Dhaariyaat",meaning:"The Winnowing Winds",verses:60},
+    {num:52,name:"الطور",translit:"At-Tur",meaning:"The Mount",verses:49},
+    {num:53,name:"النجم",translit:"An-Najm",meaning:"The Star",verses:62},
+    {num:54,name:"القمر",translit:"Al-Qamar",meaning:"The Moon",verses:55},
+    {num:55,name:"الرحمن",translit:"Ar-Rahmaan",meaning:"The Most Gracious",verses:78},
+    {num:56,name:"الواقعة",translit:"Al-Waaqia",meaning:"The Inevitable",verses:96},
+    {num:57,name:"الحديد",translit:"Al-Hadeed",meaning:"The Iron",verses:29},
+    {num:58,name:"المجادلة",translit:"Al-Mujaadila",meaning:"The Woman Who Disputes",verses:22},
+    {num:59,name:"الحشر",translit:"Al-Hashr",meaning:"The Gathering",verses:24},
+    {num:60,name:"الممتحنة",translit:"Al-Mumtahana",meaning:"The Woman to be Examined",verses:13},
+    {num:61,name:"الصف",translit:"As-Saff",meaning:"The Ranks",verses:14},
+    {num:62,name:"الجمعة",translit:"Al-Jumu'ah",meaning:"The Friday",verses:11},
+    {num:63,name:"المنافقون",translit:"Al-Munaafiqoon",meaning:"The Hypocrites",verses:11},
+    {num:64,name:"التغابن",translit:"At-Taghaabun",meaning:"Mutual Disillusion",verses:18},
+    {num:65,name:"الطلاق",translit:"At-Talaaq",meaning:"Divorce",verses:12},
+    {num:66,name:"التحريم",translit:"At-Tahreem",meaning:"The Prohibition",verses:12},
+    {num:67,name:"الملك",translit:"Al-Mulk",meaning:"The Kingdom",verses:30},
+    {num:68,name:"القلم",translit:"Al-Qalam",meaning:"The Pen",verses:52},
+    {num:69,name:"الحاقة",translit:"Al-Haaqqa",meaning:"The Reality",verses:52},
+    {num:70,name:"المعارج",translit:"Al-Ma'aarij",meaning:"The Ways of Ascent",verses:44},
+    {num:71,name:"نوح",translit:"Nooh",meaning:"Noah",verses:28},
+    {num:72,name:"الجن",translit:"Al-Jinn",meaning:"The Jinn",verses:28},
+    {num:73,name:"المزمل",translit:"Al-Muzzammil",meaning:"The Enshrouded One",verses:20},
+    {num:74,name:"المدثر",translit:"Al-Muddaththir",meaning:"The Cloaked One",verses:56},
+    {num:75,name:"القيامة",translit:"Al-Qiyaamah",meaning:"The Resurrection",verses:40},
+    {num:76,name:"الإنسان",translit:"Al-Insaan",meaning:"Man",verses:31},
+    {num:77,name:"المرسلات",translit:"Al-Mursalaat",meaning:"The Emissaries",verses:50},
+    {num:78,name:"النبأ",translit:"An-Naba",meaning:"The Announcement",verses:40},
+    {num:79,name:"النازعات",translit:"An-Naazi'aat",meaning:"Those Who Pull Out",verses:46},
+    {num:80,name:"عبس",translit:"Abasa",meaning:"He Frowned",verses:42},
+    {num:81,name:"التكوير",translit:"At-Takweer",meaning:"The Folding Up",verses:29},
+    {num:82,name:"الإنفطار",translit:"Al-Infitaar",meaning:"The Cleaving",verses:19},
+    {num:83,name:"المطففين",translit:"Al-Mutaffifeen",meaning:"The Defrauders",verses:36},
+    {num:84,name:"الإنشقاق",translit:"Al-Inshiqaaq",meaning:"The Splitting Open",verses:25},
+    {num:85,name:"البروج",translit:"Al-Burooj",meaning:"The Constellations",verses:22},
+    {num:86,name:"الطارق",translit:"At-Taariq",meaning:"The Night-Comer",verses:17},
+    {num:87,name:"الأعلى",translit:"Al-A'laa",meaning:"The Most High",verses:19},
+    {num:88,name:"الغاشية",translit:"Al-Ghaashiya",meaning:"The Overwhelming",verses:26},
+    {num:89,name:"الفجر",translit:"Al-Fajr",meaning:"The Dawn",verses:30},
+    {num:90,name:"البلد",translit:"Al-Balad",meaning:"The City",verses:20},
+    {num:91,name:"الشمس",translit:"Ash-Shams",meaning:"The Sun",verses:15},
+    {num:92,name:"الليل",translit:"Al-Lail",meaning:"The Night",verses:21},
+    {num:93,name:"الضحى",translit:"Ad-Dhuhaa",meaning:"The Forenoon",verses:11},
+    {num:94,name:"الشرح",translit:"Ash-Sharh",meaning:"The Opening Forth",verses:8},
+    {num:95,name:"التين",translit:"At-Teen",meaning:"The Fig",verses:8},
+    {num:96,name:"العلق",translit:"Al-Alaq",meaning:"The Clot",verses:19},
+    {num:97,name:"القدر",translit:"Al-Qadr",meaning:"The Power",verses:5},
+    {num:98,name:"البينة",translit:"Al-Bayyinah",meaning:"The Clear Proof",verses:8},
+    {num:99,name:"الزلزلة",translit:"Az-Zalzalah",meaning:"The Earthquake",verses:8},
+    {num:100,name:"العاديات",translit:"Al-Aadiyaat",meaning:"The Coursers",verses:11},
+    {num:101,name:"القارعة",translit:"Al-Qaari'ah",meaning:"The Striking Hour",verses:11},
+    {num:102,name:"التكاثر",translit:"At-Takaathur",meaning:"The Piling Up",verses:8},
+    {num:103,name:"العصر",translit:"Al-Asr",meaning:"The Time",verses:3},
+    {num:104,name:"الهمزة",translit:"Al-Humazah",meaning:"The Slanderer",verses:9},
+    {num:105,name:"الفيل",translit:"Al-Feel",meaning:"The Elephant",verses:5},
+    {num:106,name:"قريش",translit:"Quraish",meaning:"Quraish",verses:4},
+    {num:107,name:"الماعون",translit:"Al-Maa'un",meaning:"The Small Kindness",verses:7},
+    {num:108,name:"الكوثر",translit:"Al-Kawthar",meaning:"The Abundance",verses:3},
+    {num:109,name:"الكافرون",translit:"Al-Kaafiroon",meaning:"The Disbelievers",verses:6},
+    {num:110,name:"النصر",translit:"An-Nasr",meaning:"The Help",verses:3},
+    {num:111,name:"المسد",translit:"Al-Masad",meaning:"The Palm Fibre",verses:5},
+    {num:112,name:"الإخلاص",translit:"Al-Ikhlaas",meaning:"The Sincerity",verses:4},
+    {num:113,name:"الفلق",translit:"Al-Falaq",meaning:"The Daybreak",verses:5},
+    {num:114,name:"الناس",translit:"An-Naas",meaning:"Mankind",verses:6},
   ];
   const SURAH_BY_NUM = {};
   for(const s of SURAH_META) SURAH_BY_NUM[s.num] = s;
@@ -729,6 +855,82 @@
     const _prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
     setTheme(_prefersLight ? 'light' : 'dark');
   }
+
+  // ==== SURAH PICKER ====
+  function renderSurahGrid(){
+    const grid = document.getElementById('surahGrid');
+    if(!grid) return;
+    grid.innerHTML = '';
+    for(const s of SURAH_META){
+      const card = document.createElement('div');
+      card.className = 'surah-card';
+      card.dataset.num = s.num;
+      card.innerHTML = '<div class="num">Surah ' + s.num + '</div>' +
+                       '<div class="ar-name">' + s.name + '</div>' +
+                       '<div class="translit">' + s.translit + ' &middot; ' + s.meaning + '</div>' +
+                       '<div class="ayahs">' + s.verses + ' ayah' + (s.verses === 1 ? '' : 's') + '</div>';
+      card.addEventListener('click', () => selectSurah(s.num, card));
+      grid.appendChild(card);
+    }
+  }
+  function selectSurah(num, cardEl){
+    if(!window.SURAH_PHONEMES){ return; }
+    // Mark active card
+    document.querySelectorAll('.surah-card').forEach(c => c.classList.toggle('active', c === cardEl));
+    // Find the surah in refWords and re-paginate to it
+    const startIdx = refWords.findIndex(w => w.surah === num);
+    if(startIdx < 0) return;
+    // End of this surah: start of next surah
+    let endIdx = refWords.length;
+    for(let i = startIdx + 1; i < refWords.length; i++){
+      if(refWords[i].surah !== num){
+        endIdx = i;
+        break;
+      }
+    }
+    // Reset pointer to start of this surah
+    pointer = startIdx;
+    // Paginate: just the first page of this surah
+    pageStart = startIdx;
+    pageEnd   = Math.min(endIdx, pageStart + PAGE_SIZE);
+    renderPage();
+    // Scroll the page into view
+    document.getElementById('page').scrollIntoView({behavior:'smooth', block:'start'});
+  }
+  // Search filter
+  const searchInput = document.getElementById('searchInput');
+  if(searchInput){
+    searchInput.addEventListener('input', (e) => {
+      const q = e.target.value.toLowerCase().trim();
+      document.querySelectorAll('.surah-card').forEach(card => {
+        const num = parseInt(card.dataset.num, 10);
+        const meta = SURAH_META.find(s => s.num === num);
+        if(!meta) return;
+        const hay = (num + ' ' + meta.translit + ' ' + meta.name + ' ' + meta.meaning).toLowerCase();
+        card.classList.toggle('hidden', q && !hay.includes(q));
+      });
+    });
+  }
+  // Reset button — clear search + clear active card + scroll to top
+  const resetBtn = document.getElementById('resetBtn');
+  if(resetBtn){
+    resetBtn.addEventListener('click', () => {
+      if(searchInput) searchInput.value = '';
+      document.querySelectorAll('.surah-card').forEach(c => {
+        c.classList.remove('hidden');
+        c.classList.remove('active');
+      });
+      window.scrollTo({top:0, behavior:'smooth'});
+    });
+  }
+
+  // Render the surah grid
+  renderSurahGrid();
+  // Auto-load surah 1 (Al-Fatihah) so the page lands on a working recite screen
+  setTimeout(() => {
+    const fatihaCard = document.querySelector('.surah-card[data-num="1"]');
+    if(fatihaCard) selectSurah(1, fatihaCard);
+  }, 50);
 
   // Initial render
   renderPage();
