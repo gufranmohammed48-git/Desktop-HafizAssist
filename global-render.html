@@ -237,10 +237,9 @@
     padding:14px;
     margin:0 auto 16px;
     max-width:700px;
-    /* Height = ~18-20 lines. font-size:22px, line-height:2.1 = 46.2px/line.
-       20 lines = 924px. The page scrolls internally if content overflows
-       but mostly the user sees 15-18 lines at once on a phone. */
-    min-height:900px;
+    /* Height = ~11 lines. font-size:22px, line-height:2.1 = 46.2px/line.
+       11 lines = ~510px. */
+    min-height:510px;
     overflow:hidden;
     position:relative;
   }
@@ -421,7 +420,7 @@
 </head>
 <body class="theme-dark">
 
-<div class="ver" id="ver">v2.0</div>
+<div class="ver" id="ver">v2.1</div>
 
 <button class="settings-btn" id="settingsBtn" title="Settings">⚙</button>
 <div class="settings-menu" id="settingsMenu">
@@ -877,7 +876,7 @@
     if(!window.SURAH_PHONEMES){ return; }
     // Mark active card
     document.querySelectorAll('.surah-card').forEach(c => c.classList.toggle('active', c === cardEl));
-    // Find the surah in refWords and re-paginate to it
+    // Find the surah in refWords
     const startIdx = refWords.findIndex(w => w.surah === num);
     if(startIdx < 0) return;
     // End of this surah: start of next surah
@@ -888,14 +887,20 @@
         break;
       }
     }
-    // Reset pointer to start of this surah
+    // CONTINUOUS FLOW: keep the current pageStart, but extend pageEnd to
+    // include the new surah. The new surah header will appear at the
+    // position of the new surah's first word (which is now at the
+    // bottom of the page, where the new content starts) — NOT at the top.
+    // If the new surah starts before the current pageStart (user picked
+    // an earlier surah), just navigate to the start of the picked surah.
+    if(startIdx < pageStart){
+      pageStart = startIdx;
+    }
     pointer = startIdx;
-    // Paginate: just the first page of this surah
-    pageStart = startIdx;
-    pageEnd   = Math.min(endIdx, pageStart + PAGE_SIZE);
+    // Extend pageEnd to include the new surah's content (so the user can
+    // see at least the start of the new surah in the rendered page)
+    pageEnd = Math.max(pageEnd, Math.min(endIdx, startIdx + PAGE_SIZE));
     renderPage();
-    // Scroll the page into view
-    document.getElementById('page').scrollIntoView({behavior:'smooth', block:'start'});
   }
   // Search filter
   const searchInput = document.getElementById('searchInput');
@@ -926,13 +931,8 @@
 
   // Render the surah grid
   renderSurahGrid();
-  // Auto-load surah 1 (Al-Fatihah) so the page lands on a working recite screen
-  setTimeout(() => {
-    const fatihaCard = document.querySelector('.surah-card[data-num="1"]');
-    if(fatihaCard) selectSurah(1, fatihaCard);
-  }, 50);
 
-  // Initial render
+  // Initial render (page starts empty — user picks a surah to begin)
   renderPage();
 
   // Expose for debugging
