@@ -434,7 +434,7 @@
 </head>
 <body class="theme-dark">
 
-<div class="ver" id="ver">v2.5</div>
+<div class="ver" id="ver">v2.6</div>
 
 <button class="settings-btn" id="settingsBtn" title="Settings">⚙</button>
 <div class="settings-menu" id="settingsMenu">
@@ -640,11 +640,12 @@
   // The "page" shows words in [pageStart, pageEnd). When pointer is near
   // pageEnd, we extend pageEnd. When pointer is more than PAGE_KEEP_BEHIND
   // past pageStart, we move pageStart forward.
-  const PAGE_SIZE = 70;         // words to show in the visible page (~11 lines)
+  // PAGE_SIZE is no longer used — the page is one continuous flow of all 77,877 words.
+  // The user scrolls inside the page (overflow-y: auto) to see more.
   const PAGE_KEEP_BEHIND = 30;   // keep this many words behind the pointer
   const PAGE_KEEP_AHEAD = 70;    // and this many ahead
   let pageStart = 0;
-  let pageEnd = Math.min(PAGE_SIZE, refWords.length);
+  let pageEnd = refWords.length;  // ALL words — single scrollable page
 
   // ====== Render ======
   function emitSurahHeader(surahNum, isFirst){
@@ -781,18 +782,31 @@
   }
 
   function updateStats(){
-    // Show the surah currently at the top of the page + the word range
-    // being displayed. No "Page X of Y" — the prev/next buttons are
-    // self-explanatory and the user doesn't need a confusing total page
-    // count across all 77,877 words.
-    const firstWord = refWords[pageStart] || {};
-    const lastWord  = refWords[Math.max(pageStart, pageEnd - 1)] || firstWord;
-    const meta = SURAH_META.find(s => s.num === firstWord.surah);
-    const surahLabel = meta ? (meta.translit + ' (' + firstWord.surah + '/114)') : 'Surah ?';
-    const el = document.getElementById('pageInfo');
-    if(el){
-      el.textContent = surahLabel + '  ·  words ' + (pageStart + 1) + '–' + pageEnd;
+    // Show the surah currently at the TOP of the visible page scroll
+    // area. The user scrolls internally to navigate, so we track the
+    // scroll position and find the surah that contains the first
+    // visible word.
+    const page = document.getElementById('page');
+    if(!page) return;
+    const scrollTop = page.scrollTop;
+    // Find the first word whose top is >= scrollTop
+    let currentSurah = refWords[0] ? refWords[0].surah : 1;
+    for(let i = 0; i < refWords.length; i++){
+      const el = refWords[i].el;
+      if(el && el.offsetTop >= scrollTop + 1){
+        currentSurah = refWords[i].surah;
+        break;
+      }
     }
+    const meta = SURAH_META.find(s => s.num === currentSurah);
+    const surahLabel = meta ? (meta.translit + ' (' + currentSurah + '/114)') : 'Surah ?';
+    const el = document.getElementById('pageInfo');
+    if(el) el.textContent = surahLabel;
+  }
+  // Update the page info on scroll
+  const _page = document.getElementById('page');
+  if(_page){
+    _page.addEventListener('scroll', updateStats, {passive: true});
   }
 
   function maybePaginate(){
@@ -813,27 +827,31 @@
     renderPage();
   }
   function goTo(idx){
+    // Scroll the page to the word at idx (in the continuous flow)
     pointer = Math.max(0, Math.min(idx, refWords.length - 1));
-    // Center the page around the pointer
-    pageStart = Math.max(0, pointer - 10);
-    pageEnd = Math.min(refWords.length, pageStart + PAGE_SIZE);
-    renderPage();
+    renderPage();  // make sure DOM is up to date
+    const wordEl = refWords[pointer] && refWords[pointer].el;
+    const page = document.getElementById('page');
+    if(wordEl && page){
+      const wordTop = wordEl.offsetTop;
+      page.scrollTo({top: wordTop - 14, behavior: 'smooth'});
+    }
   }
   function prevPage(){
-    pageStart = Math.max(0, pageStart - PAGE_SIZE);
-    pageEnd = Math.min(refWords.length, pageStart + PAGE_SIZE);
-    renderPage();
+    // Scroll the page UP by 510px (one visible page worth)
+    const page = document.getElementById('page');
+    if(page) page.scrollBy({top: -510, behavior: 'smooth'});
   }
   function nextPage(){
-    pageEnd = Math.min(refWords.length, pageEnd + PAGE_SIZE);
-    pageStart = Math.max(0, pageEnd - PAGE_SIZE);
-    renderPage();
+    // Scroll the page DOWN by 510px (one visible page worth)
+    const page = document.getElementById('page');
+    if(page) page.scrollBy({top: 510, behavior: 'smooth'});
   }
   function reset(){
+    // Scroll back to the top of the continuous flow
     pointer = 0;
-    pageStart = 0;
-    pageEnd = Math.min(PAGE_SIZE, refWords.length);
-    renderPage();
+    const page = document.getElementById('page');
+    if(page) page.scrollTo({top: 0, behavior: 'smooth'});
   }
 
   document.getElementById('prevPageBtn').addEventListener('click', prevPage);
@@ -897,26 +915,20 @@
     if(!window.SURAH_PHONEMES){ return; }
     // Mark active card
     document.querySelectorAll('.surah-card').forEach(c => c.classList.toggle('active', c === cardEl));
-    // Find the surah in refWords
+    // Find the surah's first word in refWords
     const startIdx = refWords.findIndex(w => w.surah === num);
     if(startIdx < 0) return;
-    // End of this surah: start of next surah
-    let endIdx = refWords.length;
-    for(let i = startIdx + 1; i < refWords.length; i++){
-      if(refWords[i].surah !== num){
-        endIdx = i;
-        break;
-      }
+    // Continuous flow: don't change pageStart/pageEnd. Just scroll the
+    // page so the surah's first word is at the top. The surah header
+    // is rendered in the flow wherever the surah naturally starts.
+    pointer = startIdx;
+    renderPage();  // make sure the surah header is in the DOM
+    const wordEl = refWords[startIdx] && refWords[startIdx].el;
+    const page = document.getElementById('page');
+    if(wordEl && page){
+      const wordTop = wordEl.offsetTop;
+      page.scrollTo({top: wordTop - 14, behavior: 'smooth'});
     }
-    // Navigate to the surah: pageStart = surah's first word,
-    // pageEnd = first PAGE_SIZE words of the surah.
-    // The page is 510px / ~11 lines, so the user sees the start of the
-    // surah at the TOP of the page. They can scroll internally to see
-    // the rest of the surah.
-    pageStart = startIdx;
-    pageEnd   = Math.min(endIdx, startIdx + PAGE_SIZE);
-    pointer   = startIdx;
-    renderPage();
   }
   // Search filter
   const searchInput = document.getElementById('searchInput');
