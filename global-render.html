@@ -434,7 +434,7 @@
 </head>
 <body class="theme-dark">
 
-<div class="ver" id="ver">v2.4</div>
+<div class="ver" id="ver">v2.5</div>
 
 <button class="settings-btn" id="settingsBtn" title="Settings">⚙</button>
 <div class="settings-menu" id="settingsMenu">
@@ -908,19 +908,14 @@
         break;
       }
     }
-    // CONTINUOUS FLOW: keep the current pageStart, but extend pageEnd to
-    // include the new surah. The new surah header will appear at the
-    // position of the new surah's first word (which is now at the
-    // bottom of the page, where the new content starts) — NOT at the top.
-    // If the new surah starts before the current pageStart (user picked
-    // an earlier surah), just navigate to the start of the picked surah.
-    if(startIdx < pageStart){
-      pageStart = startIdx;
-    }
-    pointer = startIdx;
-    // Extend pageEnd to include the new surah's content (so the user can
-    // see at least the start of the new surah in the rendered page)
-    pageEnd = Math.max(pageEnd, Math.min(endIdx, startIdx + PAGE_SIZE));
+    // Navigate to the surah: pageStart = surah's first word,
+    // pageEnd = first PAGE_SIZE words of the surah.
+    // The page is 510px / ~11 lines, so the user sees the start of the
+    // surah at the TOP of the page. They can scroll internally to see
+    // the rest of the surah.
+    pageStart = startIdx;
+    pageEnd   = Math.min(endIdx, startIdx + PAGE_SIZE);
+    pointer   = startIdx;
     renderPage();
   }
   // Search filter
