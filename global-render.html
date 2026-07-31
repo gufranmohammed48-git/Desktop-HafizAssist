@@ -200,7 +200,7 @@
 </head>
 <body>
 
-<div class="ver">v1.6</div>
+<div class="ver">v1.7</div>
 <h1>Step 2: Continuous render + pagination</h1>
 <div class="sub">All 114 surahs in one scrollable page, ~12-15 lines visible at a time</div>
 
@@ -422,13 +422,12 @@
     // The user wants Bismillah shown ABOVE the surah content as a
     // separate recitable block. It is still part of the global
     // refWords (so the matcher highlights it as the user recites),
-    // but visually it's in its own yellow-tinted block with a label.
+    // but visually it's in its own yellow-tinted block — just the
+    // Arabic text, no English label. Uses a more decorative Arabic
+    // font (Amiri Quran / Scheherazade / Noto Naskh) but keeps
+    // the same yellow color.
     const block = document.createElement('div');
     block.className = 'bismillah-block';
-    const label = document.createElement('span');
-    label.className = 'label';
-    label.textContent = 'Bismillah';
-    block.appendChild(label);
     const words = document.createElement('span');
     words.className = 'words';
     for(let i = startIdx; i < endIdx; i++){
