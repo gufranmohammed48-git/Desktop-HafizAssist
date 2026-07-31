@@ -99,7 +99,64 @@
   .sc-name-ar{font-family:'Amiri',serif;font-size:18px;margin-top:4px;color:var(--text)}
   .sc-name-en{font-size:11px;color:var(--text-dim);margin-top:2px}
   .sc-verses{font-size:10px;color:var(--text-dim);margin-top:2px}
-  
+  #ayahContainer{font-family:'Amiri',serif;font-size:28px;line-height:2.2;direction:rtl;text-align:right;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;height:65vh;max-height:65vh;overflow-y:auto;transition:filter .2s ease,opacity .2s ease;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+  #ayahContainer::-webkit-scrollbar{width:8px}
+  #ayahContainer::-webkit-scrollbar-track{background:transparent}
+  #ayahContainer::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+  #ayahContainer::-webkit-scrollbar-thumb:hover{background:var(--primary)}
+  #ayahContainer .verse{margin-bottom:16px}
+  #ayahContainer .verse:last-child{margin-bottom:0}
+  #ayahContainer .verse-label{display:inline-block;background:var(--primary-soft);color:var(--primary);font-family:'Inter',sans-serif;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;margin-left:8px;vertical-align:middle}
+  .word{display:inline-block;padding:4px 6px;margin:2px 3px;border-radius:6px;cursor:pointer;transition:background-color .15s ease,color .15s ease,border-color .15s ease,opacity .15s ease;border:2px solid transparent;position:relative}
+  /* Note: NO transition on transform or box-shadow. When the .now class
+     moves to a new word on every Chrome interim tick (5-10x/sec), the
+     scale and box-shadow would animate rapidly, making the page shake
+     visibly on long surahs. The color/bg transitions stay smooth; the
+     transform/box-shadow change instantly. */
+  .word[data-status="correct"]{background:var(--green-soft);color:var(--green);border-color:rgba(46,204,113,.3)}
+  .word[data-status="correct"].now{box-shadow:0 0 0 3px rgba(46,204,113,.4);transform:scale(1.08)}
+  .word[data-status="mistake"]{background:var(--red-soft);color:var(--red);border-color:rgba(231,76,60,.3);text-decoration:line wavy var(--red)}
+  .word[data-status="unclear"]{background:var(--yellow-soft);color:var(--yellow);border-color:rgba(241,196,15,.3)}
+  /* Under Hide Script, the .past class dims every past word. Unclear
+     words need to stay unmistakably visible so the user can see which
+     words they skipped over. Override the dimming and make the yellow
+     tile pop. */
+  #ayahContainer.script-hidden .word[data-status="unclear"]{opacity:1;color:var(--yellow);background:var(--yellow-soft);border:2px solid rgba(241,196,15,.6);font-weight:600;filter:none}
+  .word.now{box-shadow:0 0 0 3px var(--primary);transform:scale(1.05)}
+  /* Position markers (set by highlightCurrent) — drives hide-script mode */
+  .word.past{color:var(--text-dim);opacity:.85}
+  .word.future{color:var(--text)}
+  /* === Hide Script mode ===
+     Hides only UNRECITED words (.future). Already-recited words (.past)
+     stay visible so the user sees their progress. The current word
+     (.now) stays highlighted so the user knows where they are. */
+  #ayahContainer.script-hidden .word.future{filter:blur(6px);opacity:.25}
+  #ayahContainer.script-hidden .verse-label{filter:blur(4px);opacity:.3}
+  /* The .now word must ALSO be hidden when script is hidden. The user
+     hid the script specifically to test their memory — if the current
+     word is fully visible, the test is broken. We blur it the same
+     way as .future, and add a solid border (not box-shadow) so the
+     user still has a subtle position indicator. The border is outside
+     the filter so it stays sharp. */
+  /* The .now word under Hide Script needs to be a CLEAR "you are here"
+     marker, not just a faint border. Without this the user loses track
+     of where they are supposed to be reciting. We give it a visible
+     blue background tint, a thick primary-color border, and remove the
+     blur on the border itself so the position is obvious. The TEXT
+     inside is still blurred so the user can't peek at the answer. */
+  /* .now tile under Hide Script: solid bright marker. The text
+     inside is hidden with color:transparent (not filter:blur) so the
+     box, border, and background stay perfectly sharp and the user
+     can clearly see WHERE they are reciting from, without being able
+     to read the word itself. */
+  #ayahContainer.script-hidden .word.now{
+    color:transparent;
+    background:var(--primary);
+    border:3px solid #fff;
+    box-shadow:0 0 0 2px var(--primary), 0 0 22px rgba(108,159,235,.7);
+    transform:none;
+    font-weight:700;
+  }
   /* The phoneme tooltip child must stay invisible too (it inherits
      color:transparent which is fine since the tooltip only shows on
      :hover and is also hidden under script-hidden by JS). */
@@ -186,7 +243,7 @@
   <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
   <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
 </header>
-<div class="version-badge" title="Increment on every change so you can verify your browser isn't loading a cached version">48.0</div>
+<div class="version-badge" title="Increment on every change so you can verify your browser isn't loading a cached version">47.8</div>
 
 <p class="lede">
   Pick a surah, hit Start, then recite naturally. The tracker follows along word-by-word and
@@ -235,12 +292,7 @@
     <audio id="playbackAudio" preload="auto"></audio>
   </div>
 
-  <div class="page-controls" id="pageControls">
-    <button class="page-btn" id="prevPageBtn">← Previous page</button>
-    <div class="page-info" id="pageInfo">Page 1 of 1</div>
-    <button class="page-btn" id="nextPageBtn">Next page →</button>
-  </div>
-  <div id="pageContainer"><div id="page-inner"></div></div>
+  <div id="ayahContainer"></div>
 
   <div class="transcript-box hidden" id="transcriptBox">
     <span class="label">Live transcript — what the app heard from you</span>
@@ -752,8 +804,8 @@ const PHONEME_LEVENSHTEIN_RATIO = 0.30;
 // =========================================================================
 // STATE
 // =========================================================================
-// refWords declared in GLOBAL REF-WORDS section below
-// ayahEndIndex declared in GLOBAL REF-WORDS section below
+let refWords       = [];     // [{text, norm, phoneme, el, surah, ayah, position}]
+let ayahEndIndex   = [];     // [endIdx_in_refWords_of_ayah_1, endIdx_of_ayah_2, ...]
 let pointer        = 0;
 let consecutiveMisses = 0;
 let _lastHighlightedPointer = -1;
@@ -839,12 +891,6 @@ function levenshtein(a, b){
   return dp[m][n];
 }
 function _simpleFindMatch(w, p){
-  // 0) PAST REGION: if the heard word matches an already-recited word,
-  //    it's a re-recitation (the user is rehearsing from the start, or
-  //    the recognition re-fired on a previous utterance). Ignore it.
-  for(let i = 0; i < p; i++){
-    if(refWords[i].norm === w) return {idx:i, kind:'past'};
-  }
   const NEAR = 12;
   const end = Math.min(refWords.length, p + NEAR);
   // 1) exact
@@ -871,72 +917,45 @@ function _simpleMatch(text){
   let p = pointer;
   for(const w of heard){
     const m = _simpleFindMatch(w, p);
-    if(m.kind === 'past'){
-      // Already recited - ignore this heard word
-      if(window.__envLog) window.__envLog('MATCH', '"' + w + '" -> past (idx ' + m.idx + '), skipping');
-      continue;
-    }
     if(m.idx >= 0){
       // mark skipped words as unclear
       for(let i = p; i < m.idx; i++){
-        if(refWords[i].status !== 'correct'){
-          refWords[i].status = 'unclear';
-          if(refWords[i].el){
-            refWords[i].el.dataset.status = 'unclear';
-            refWords[i].el.classList.remove('now','future','wrong');
-            refWords[i].el.classList.add('past','unclear');
-          }
+        if(refWords[i].el.dataset.status !== 'correct'){
+          refWords[i].el.dataset.status = 'unclear';
+          refWords[i].el.classList.remove('now','future','past','wrong');
+          refWords[i].el.classList.add('past');
         }
       }
-      refWords[m.idx].status = 'correct';
-      if(refWords[m.idx].el){
-        refWords[m.idx].el.dataset.status = 'correct';
-        refWords[m.idx].el.classList.remove('now','future','unclear','wrong');
-        refWords[m.idx].el.classList.add('past');
-      }
-      if(window.__envLog) window.__envLog('MATCH', '"' + w + '" -> refWords[' + m.idx + ']="' + refWords[m.idx].norm + '" (' + m.kind + (m.dist?', d='+m.dist:'') + ')');
+      refWords[m.idx].el.dataset.status = 'correct';
+      refWords[m.idx].el.classList.remove('now','future','unclear','wrong');
+      refWords[m.idx].el.classList.add('past');
+      if(window.__envLog) window.__envLog('MATCH', '"' + w + '" → refWords[' + m.idx + ']="' + refWords[m.idx].norm + '" (' + m.kind + (m.dist?', d='+m.dist:'') + ')');
       p = m.idx + 1;
     } else {
       if(p < refWords.length){
-        refWords[p].status = 'wrong';
-        if(refWords[p].el){
-          refWords[p].el.dataset.status = 'wrong';
-          refWords[p].el.classList.remove('now','future','past','unclear');
-          refWords[p].el.classList.add('wrong');
-        }
-        if(window.__envLog) window.__envLog('MATCH', '"' + w + '" -> WRONG at refWords[' + p + ']="' + refWords[p].norm + '"');
+        refWords[p].el.dataset.status = 'wrong';
+        refWords[p].el.classList.remove('now','future','past','unclear');
+        refWords[p].el.classList.add('wrong');
+        if(window.__envLog) window.__envLog('MATCH', '"' + w + '" → WRONG at refWords[' + p + ']="' + refWords[p].norm + '"');
         p++;
       }
     }
   }
   pointer = Math.min(p, refWords.length);
   if(pointer < refWords.length){
-    refWords[pointer].status = 'now';
-    if(refWords[pointer].el){
-      refWords[pointer].el.classList.remove('future');
-      refWords[pointer].el.classList.add('now');
-    }
+    refWords[pointer].el.classList.remove('future');
+    refWords[pointer].el.classList.add('now');
   }
-  if(pointer > 0){
-    // Only mark as 'past' if the previous word was 'now' (i.e. it was
-    // correctly transitioning forward). A 'wrong' word stays 'wrong'
-    // so the user can see their mistake.
-    if(refWords[pointer-1].status === 'now'){
-      refWords[pointer-1].status = 'past';
-      if(refWords[pointer-1].el && refWords[pointer-1].el.classList.contains('now')){
-        refWords[pointer-1].el.classList.remove('now');
-        refWords[pointer-1].el.classList.add('past');
-      }
-    }
+  if(pointer > 0 && refWords[pointer-1].el.classList.contains('now')){
+    refWords[pointer-1].el.classList.remove('now');
+    refWords[pointer-1].el.classList.add('past');
   }
-  // Count stats from in-memory status (NOT from DOM, since words on
-  // other pages have el === null). Count across the WHOLE active surah
-  // (not just the current page) so the user sees cumulative progress.
+  // Count stats from DOM state
   const newStats = {correct:0, mistake:0, unclear:0};
-  for(let i = activeSurahStartIdx; i < activeSurahEndIdx; i++){
-    const s = refWords[i].status;
-    if(s === 'correct' || s === 'past') newStats.correct++;
-    else if(s === 'wrong') newStats.mistake++;
+  for(let i = 0; i < refWords.length; i++){
+    const s = refWords[i].el.dataset.status;
+    if(s === 'correct') newStats.correct++;
+    else if(s === 'mistake') newStats.mistake++;
     else if(s === 'unclear') newStats.unclear++;
   }
   stats = newStats;
@@ -1234,7 +1253,7 @@ const surahGrid   = document.getElementById('surahGrid');
 const searchInput = document.getElementById('searchInput');
 const step2       = document.getElementById('step2');
 const step2Title  = document.getElementById('step2Title');
-const pageContainerEl = document.getElementById('pageContainer');
+const ayahContainer = document.getElementById('ayahContainer');
 const micBtn      = document.getElementById('micBtn');
 const micLabel    = document.getElementById('micLabel');
 const statusEl    = document.getElementById('status');
@@ -1308,244 +1327,9 @@ async function selectSurah(num, cardEl){
   // when they want the recite screen.
 }
 
-// =========================================================================
-// GLOBAL REF-WORDS — built once on app boot, contains all 77,877 words
-// (77,429 + 448 Bismillah words for 112 surahs × 4 words). The pointer
-// operates on this global array so the user can keep reciting without
-// us re-creating DOM elements every surah.
-// =========================================================================
-const BISMILLAH = [
-  {text:'بِسْمِ',  norm:'بسم',   phoneme:'bismi',  surah:0, ayah:'bismillah', position:1, rules:''},
-  {text:'ٱللَّهِ', norm:'الله',   phoneme:'lla:hi', surah:0, ayah:'bismillah', position:2, rules:''},
-  {text:'ٱلرَّحْمَـٰنِ', norm:'الرحن', phoneme:'rħma:ni', surah:0, ayah:'bismillah', position:3, rules:''},
-  {text:'ٱلرَّحِيمِ', norm:'الرحيم', phoneme:'rħi:mi', surah:0, ayah:'bismillah', position:4, rules:''}
-];
-let refWords       = [];     // global array, built once on boot
-let ayahEndIndex   = [];     // unused with global refWords, kept for compat
-let globalBuilt    = false;
-function buildGlobalRefWords(){
-  const all = [];
-  for(let s = 1; s <= 114; s++){
-    // Prepend Bismillah unless this is Al-Fatihah (already has it as
-    // ayah 1) or At-Tawbah (no Bismillah).
-    if(s !== 1 && s !== 9){
-      for(const w of BISMILLAH){
-        all.push({text:w.text, norm:w.norm, phoneme:w.phoneme, rules:w.rules,
-                  surah:s, ayah:'bismillah', position:w.position, el:null, status:'future'});
-      }
-    }
-    const surah = phonemeData?.[String(s)];
-    if(!surah){ continue; }
-    const ayahKeys = Object.keys(surah).map(Number).sort((a,b)=>a-b);
-    for(const a of ayahKeys){
-      const ayah = surah[String(a)];
-      const posKeys = Object.keys(ayah).map(Number).sort((a,b)=>a-b);
-      for(const p of posKeys){
-        const [text, phoneme, rules] = ayah[String(p)];
-        all.push({text, norm:normalize(text), phoneme, rules,
-                  surah:s, ayah:a, position:p, el:null, status:'future'});
-      }
-    }
-  }
-  return all;
-}
-
-// =========================================================================
-// PAGINATION — slice refWords into pages of ~PAGE_SIZE words
-// =========================================================================
-const PAGE_SIZE = 60;   // roughly 12-15 lines
-let pageStart = 0;      // index into refWords where the current page begins
-let pageEnd   = 0;      // index (exclusive) where the current page ends
-let totalPages = 1;
-let activeSurahStartIdx = 0;  // first index in refWords of the active surah (incl. Bismillah)
-let activeSurahEndIdx   = 0;  // last index (exclusive) of the active surah (excl. Bismillah of next)
-
-// Compute the start index in refWords for a given surah (including its Bismillah)
-function getSurahStartIdx(s){
-  return refWords.findIndex(w => w.surah === s);
-}
-// Compute the end index (exclusive) — start of next surah
-function getSurahEndIdx(s){
-  if(s === 114) return refWords.length;
-  return refWords.findIndex((w, i) => i > 0 && w.surah === s + 1);
-}
-
-function setSurahPage(s){
-  activeSurahStartIdx = getSurahStartIdx(s);
-  activeSurahEndIdx   = getSurahEndIdx(s);
-  const wordsInSurah  = activeSurahEndIdx - activeSurahStartIdx;
-  // Each surah gets its own page (or split into multiple if very long)
-  const pages = Math.max(1, Math.ceil(wordsInSurah / PAGE_SIZE));
-  totalPages = pages;
-  // Start at page 1 of this surah
-  pageStart = activeSurahStartIdx;
-  pageEnd   = Math.min(activeSurahEndIdx, pageStart + PAGE_SIZE);
-}
-function goToPage(p){
-  const pages = Math.max(1, Math.ceil((activeSurahEndIdx - activeSurahStartIdx) / PAGE_SIZE));
-  if(p < 1 || p > pages) return;
-  pageStart = activeSurahStartIdx + (p - 1) * PAGE_SIZE;
-  pageEnd   = Math.min(activeSurahEndIdx, pageStart + PAGE_SIZE);
-  renderPage();
-}
-function nextPage(){
-  if(pageEnd >= activeSurahEndIdx) return;
-  goToPage(Math.floor((pageStart - activeSurahStartIdx) / PAGE_SIZE) + 2);
-}
-function prevPage(){
-  if(pageStart <= activeSurahStartIdx) return;
-  goToPage(Math.floor((pageStart - activeSurahStartIdx) / PAGE_SIZE));
-}
-
-// =========================================================================
-// RENDER — emits the surah header, bismillah block (if applicable), and
-// the words + verse markers for the current page slice.
-// =========================================================================
-function emitSurahHeader(surahNum, isFirst){
-  const meta = SURAH_META.find(s => s.num === surahNum);
-  if(!meta) return;
-  const h = document.createElement('div');
-  h.className = 'surah-header' + (isFirst ? ' first' : '');
-  const ar = document.createElement('div');
-  ar.className = 'surah-ar';
-  ar.textContent = meta.name;
-  h.appendChild(ar);
-  const info = document.createElement('div');
-  info.className = 'surah-info';
-  info.innerHTML = '<div class="num-name"><span class="num">' + meta.num + '.</span>Surah ' + meta.translit + '</div><div class="meaning">' + meta.meaning + '</div>';
-  h.appendChild(info);
-  document.getElementById('page-inner').appendChild(h);
-}
-function emitBismillahBlock(surahNum, bismillahStartIdx){
-  // For surahs 2-114 (except 9), the first 4 refWords of the surah are Bismillah.
-  // Emit them as a single yellow-tinted block. The bismillah words already
-  // exist in refWords and we just attach the same DOM elements.
-  const block = document.createElement('div');
-  block.className = 'bismillah-block';
-  const words = document.createElement('span');
-  words.className = 'words';
-  for(let i = 0; i < 4; i++){
-    const idx = bismillahStartIdx + i;
-    const w = refWords[idx];
-    const span = document.createElement('span');
-    span.className = 'word bismillah';
-    span.dataset.idx = idx;
-    span.dataset.status = w.status;
-    span.dataset.surah = w.surah;
-    span.dataset.ayah = w.ayah;
-    if(w.status === 'past') span.classList.add('past');
-    else if(w.status === 'wrong') span.classList.add('wrong');
-    else if(w.status === 'unclear') span.classList.add('unclear');
-    else if(w.status === 'correct') span.classList.add('past');
-    else span.classList.add('future');
-    span.textContent = w.text;
-    // tooltip
-    const tooltip = document.createElement('div');
-    tooltip.className = 'phoneme-tooltip';
-    tooltip.innerHTML = `<div class="ipa">/${w.phoneme}/</div>`;
-    span.appendChild(tooltip);
-    w.el = span;
-    words.appendChild(span);
-  }
-  block.appendChild(words);
-  document.getElementById('page-inner').appendChild(block);
-}
-function renderPage(){
-  const inner = document.getElementById('page-inner');
-  if(!inner) return;
-  inner.innerHTML = '';
-  let lastSurah = null;
-  let isFirstSurah = true;
-
-  // Pre-compute bismillah-run check
-  function isBismillahRun(s, e){
-    if(e - s !== 4) return false;
-    for(let i = s; i < e; i++){
-      if(refWords[i].ayah !== 'bismillah') return false;
-    }
-    return true;
-  }
-
-  for(let i = pageStart; i < pageEnd; i++){
-    const w = refWords[i];
-    // === Surah transition ===
-    if(w.surah !== lastSurah){
-      // Detect a bismillah-run at the start of the surah (for surahs 2-114, except 9)
-      if(isBismillahRun(i, Math.min(i+4, refWords.length))){
-        emitSurahHeader(w.surah, isFirstSurah);
-        isFirstSurah = false;
-        emitBismillahBlock(w.surah, i);
-        lastSurah = w.surah;
-        // Emit verse marker '1' AFTER the bismillah block
-        const m = document.createElement('span');
-        m.className = 'verse-marker';
-        m.textContent = '1';
-        inner.appendChild(m);
-        // Skip past the 4 bismillah words
-        i += 3;  // (loop i++ will move to i+4)
-        continue;
-      }
-      // For surah 1: Bismillah IS ayah 1, no separate block.
-      emitSurahHeader(w.surah, isFirstSurah);
-      isFirstSurah = false;
-      lastSurah = w.surah;
-    }
-    // === End-of-ayah detection ===
-    const isLastWordOfAyah = (i === pageEnd - 1) ||
-      (refWords[i+1].ayah !== w.ayah) ||
-      (refWords[i+1].surah !== w.surah);
-    // === Emit the word ===
-    const span = document.createElement('span');
-    span.className = 'word';
-    if(w.ayah === 'bismillah' && w.surah === 1) span.classList.add('bismillah');
-    span.dataset.idx = i;
-    span.dataset.status = w.status;
-    span.dataset.surah = w.surah;
-    span.dataset.ayah = w.ayah;
-    if(w.status === 'past') span.classList.add('past');
-    else if(w.status === 'wrong') span.classList.add('wrong');
-    else if(w.status === 'unclear') span.classList.add('unclear');
-    else if(w.status === 'correct') span.classList.add('past');
-    else if(i === pointer) span.classList.add('now');
-    else span.classList.add('future');
-    span.textContent = w.text;
-    // tooltip
-    const tooltip = document.createElement('div');
-    tooltip.className = 'phoneme-tooltip';
-    const rulesArr = (w.rules||'').split(',').filter(Boolean);
-    const ruleNames = rulesArr.map(r => {
-      const [ch, rule] = r.split(':');
-      return `<span style="color:var(--accent)">${ch}</span> → ${rule}`;
-    }).join('<br>');
-    tooltip.innerHTML = `
-      <div class="ipa">/${w.phoneme}/</div>
-      <div class="rules">${ruleNames || '<span style="color:var(--text-dim)">no Tajweed annotations</span>'}</div>
-    `;
-    span.appendChild(tooltip);
-    w.el = span;
-    inner.appendChild(span);
-    // === If last word of ayah, emit verse marker AFTER ===
-    if(isLastWordOfAyah && w.ayah !== 'bismillah'){
-      const m = document.createElement('span');
-      m.className = 'verse-marker';
-      m.textContent = w.ayah;
-      inner.appendChild(m);
-    }
-  }
-  // Update page-info
-  const pageNum = Math.floor((pageStart - activeSurahStartIdx) / PAGE_SIZE) + 1;
-  const pages = Math.max(1, Math.ceil((activeSurahEndIdx - activeSurahStartIdx) / PAGE_SIZE));
-  const pageInfo = document.getElementById('pageInfo');
-  if(pageInfo) pageInfo.textContent = 'Page ' + pageNum + ' of ' + pages;
-  const prevBtn = document.getElementById('prevPageBtn');
-  const nextBtn = document.getElementById('nextPageBtn');
-  if(prevBtn) prevBtn.disabled = (pageNum <= 1);
-  if(nextBtn) nextBtn.disabled = (pageNum >= pages);
-  updateStats();
-}
-
 function resetState(){
-  // Don't reset refWords — they are global. Just reset pointer + stats.
+  refWords = [];
+  ayahEndIndex = [];
   pointer = 0;
   consecutiveMisses = 0;
   stats = {correct:0, mistake:0, unclear:0};
@@ -1553,27 +1337,79 @@ function resetState(){
   committedWordCount = 0;
   finalizedText = '';
   confidences = [];
-  // Reset all word statuses
-  for(const w of refWords){
-    w.status = 'future';
-    w.el = null;
-  }
-  if(typeof renderDebugPanel === 'function') renderDebugPanel();
+  renderDebugPanel();
   updateStats();
-  if(transcriptBox) transcriptBox.classList.add('hidden');
-  if(playbackRow) playbackRow.classList.add('hidden');
+  transcriptBox.classList.add('hidden');
+  playbackRow.classList.add('hidden');
 }
 
 function buildSurah(num){
-  // Build/refill refWords once (idempotent), then set the page slice
-  // for the requested surah and render.
-  if(!globalBuilt){
-    refWords = buildGlobalRefWords();
-    globalBuilt = true;
-    if(window.__envLog) window.__envLog('BOOT', 'refWords built: ' + refWords.length + ' words');
+  const meta = SURAH_META.find(s => s.num === num);
+  if(!meta) return;
+  const surah = phonemeData?.[String(num)];
+  if(!surah){
+    ayahContainer.innerHTML = '<p style="color:var(--text-dim);text-align:center;padding:40px 0">Phoneme data for this surah is missing.</p>';
+    return;
   }
-  setSurahPage(num);
-  renderPage();
+  ayahContainer.innerHTML = '';
+  const wordList = refWords = [];
+  ayahEndIndex = [];
+  let wordCounter = 0;
+
+  // iterate over every ayah in canonical order
+  const ayahKeys = Object.keys(surah).map(Number).sort((a,b)=>a-b);
+  ayahKeys.forEach(v => {
+    const verse = document.createElement('div');
+    verse.className = 'verse';
+    // Create the label but don't append yet — we append it AFTER the
+    // words so that in RTL it renders on the LEFT (visually) of the verse.
+    const label = document.createElement('span');
+    label.className = 'verse-label';
+    label.textContent = toArabicDigits(v);
+    const posKeys = Object.keys(surah[v]).map(Number).sort((a,b)=>a-b);
+    posKeys.forEach(p => {
+      const [text, phoneme, tajweedStr] = surah[v][p];
+      const span = document.createElement('span');
+      span.className = 'word future';
+      span.textContent = text;
+      // tooltip with phoneme + tajweed rules
+      const tooltip = document.createElement('div');
+      tooltip.className = 'phoneme-tooltip';
+      const rulesArr = (tajweedStr||'').split(',').filter(Boolean);
+      const ruleNames = rulesArr.map(r => {
+        const [ch, rule] = r.split(':');
+        return `<span style="color:var(--accent)">${ch}</span> → ${rule}`;
+      }).join('<br>');
+      tooltip.innerHTML = `
+        <div class="ipa">/${phoneme}/</div>
+        <div class="rules">${ruleNames || '<span style="color:var(--text-dim)">no Tajweed annotations</span>'}</div>
+      `;
+      span.appendChild(tooltip);
+      // mark up by Tajweed rule for border colors
+      const ruleSet = new Set(rulesArr.map(r => r.split(':')[1]));
+      if(ruleSet.has('TAFKHEEM'))                  span.classList.add('tajweed-tafkheem');
+      if(ruleSet.has('QALQALA_KUBRA')||ruleSet.has('QALQALA_SUGHRA')) span.classList.add('tajweed-qalqala');
+      if(/MADD/.test([...ruleSet].join(' ')))      span.classList.add('tajweed-madd');
+      if(ruleSet.has('IDGHAM')||ruleSet.has('IDGHAM_SHAMSIYAH')||ruleSet.has('IDGHAM_QAMARIYAH')||ruleSet.has('IDGHAM_WAW')||ruleSet.has('IDGHAM_YAA')||ruleSet.has('IDGHAM_MEEM')||ruleSet.has('IDGHAM_LAM')||ruleSet.has('IDGHAM_NOON')) span.classList.add('tajweed-idgham');
+      if(ruleSet.has('IKHFAA')||ruleSet.has('IKHFAA_SHAFAWI')) span.classList.add('tajweed-ikhfaa');
+      if(ruleSet.has('IQLAB'))                     span.classList.add('tajweed-iqlab');
+      if(ruleSet.has('GHUNNA'))                    span.classList.add('tajweed-ghunna');
+      verse.appendChild(span);
+      wordCounter++;
+      wordList.push({
+        text,
+        norm: normalize(text),
+        phoneme,
+        el: span,
+        surah:num, ayah:v, position:p,
+      });
+    });
+    // Append the verse label AFTER all words so it renders on the LEFT
+    // (visually) in this RTL layout.
+    verse.appendChild(label);
+    ayahContainer.appendChild(verse);
+    ayahEndIndex.push(wordCounter);
+  });
 }
 
 function updateStats(){
@@ -1584,23 +1420,6 @@ function updateStats(){
 }
 
 function highlightCurrent(){
-  // If the pointer is on a different page than what's currently rendered
-  // (e.g. user clicked "Next page" or surah switched), the current word's
-  // DOM element is detached. Re-render the page that contains the pointer.
-  if(pointer < refWords.length && refWords[pointer] && refWords[pointer].el && !refWords[pointer].el.isConnected){
-    if(pointer >= activeSurahStartIdx && pointer < activeSurahEndIdx){
-      const pNum = Math.floor((pointer - activeSurahStartIdx) / PAGE_SIZE) + 1;
-      const pages = Math.max(1, Math.ceil((activeSurahEndIdx - activeSurahStartIdx) / PAGE_SIZE));
-      if(pNum >= 1 && pNum <= pages){
-        pageStart = activeSurahStartIdx + (pNum - 1) * PAGE_SIZE;
-        pageEnd   = Math.min(activeSurahEndIdx, pageStart + PAGE_SIZE);
-        renderPage();
-        _lastHighlightedPointer = pointer;
-        return;
-      }
-    }
-  }
-
   // PERFORMANCE: bail if pointer has not changed. The onresult handler
   // calls this on every interim tick but most ticks the pointer is
   // the same. The old code did an O(all words) re-class even when
@@ -1610,7 +1429,7 @@ function highlightCurrent(){
     // Still do the scroll check in case the user scrolled manually.
     if(pointer < refWords.length){
       const el = refWords[pointer].el;
-      const _container = document.getElementById('pageContainer');
+      const _container = document.getElementById('ayahContainer');
       if(_container){
         const _cRect = _container.getBoundingClientRect();
         const _eRect = el.getBoundingClientRect();
@@ -1663,7 +1482,7 @@ function highlightCurrent(){
     // the ayah container. Use instant ('auto') scroll rather than
     // 'smooth' — smooth scrolling re-triggers on every Chrome interim
     // tick and visibly shakes the page on long surahs.
-    const _container = document.getElementById('pageContainer');
+    const _container = document.getElementById('ayahContainer');
     if(_container){
       const _cRect = _container.getBoundingClientRect();
       const _eRect = el.getBoundingClientRect();
@@ -1785,12 +1604,12 @@ async function startListening(){
       }
       // Split into words and process each one
       const words = txt.split(/\s+/);
-      // NOTE: We DO NOT reset the pointer here. With the global flow
-      // render, we want the pointer to keep advancing as the user
-      // recites across the whole surah. The _simpleMatch past-region
-      // check (in _simpleFindMatch) ensures re-recited words (e.g. the
-      // user rehearsing from the start) are skipped instead of being
-      // marked as wrong at the current pointer position.
+      // Reset state for clean re-derivation
+      pointer = 0;
+      _lastHighlightedPointer = -1;
+      _maxPointerReached = 0;
+      _prevPastEnd = 0;
+      consecutiveMisses = 0;
       // Use the SIMPLE matcher from mobile-simple.html (works on Android).
       // The complex processNewWord matcher was stalling on Android.
       if(typeof _simpleMatch === 'function'){
@@ -2004,12 +1823,6 @@ micBtn.addEventListener('click', () => {
   if(listening) stopListening();
   else startListening();
 });
-  // Wire up prev/next page buttons (Step 2 v2.0 global flow)
-  const _prevPageBtn = document.getElementById('prevPageBtn');
-  const _nextPageBtn = document.getElementById('nextPageBtn');
-  if(_prevPageBtn) _prevPageBtn.addEventListener('click', () => { prevPage(); if(typeof highlightCurrent === 'function') highlightCurrent(); });
-  if(_nextPageBtn) _nextPageBtn.addEventListener('click', () => { nextPage(); if(typeof highlightCurrent === 'function') highlightCurrent(); });
-
 document.getElementById('resetBtn').addEventListener('click', () => {
   // Stop recognition first if it's still running (state may be inconsistent)
   if(listening) stopListening();
@@ -2045,7 +1858,7 @@ const toggleScriptBtn = document.getElementById('toggleScriptBtn');
 let scriptHidden = false;
 toggleScriptBtn.addEventListener('click', () => {
   scriptHidden = !scriptHidden;
-  pageContainerEl.classList.toggle('script-hidden', scriptHidden);
+  ayahContainer.classList.toggle('script-hidden', scriptHidden);
   toggleScriptBtn.classList.toggle('active', scriptHidden);
   toggleScriptBtn.textContent = scriptHidden ? 'Show Script' : 'Hide Script';
   toggleScriptBtn.title = scriptHidden
