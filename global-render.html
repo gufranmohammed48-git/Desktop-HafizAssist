@@ -237,7 +237,10 @@
   h1{font-size:16px;color:#2ecc71;margin-bottom:6px;text-align:center}
   .sub{font-size:11px;color:var(--text-dim);text-align:center;margin-bottom:12px}
 
-  /* The PAGE — fixed height showing ~12-15 lines of words */
+  /* The PAGE — FIXED height showing ~11 lines, internal scroll.
+     Was: min-height:510px + overflow:hidden — but with 100 words the
+     content grew past 510px and the page expanded (no internal scroll).
+     Now: height:510px (FIXED) + overflow-y:auto (internal scroll). */
   #page{
     background:var(--card);
     border:1px solid var(--border);
@@ -245,12 +248,15 @@
     padding:14px;
     margin:0 auto 16px;
     max-width:700px;
-    /* Height = ~11 lines. font-size:22px, line-height:2.1 = 46.2px/line.
-       11 lines = ~510px. */
-    min-height:510px;
-    overflow:hidden;
+    height:510px;            /* FIXED — page never grows past this */
+    overflow-y:auto;         /* internal scroll when content overflows */
     position:relative;
+    scrollbar-width:thin;
+    scrollbar-color:var(--primary) transparent;
   }
+  #page::-webkit-scrollbar{width:8px}
+  #page::-webkit-scrollbar-track{background:transparent}
+  #page::-webkit-scrollbar-thumb{background:var(--primary);border-radius:4px}
   /* Words flow inline. LTR so DOM order = visual order */
   /* Flexbox with row-reverse guarantees DOM order = visual reading order
      for the user, regardless of the Arabic text's inherent RTL direction.
@@ -428,7 +434,7 @@
 </head>
 <body class="theme-dark">
 
-<div class="ver" id="ver">v2.3</div>
+<div class="ver" id="ver">v2.4</div>
 
 <button class="settings-btn" id="settingsBtn" title="Settings">⚙</button>
 <div class="settings-menu" id="settingsMenu">
@@ -634,7 +640,7 @@
   // The "page" shows words in [pageStart, pageEnd). When pointer is near
   // pageEnd, we extend pageEnd. When pointer is more than PAGE_KEEP_BEHIND
   // past pageStart, we move pageStart forward.
-  const PAGE_SIZE = 100;         // words to show in the visible page (~18-20 lines)
+  const PAGE_SIZE = 70;         // words to show in the visible page (~11 lines)
   const PAGE_KEEP_BEHIND = 30;   // keep this many words behind the pointer
   const PAGE_KEEP_AHEAD = 70;    // and this many ahead
   let pageStart = 0;
