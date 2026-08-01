@@ -578,7 +578,7 @@
 </head>
 <body class="theme-dark">
 
-<div class="ver" id="ver">v6</div>
+<div class="ver" id="ver">v7</div>
 
 <button class="settings-btn" id="settingsBtn" title="Settings">⚙</button>
 <div class="settings-menu" id="settingsMenu">
@@ -1267,6 +1267,13 @@
     if(pointer >= refWords.length) return;
     // DEBUG: show what we're about to try
     console.log(`[matcher] try: pointer=${pointer} word="${rawWord}" norm="${norm}" target="${refWords[pointer] ? refWords[pointer].norm : 'OOB'}" target.text="${refWords[pointer] ? refWords[pointer].text : 'OOB'}"`);
+    // STUCK-WORD DEBUG: if pointer is at العالمين (idx 7), show detailed info
+    if(pointer === 7 && refWords[pointer] && refWords[pointer].norm === 'العلمين'){
+      const stuckEl = document.getElementById('mdStuck');
+      if(stuckEl) stuckEl.textContent = `STUCK: trying "${rawWord}" (norm:"${norm}") at idx 7 — el=${refWords[pointer].el ? 'YES' : 'NO'} class="${refWords[pointer].el ? refWords[pointer].el.className : 'N/A'}"`;
+    }
+    const lastAtt = document.getElementById('mdLastAttempt');
+    if(lastAtt) lastAtt.textContent = `last: p=${pointer} word="${rawWord}" (norm:"${norm}") target="${refWords[pointer] ? refWords[pointer].norm : 'OOB'}"`;
 
     // FIRST-WORD BIAS: when pointer is at pageStart (the very
     // first word of the current page) AND no recent misses,
