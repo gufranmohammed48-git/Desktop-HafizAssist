@@ -573,7 +573,7 @@
 </head>
 <body class="theme-dark">
 
-<div class="ver" id="ver">v3.6</div>
+<div class="ver" id="ver">v3.7</div>
 
 <button class="settings-btn" id="settingsBtn" title="Settings">⚙</button>
 <div class="settings-menu" id="settingsMenu">
@@ -1225,16 +1225,7 @@
     }
     stats = newStats;
     updateStatsUI();
-    // Follow the pointer: if it moved out of the current page
-    // slice, advance the page slice to keep the .now word visible.
-    if(pointer >= pageEnd){
-      const newPageNum = Math.floor(pointer / PAGE_SIZE);
-      pageStart = newPageNum * PAGE_SIZE;
-      pageEnd   = Math.min(refWords.length, pageStart + PAGE_SIZE);
-      renderPage();
-    }
-    // (else: no re-render needed — the .now class was set
-    //  on the affected word element directly above)
+    // (page-flip is handled in onresult after _simpleMatch returns)
   }
 
   // ==== SPEECH RECOGNITION ====
@@ -1262,12 +1253,43 @@
     // has already stopped the mic
     const sessionId = ++window.__hifzappSessionId;
     recognition.onresult = (event) => {
+      // PRODUCTION PATTERN: extract the LATEST transcript from this
+      // result event (this is one utterance's worth, since
+      // continuous=false). Then RESET the pointer back to the start
+      // of the current page, and re-run the simple matcher. The
+      // matcher re-derives the entire page state from the latest
+      // transcript, marking each word as it finds a match. This is
+      // why the production version highlights word-by-word as the
+      // user recites — every onresult, we re-derive from scratch
+      // using the latest transcript.
       let txt = '';
       for(let i = event.resultIndex; i < event.results.length; i++){
         txt += event.results[i][0].transcript + ' ';
       }
       txt = txt.trim();
-      if(txt) _simpleMatch(txt);
+      if(!txt) return;
+      // Save the current page (in case pointer moves out of it)
+      const savedPageStart = pageStart;
+      // Reset state for clean re-derivation (the matcher preserves
+      // already-correct words, so this is safe — see _simpleMatch
+      // which checks `if(refWords[i].status !== 'correct')` before
+      // overwriting)
+      pointer = pageStart;
+      // Clear status on words after the pointer, so the matcher
+      // re-marks them based on the new transcript
+      for(let i = pageStart; i < pageEnd; i++){
+        if(refWords[i]) refWords[i].status = '';
+      }
+      // Run the matcher
+      _simpleMatch(txt);
+      // If the pointer moved out of the current page, advance the
+      // page slice (mushaf page flip)
+      if(pointer >= pageEnd){
+        const newPageNum = Math.floor(pointer / PAGE_SIZE);
+        pageStart = newPageNum * PAGE_SIZE;
+        pageEnd   = Math.min(refWords.length, pageStart + PAGE_SIZE);
+        renderPage();
+      }
     };
     recognition.onend = () => {
       // Only auto-restart if the user is still reciting AND this
