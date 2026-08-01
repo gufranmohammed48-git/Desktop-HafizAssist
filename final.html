@@ -244,11 +244,17 @@
   #page .surah-meaning{font-size:13px;color:var(--text-dim);font-style:italic}
   #page .bismillah-block{text-align:center;padding:14px;background:rgba(30,132,73,.12);border:1px solid rgba(30,132,73,.35);border-radius:8px;margin:10px 0 14px}
   #page .word{display:inline-block;margin:2px 4px;padding:2px 6px;border-radius:4px;transition:all .15s ease}
-  #page .word.past{color:var(--primary);background:var(--primary-soft);opacity:.95;padding:3px 7px;border-radius:6px;font-weight:500}
-  #page .word.now{background:var(--primary);color:#0a1f12;font-weight:800;font-size:1.15em;padding:6px 10px;margin:0 4px;border-radius:8px;transform:scale(1.15);box-shadow:0 0 0 3px var(--primary),0 0 24px var(--now-glow),0 4px 12px rgba(0,0,0,.3);position:relative;z-index:10}
+  #page .word{padding:3px 7px;border-radius:6px;transition:all .15s ease}
+  /* data-status based styling (production's approach — matcher sets these) */
+  #page .word[data-status="correct"]{color:var(--primary);background:var(--primary-soft);opacity:.95;font-weight:500}
+  #page .word[data-status="unclear"]{color:var(--yellow);background:var(--yellow-soft);font-weight:600}
+  /* .now class (active word) — strong highlight */
+  #page .word.now{background:var(--primary)!important;color:#0a1f12!important;font-weight:800!important;font-size:1.15em!important;padding:6px 10px!important;margin:0 4px!important;border-radius:8px!important;transform:scale(1.15)!important;box-shadow:0 0 0 3px var(--primary),0 0 24px var(--now-glow),0 4px 12px rgba(0,0,0,.3)!important;position:relative!important;z-index:10!important;opacity:1!important}
+  /* .future (not yet recited) */
   #page .word.future{color:var(--text-dim);opacity:.75}
+  /* .wrong (red background) */
   #page .word.wrong{color:#e74c3c;background:rgba(231,76,60,.25);font-weight:600;border-radius:6px;padding:4px 8px}
-  #page .word.unclear{color:var(--yellow);background:var(--yellow-soft);font-weight:600;border-radius:6px;padding:4px 8px}
+  /* .bismillah word */
   #page .word.bismillah{color:#1e8448}
   #page .verse-marker{display:inline-block;background:var(--primary-soft);color:var(--primary);font-family:'Inter',sans-serif;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;margin:0 4px;vertical-align:middle}
   #page.script-hidden .word.future{visibility:hidden}
