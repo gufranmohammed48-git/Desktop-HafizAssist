@@ -622,11 +622,13 @@
   <button class="toggle-script-btn" id="toggleScriptBtn">Hide Script</button>
   <span class="status-text" id="status">Pick a surah from the above list and track your recitation</span>
 </div>
-<div id="matcherDebug" style="max-width:700px;margin:0 auto 12px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:12px;line-height:1.6">
-  <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">🔍 Matcher Debug</div>
-  <div id="mdPointer" style="font-family:monospace;color:var(--primary)">pointer: —</div>
-  <div id="mdLastWords" style="font-family:monospace;color:var(--text);margin-top:4px">last 5: —</div>
-  <div id="mdTranscript" style="font-family:monospace;color:var(--text-dim);margin-top:4px">transcript: —</div>
+<div id="matcherDebug" style="max-width:900px;margin:0 auto 12px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 16px;font-size:12px;line-height:1.5">
+  <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">🔍 Comprehensive Matcher Debug</div>
+  <div id="mdPointer" style="font-family:monospace;color:var(--primary);font-size:13px;padding:4px;background:rgba(0,0,0,.2);border-radius:4px;margin-bottom:6px">pointer: —</div>
+  <div id="mdCurrent" style="font-family:monospace;color:var(--yellow);font-size:12px;margin-bottom:6px">refWords[pointer]: —</div>
+  <div id="mdTrace" style="font-family:monospace;color:var(--text);font-size:11px;margin-bottom:6px;max-height:200px;overflow-y:auto;background:rgba(0,0,0,.2);padding:6px;border-radius:4px">trace: (empty)</div>
+  <div id="mdLastWords" style="font-family:monospace;color:var(--text);font-size:11px;margin-bottom:6px">last 5: —</div>
+  <div id="mdTranscript" style="font-family:monospace;color:var(--text-dim);font-size:11px">transcript: —</div>
 </div>
 <div id="transcriptBox" class="transcript-box hidden">
   <span class="label">Live transcript — what the app heard from you</span>
@@ -1272,8 +1274,13 @@
       const head = isFuzzyMatch(norm, refWords[pointer].norm, refWords[pointer].phoneme, 0.40);
       if(head.matched){
         applyMatch(pointer, head, rawWord);
-        if(typeof updateMatcherDebug === 'function') updateMatcherDebug(_pendingFullText, rawWord, 'match(bias)');
+        if(typeof updateMatcherDebug === 'function'){
+          updateMatcherDebug(_pendingFullText, rawWord, 'match(bias)', `at idx ${pointer}`);
+          traceMatch(rawWord, 'match(bias)', `at idx ${pointer}`);
+        }
         return;
+      } else {
+        if(typeof traceMatch === 'function') traceMatch(rawWord, 'bias-fail', `trying "${refWords[pointer].norm}"`);
       }
     }
 
@@ -1281,8 +1288,16 @@
     const near = findMatch(norm, pointer, pointer + NEAR_WINDOW);
     if(near.idx !== -1 && (near.idx - pointer) <= 3){
       applyMatch(near.idx, near.match, rawWord);
-      if(typeof updateMatcherDebug === 'function') updateMatcherDebug(_pendingFullText, rawWord, 'match');
+      if(typeof updateMatcherDebug === 'function'){
+        updateMatcherDebug(_pendingFullText, rawWord, 'match', `at idx ${near.idx} (delta=${near.idx-pointer})`);
+        traceMatch(rawWord, 'match', `at idx ${near.idx} (delta=${near.idx-pointer})`);
+      }
       return;
+    } else if(near.idx !== -1){
+      // Found a match but it's too far (delta > 3)
+      if(typeof traceMatch === 'function') traceMatch(rawWord, 'too-far', `near match at ${near.idx} but delta=${near.idx-pointer} > 3`);
+    } else {
+      if(typeof traceMatch === 'function') traceMatch(rawWord, 'no-near', `nothing in [${pointer}, ${pointer+NEAR_WINDOW})`);
     }
 
     // 2) far-window search (only after RESYNC_THRESHOLD misses)
@@ -1291,13 +1306,19 @@
       const far = findMatch(norm, pointer + NEAR_WINDOW, pointer + FAR_WINDOW);
       if(far.idx !== -1){
         applyMatch(far.idx, far.match, rawWord);
-        if(typeof updateMatcherDebug === 'function') updateMatcherDebug(_pendingFullText, rawWord, 'match(far)');
+        if(typeof updateMatcherDebug === 'function'){
+          updateMatcherDebug(_pendingFullText, rawWord, 'match(far)', `at idx ${far.idx} (delta=${far.idx-pointer})`);
+          traceMatch(rawWord, 'match(far)', `at idx ${far.idx} (delta=${far.idx-pointer})`);
+        }
         return;
       }
     }
 
     // 3) no match — don't advance, don't mark
-    if(typeof updateMatcherDebug === 'function') updateMatcherDebug(_pendingFullText, rawWord, 'miss');
+    if(typeof updateMatcherDebug === 'function'){
+      updateMatcherDebug(_pendingFullText, rawWord, 'miss', `consecutiveMisses=${consecutiveMisses}`);
+      traceMatch(rawWord, 'miss', `consecutiveMisses=${consecutiveMisses}`);
+    }
   }
   // === rAF-throttled re-processing (production's pattern) ===
   function _scheduleReProcess(){
@@ -1336,20 +1357,39 @@
       renderPage();
     }
   }
-  // === updateMatcherDebug: show real-time matcher state ===
+  // === COMPREHENSIVE debug logging ===
   let _lastWordsLog = [];
-  function updateMatcherDebug(transcript, heardWord, matchResult){
+  let _traceLog = [];  // detailed trace of every matcher decision
+  function updateMatcherDebug(transcript, heardWord, matchResult, extra){
     if(heardWord){
-      _lastWordsLog.push({word:heardWord, result:matchResult, time:Date.now()});
+      _lastWordsLog.push({word:heardWord, result:matchResult, time:Date.now(), extra:extra||''});
       if(_lastWordsLog.length > 5) _lastWordsLog.shift();
     }
     const mdP = document.getElementById('mdPointer');
+    const mdC = document.getElementById('mdCurrent');
+    const mdTr = document.getElementById('mdTrace');
     const mdL = document.getElementById('mdLastWords');
     const mdT = document.getElementById('mdTranscript');
     if(mdP){
       const w = refWords[pointer];
-      const wTxt = w ? `${w.text} (norm: ${w.norm || '?'})` : '(end)';
-      mdP.textContent = `pointer: ${pointer} → "${wTxt}"`;
+      const wTxt = w ? `text="${w.text}" norm="${w.norm || '?'}"` : '(end)';
+      mdP.textContent = `pointer: ${pointer} → ${wTxt}`;
+    }
+    if(mdC && refWords[pointer]){
+      const w = refWords[pointer];
+      const el = w.el;
+      const status = el ? (el.dataset.status || 'none') : 'no-el';
+      mdC.textContent = `refWords[${pointer}]: text="${w.text}" | norm="${w.norm||'?'}" | phoneme="${w.phoneme||'?'}" | status="${status}" | el=${el?'yes':'NO'}`;
+    }
+    if(mdTr){
+      mdTr.innerHTML = _traceLog.slice(-15).map(t => {
+        let color = 'var(--text-dim)';
+        if(t.result === 'match') color = 'var(--primary)';
+        else if(t.result === 'match(bias)') color = 'var(--primary)';
+        else if(t.result === 'match(far)') color = '#5dade2';
+        else if(t.result === 'miss') color = '#e74c3c';
+        return `<div style="color:${color}">p=${t.pointer} "${t.word}" (norm:"${t.norm}") → ${t.result} ${t.extra||''}</div>`;
+      }).join('');
     }
     if(mdL){
       mdL.innerHTML = _lastWordsLog.map(e => {
@@ -1360,8 +1400,21 @@
       }).join(' · ');
     }
     if(mdT && transcript){
-      mdT.textContent = `transcript: "${transcript.length > 60 ? transcript.slice(0,60) + '…' : transcript}"`;
+      const words = transcript.split(/\s+/);
+      const display = words.map((w,i) => `<span style="color:${i===words.length-1?'var(--primary)':'var(--text-dim)'}">${i}:${w}</span>`).join(' ');
+      mdT.innerHTML = `transcript (${words.length} words): ${display}`;
     }
+  }
+  function traceMatch(heardWord, result, extra){
+    _traceLog.push({
+      pointer: pointer,
+      word: heardWord,
+      norm: normalize(heardWord),
+      result: result,
+      extra: extra || '',
+      time: Date.now()
+    });
+    if(_traceLog.length > 30) _traceLog.shift();
   }
 
   // === highlightCurrent: incremental DOM updates (production's pattern) ===
