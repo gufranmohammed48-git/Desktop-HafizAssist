@@ -319,7 +319,20 @@
     <audio id="playbackAudio" preload="auto"></audio>
   </div>
 
-  <div id="ayahContainer"></div>
+  <div class="stats-row">
+    <div class="stat-box"><span class="stat-label">Correct</span><span class="stat-value" id="statCorrect">0</span></div>
+    <div class="stat-box"><span class="stat-label">Mistakes</span><span class="stat-value" id="statMistake">0</span></div>
+    <div class="stat-box"><span class="stat-label">Unclear</span><span class="stat-value" id="statUnclear">0</span></div>
+    <div class="stat-box"><span class="stat-label">Pointer</span><span class="stat-value" id="statPointer">0 / 0</span></div>
+  </div>
+  <div class="page-controls">
+    <button id="prevPageBtn">← Previous page</button>
+    <span id="pageInfo">Page 1 of 1113</span>
+    <button id="nextPageBtn">Next page →</button>
+  </div>
+  <div id="page" class="page script-container">
+    <div id="page-inner"></div>
+  </div>
 
   <div class="transcript-box hidden" id="transcriptBox">
     <span class="label">Live transcript — what the app heard from you</span>
