@@ -309,32 +309,38 @@
     transition:all .15s ease;
   }
   .toggle-script-btn:hover{border-color:var(--primary);color:var(--primary)}
+  .skip-btn{background:rgba(241,196,15,.15);color:var(--yellow);border:1px solid var(--yellow);padding:8px 14px;border-radius:8px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s ease}
+  .skip-btn:hover{background:rgba(241,196,15,.3);transform:translateY(-1px)}
   .status-text{
     color:var(--text-dim);
     font-size:12px;
     font-family:system-ui,-apple-system,sans-serif;
   }
-  /* Hide Script mode for the page — display:none (NOT blur).
-     Muslims don't blur the Quran — when Hide Script is pressed,
-     the entire text is hidden, and only the .now word shows
-     (so the user can still see what they need to recite next). */
-  #page.script-hidden .word.future{display:none}
-  #page.script-hidden .verse-marker{display:none}
-  #page.script-hidden .word.past{display:none}
-  #page.script-hidden .bismillah-block{display:none}
-  #page.script-hidden .surah-header{display:none}
-  /* The .now word stays visible so the user can see the next word */
+  /* Hide Script mode for the page — use visibility:hidden
+     (NOT display:none, NOT blur) so the .now word stays
+     in its ORIGINAL position when everything else is hidden.
+     Muslims don't blur the Quran — when Hide Script is
+     pressed, the text is hidden, but the layout is
+     preserved so the active .now word doesn't jump. */
+  #page.script-hidden .word.future{visibility:hidden}
+  #page.script-hidden .verse-marker{visibility:hidden}
+  #page.script-hidden .word.past{visibility:hidden}
+  #page.script-hidden .bismillah-block{visibility:hidden}
+  #page.script-hidden .surah-header{visibility:hidden}
+  /* The .now word stays visible (and in its position) so the
+     user can see the next word to recite */
   #page.script-hidden .word.now{
     color:#0a1f12!important;
     background:var(--primary)!important;
     border:3px solid #fff!important;
     box-shadow:0 0 16px var(--now-glow),0 0 4px #fff inset!important;
     text-shadow:none!important;
+    visibility:visible!important;
   }
   /* The .unclear and .wrong words also stay visible (user needs
      to see what they've recited) */
-  #page.script-hidden .word[data-status="unclear"]{opacity:1;color:var(--yellow);background:var(--yellow-soft);border:2px solid rgba(241,196,15,.6);font-weight:600}
-  #page.script-hidden .word.wrong{opacity:1;color:#e74c3c;background:rgba(231,76,60,.3);font-weight:600}
+  #page.script-hidden .word[data-status="unclear"]{visibility:visible;opacity:1;color:var(--yellow);background:var(--yellow-soft);border:2px solid rgba(241,196,15,.6);font-weight:600}
+  #page.script-hidden .word.wrong{visibility:visible;opacity:1;color:#e74c3c;background:rgba(231,76,60,.3);font-weight:600}
 
   #page{
     background:var(--card);
@@ -565,11 +571,14 @@
   }
   .info b{color:#2ecc71}
   .info code{background:rgba(46,204,113,.15);padding:1px 5px;border-radius:3px;font-size:11px}
-</style>
+
+  .transcript-box{margin-top:14px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;font-size:13px;line-height:1.6;max-height:140px;overflow-y:auto}
+  .transcript-box .label{color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;display:block}
+  .transcript-box .text{font-family:'Amiri',serif;font-size:18px;direction:rtl;text-align:right}</style>
 </head>
 <body class="theme-dark">
 
-<div class="ver" id="ver">v3.4</div>
+<div class="ver" id="ver">v3.16</div>
 
 <button class="settings-btn" id="settingsBtn" title="Settings">⚙</button>
 <div class="settings-menu" id="settingsMenu">
@@ -609,8 +618,19 @@
     <span class="mic-dot"></span>
     <span id="micLabel">Start reciting</span>
   </button>
+  <button class="skip-btn" id="skipBtn" title="Skip current word (advance pointer)">Skip →</button>
   <button class="toggle-script-btn" id="toggleScriptBtn">Hide Script</button>
   <span class="status-text" id="status">Pick a surah from the above list and track your recitation</span>
+</div>
+<div id="matcherDebug" style="max-width:700px;margin:0 auto 12px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:12px;line-height:1.6">
+  <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">🔍 Matcher Debug</div>
+  <div id="mdPointer" style="font-family:monospace;color:var(--primary)">pointer: —</div>
+  <div id="mdLastWords" style="font-family:monospace;color:var(--text);margin-top:4px">last 5: —</div>
+  <div id="mdTranscript" style="font-family:monospace;color:var(--text-dim);margin-top:4px">transcript: —</div>
+</div>
+<div id="transcriptBox" class="transcript-box hidden">
+  <span class="label">Live transcript — what the app heard from you</span>
+  <div id="transcriptText" class="text"></div>
 </div>
 <div style="max-width:700px;margin:0 auto 12px;display:flex;justify-content:space-between;gap:8px">
   <button id="prevPageBtn" style="flex:1;background:var(--card);color:var(--primary);border:1px solid var(--primary);padding:10px 16px;border-radius:8px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer">← Previous page</button>
@@ -745,13 +765,21 @@
   for(const s of SURAH_META) SURAH_BY_NUM[s.num] = s;
 
   // ====== Same data build as global-words.html ======
-  function normalize(s){
-    return (s||'')
-      .replace(/[\u064B-\u0652\u0670\u0640]/g, '')
+  // PRODUCTION'S EXACT NORMALIZE (copied verbatim)
+  // Normalizes Arabic text for matching: strips diacritics/tatweel,
+  // unifies alef/ya/kaf/ha variants, removes non-Arabic chars.
+  // Critical for matching user recitation against the Quran text.
+  function normalize(word){
+    if(!word) return '';
+    return word
+      .normalize('NFKC')
+      .replace(/[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED\u0640]/g, '')
       .replace(/[إأآاٱ]/g, 'ا')
-      .replace(/ى/g, 'ي')
+      .replace(/[يىی]/g, 'ي')
+      .replace(/[كک]/g, 'ك')
+      .replace(/[هھ]/g, 'ه')
       .replace(/ة/g, 'ه')
-      .replace(/[^\u0600-\u06FF\s]/g, '')
+      .replace(/[^\u0600-\u06FF]/g, '')
       .trim();
   }
   const BISMILLAH = [
@@ -796,7 +824,7 @@
   const PAGE_KEEP_BEHIND = 30;   // keep this many words behind the pointer
   const PAGE_KEEP_AHEAD = 70;    // and this many ahead
   let pageStart = 0;
-  let pageEnd = 0;  // initial value; will be set in initState() below
+  let pageEnd = PAGE_SIZE;  // initial: render page 1 (PAGE_SIZE words) on startup
 
   // ====== Render ======
   function emitSurahHeader(surahNum, isFirst){
@@ -927,6 +955,12 @@
       else if(i === pointer) span.classList.add('now');
       else span.classList.add('future');
       span.textContent = w.text;
+      // CRITICAL: link this DOM element back to the refWord so the
+      // matcher can highlight it. Without this, applyMatch and
+      // highlightCurrent silently fail because refWords[i].el is
+      // undefined. Also ensure .norm is set (matcher needs it).
+      w.el = span;
+      w.norm = w.norm || normalize(w.text);
       inner.appendChild(span);
       // === If this is the last word of the ayah, emit the verse marker ===
       if(isLastWordOfAyah && w.ayah !== 'bismillah'){
@@ -1142,100 +1176,228 @@
     }
     return dp[m][n];
   }
-  function _simpleFindMatch(w, p){
-    // Past region: if the heard word is already recited, skip it
-    for(let i = 0; i < p; i++){
-      if(refWords[i].norm === w) return {idx:i, kind:'past'};
+  // === PRODUCTION'S MATCHER (copied verbatim from production index.html v38.0) ===
+  // This is the exact matcher logic that works perfectly on the live
+  // production website. It uses:
+  //   - first-word bias (lenient match for the first word)
+  //   - near-window search (pointer to pointer + NEAR_WINDOW)
+  //   - far-window search (only after RESYNC_THRESHOLD misses)
+  //   - no match → log + don't advance pointer
+  // Plus the applyMatch function that marks words as correct/unclear.
+  const NEAR_WINDOW = 12;       // was 8 — more lenient lookahead
+  const FAR_WINDOW = 16;        // was 8 — search further on resync
+  const RESYNC_THRESHOLD = 3;   // was 6 — trigger far-window sooner
+  const LEVENSHTEIN_RATIO = 0.30;
+  const PHONEME_LEVENSHTEIN_RATIO = 0.40;
+  let _maxPointerReached = 0;
+  let _lastHighlightedPointer = -1;
+  let _prevPastEnd = 0;
+  let consecutiveMisses = 0;
+  let committedWordCount = 0;
+  let _pendingFullText = '';
+  let _pendingWords = [];
+  let _pendingReProcess = false;
+  let _pendingFinalized = '';
+  function isFuzzyMatch(heardNorm, expectedNorm, expectedPhoneme, lenientRatio){
+    if(!heardNorm || !expectedNorm) return {matched:false, kind:'none'};
+    lenientRatio = lenientRatio || LEVENSHTEIN_RATIO;
+    // 1) exact match
+    if(heardNorm === expectedNorm) return {matched:true, kind:'text', ratio:1};
+    // 2) substring — Chrome often merges "ال" + next word
+    const minLen = Math.min(heardNorm.length, expectedNorm.length);
+    const maxLen = Math.max(heardNorm.length, expectedNorm.length);
+    if(minLen >= 3){
+      if(heardNorm.includes(expectedNorm) || expectedNorm.includes(heardNorm)){
+        return {matched:true, kind:'substring', ratio: minLen/maxLen};
+      }
     }
-    const NEAR = 12;
-    const end = Math.min(refWords.length, p + NEAR);
-    for(let i = p; i < end; i++){
-      if(refWords[i].norm === w) return {idx:i, kind:'exact'};
+    // 3) text Levenshtein ratio
+    const textRatio = levRatio(heardNorm, expectedNorm);
+    if(textRatio >= 1 - lenientRatio){
+      return {matched:true, kind:'text', ratio:textRatio};
     }
-    for(let i = p; i < end; i++){
-      if(refWords[i].norm.startsWith(w) && w.length >= 2) return {idx:i, kind:'prefix'};
-      if(w.startsWith(refWords[i].norm) && refWords[i].norm.length >= 2) return {idx:i, kind:'prefix'};
+    // 4) phoneme fallback
+    if(expectedPhoneme){
+      const heardPh = phonemizeArabic(heardNorm);
+      if(heardPh && heardPh.length >= 3 && expectedPhoneme.length >= 3){
+        const phRatio = levRatio(heardPh, expectedPhoneme);
+        if(phRatio >= 1 - PHONEME_LEVENSHTEIN_RATIO){
+          return {matched:true, kind:'phoneme', ratio:phRatio};
+        }
+      }
     }
-    for(let i = p; i < end; i++){
-      const d = levenshtein(refWords[i].norm, w);
-      const tol = Math.max(1, Math.floor(Math.max(refWords[i].norm.length, w.length) * 0.25));
-      if(d <= tol) return {idx:i, kind:'fuzzy', dist:d};
-    }
-    return {idx:-1, kind:'none'};
+    return {matched:false, kind:'none'};
   }
-  function _simpleMatch(text){
-    const heard = (text||'').split(/\s+/).map(normalize).filter(Boolean);
-    if(!heard.length) return;
-    let p = pointer;
-    for(const w of heard){
-      const m = _simpleFindMatch(w, p);
-      if(m.kind === 'past') continue;
-      if(m.idx >= 0){
-        for(let i = p; i < m.idx; i++){
-          if(refWords[i].status !== 'correct'){
-            refWords[i].status = 'unclear';
-            if(refWords[i].el){
-              refWords[i].el.dataset.status = 'unclear';
-              refWords[i].el.classList.remove('now','future','wrong');
-              refWords[i].el.classList.add('past','unclear');
-            }
-          }
-        }
-        refWords[m.idx].status = 'correct';
-        if(refWords[m.idx].el){
-          refWords[m.idx].el.dataset.status = 'correct';
-          refWords[m.idx].el.classList.remove('now','future','unclear','wrong');
-          refWords[m.idx].el.classList.add('past');
-        }
-        p = m.idx + 1;
-      } else {
-        if(p < refWords.length){
-          refWords[p].status = 'wrong';
-          if(refWords[p].el){
-            refWords[p].el.dataset.status = 'wrong';
-            refWords[p].el.classList.remove('now','future','past','unclear');
-            refWords[p].el.classList.add('wrong');
-          }
-          p++;
-        }
+  function findMatch(heardNorm, from, to){
+    const end = Math.min(refWords.length, to);
+    for(let i = from; i < end; i++){
+      const m = isFuzzyMatch(heardNorm, refWords[i].norm, refWords[i].phoneme);
+      if(m.matched) return {idx:i, match:m};
+    }
+    return {idx:-1, match:{matched:false, kind:'none'}};
+  }
+  function applyMatch(matchAt, matchInfo, heardWord){
+    // Mark skipped words as 'unclear' (yellow). Skip already-correct
+    // words so the re-derivation doesn't re-mark them.
+    for(let i = pointer; i < matchAt; i++){
+      const w = refWords[i];
+      if(w.el && w.el.dataset.status !== 'correct' && w.el.dataset.status !== 'past'){
+        w.el.dataset.status = 'unclear';
+        if(w.status !== 'correct') w.status = 'unclear';
       }
     }
-    pointer = Math.min(p, refWords.length);
-    if(pointer < refWords.length){
-      refWords[pointer].status = 'now';
-      if(refWords[pointer].el){
-        refWords[pointer].el.classList.remove('future');
-        refWords[pointer].el.classList.add('now');
+    if(refWords[matchAt] && refWords[matchAt].el){
+      refWords[matchAt].el.dataset.status = 'correct';
+      refWords[matchAt].status = 'correct';
+    }
+    pointer = matchAt + 1;
+    consecutiveMisses = 0;
+  }
+  function processNewWord(rawWord){
+    const norm = normalize(rawWord);
+    if(!norm) return;
+    if(pointer >= refWords.length) return;
+    // PAST REGION CHECK: if the heard word matches a word in the
+    // past region (already recited and correct), skip it. This
+    // prevents duplicate words from the recognition transcript
+    // (e.g., "الرحمن الرحيم" appearing twice) from confusing
+    // the matcher. Without this, the matcher would try to
+    // re-match the duplicate and could send the pointer
+    // backwards or get stuck.
+    for(let i = pageStart; i < pointer; i++){
+      if(refWords[i] && refWords[i].norm === norm && refWords[i].status === 'correct'){
+        if(typeof updateMatcherDebug === 'function') updateMatcherDebug(_pendingFullText, rawWord, 'skip(past)');
+        return;
       }
     }
-    if(pointer > 0 && refWords[pointer-1].status === 'now'){
-      refWords[pointer-1].status = 'past';
+    // FIRST-WORD BIAS: ONLY at pageStart (the very first word of
+    // the page). Removed the `consecutiveMisses === 0` condition
+    // because it was triggering for EVERY word at the start of
+    // each tick, which caused the pointer to oscillate when
+    // duplicate words appeared in the transcript.
+    if(pointer === pageStart){
+      const head = isFuzzyMatch(norm, refWords[pointer].norm, refWords[pointer].phoneme, 0.40);
+      if(head.matched){
+        applyMatch(pointer, head, rawWord);
+        if(typeof updateMatcherDebug === 'function') updateMatcherDebug(_pendingFullText, rawWord, 'match(bias)');
+        return;
+      }
     }
-    // Recount stats across the WHOLE active surah
-    const newStats = {correct:0, mistake:0, unclear:0};
-    for(let i = pageStart; i < pageEnd; i++){
-      const s = refWords[i].status;
-      if(s === 'correct' || s === 'past') newStats.correct++;
-      else if(s === 'wrong') newStats.mistake++;
-      else if(s === 'unclear') newStats.unclear++;
+    // 1) near-window search
+    const near = findMatch(norm, pointer, pointer + NEAR_WINDOW);
+    if(near.idx !== -1 && (near.idx - pointer) <= 8){
+      applyMatch(near.idx, near.match, rawWord);
+      if(typeof updateMatcherDebug === 'function') updateMatcherDebug(_pendingFullText, rawWord, 'match');
+      return;
     }
-    stats = newStats;
+    // 2) far-window search
+    consecutiveMisses++;
+    if(consecutiveMisses >= RESYNC_THRESHOLD){
+      const far = findMatch(norm, pointer + NEAR_WINDOW, pointer + FAR_WINDOW);
+      if(far.idx !== -1){
+        applyMatch(far.idx, far.match, rawWord);
+        if(typeof updateMatcherDebug === 'function') updateMatcherDebug(_pendingFullText, rawWord, 'match(far)');
+        return;
+      }
+    }
+    // 3) no match — don't advance, don't mark
+    if(typeof updateMatcherDebug === 'function') updateMatcherDebug(_pendingFullText, rawWord, 'miss');
+  }
+  // === rAF-throttled re-processing (production's pattern) ===
+  function _scheduleReProcess(){
+    if(_pendingReProcess) return;
+    _pendingReProcess = true;
+    requestAnimationFrame(_runReProcess);
+  }
+  function _runReProcess(){
+    _pendingReProcess = false;
+    if(!refWords.length) return;
+    const words = _pendingWords;
+    // Reset status ONLY for words at _maxPointerReached and beyond
+    for(let i = _maxPointerReached; i < refWords.length; i++){
+      if(refWords[i] && refWords[i].el){
+        refWords[i].el.dataset.status = '';
+        refWords[i].status = '';
+      }
+    }
+    pointer = pageStart;
+    _lastHighlightedPointer = -1;
+    _maxPointerReached = pageStart;
+    _prevPastEnd = pageStart;
+    consecutiveMisses = 0;
+    stats = {correct:0, mistake:0, unclear:0};
+    // Re-process every word
+    for(let i = 0; i < words.length; i++){
+      processNewWord(words[i]);
+    }
+    committedWordCount = words.length;
+    highlightCurrent();
     updateStatsUI();
-    // Follow the pointer: if it moved out of the current page
-    // slice, advance the page slice to keep the .now word visible.
+    // Page-flip if pointer moved out of current page
     if(pointer >= pageEnd){
       const newPageNum = Math.floor(pointer / PAGE_SIZE);
       pageStart = newPageNum * PAGE_SIZE;
       pageEnd   = Math.min(refWords.length, pageStart + PAGE_SIZE);
       renderPage();
-    } else {
-      // Just re-render the current page so the .now word is up to date
-      renderPage();
     }
+  }
+  // === updateMatcherDebug: show real-time matcher state ===
+  let _lastWordsLog = [];
+  function updateMatcherDebug(transcript, heardWord, matchResult){
+    if(heardWord){
+      _lastWordsLog.push({word:heardWord, result:matchResult, time:Date.now()});
+      if(_lastWordsLog.length > 5) _lastWordsLog.shift();
+    }
+    const mdP = document.getElementById('mdPointer');
+    const mdL = document.getElementById('mdLastWords');
+    const mdT = document.getElementById('mdTranscript');
+    if(mdP){
+      const w = refWords[pointer];
+      const wTxt = w ? `${w.text} (norm: ${w.norm || '?'})` : '(end)';
+      mdP.textContent = `pointer: ${pointer} → "${wTxt}"`;
+    }
+    if(mdL){
+      mdL.innerHTML = _lastWordsLog.map(e => {
+        const color = e.result === 'match' ? 'var(--primary)' :
+                      e.result === 'skip'  ? 'var(--yellow)'  :
+                      e.result === 'miss'  ? '#e74c3c' : 'var(--text-dim)';
+        return `<span style="color:${color}">"${e.word}" [${e.result}]</span>`;
+      }).join(' · ');
+    }
+    if(mdT && transcript){
+      mdT.textContent = `transcript: "${transcript.length > 60 ? transcript.slice(0,60) + '…' : transcript}"`;
+    }
+  }
+
+  // === highlightCurrent: incremental DOM updates (production's pattern) ===
+  function highlightCurrent(){
+    if(pointer === _lastHighlightedPointer) return;
+    if(_lastHighlightedPointer >= 0 && _lastHighlightedPointer < refWords.length){
+      const oldEl = refWords[_lastHighlightedPointer] && refWords[_lastHighlightedPointer].el;
+      if(oldEl) oldEl.classList.remove('now');
+    }
+    for(let i = _prevPastEnd; i < _maxPointerReached; i++){
+      const w = refWords[i] && refWords[i].el;
+      if(w){
+        w.classList.add('past');
+        w.classList.remove('future');
+      }
+    }
+    if(pointer < refWords.length){
+      const w = refWords[pointer] && refWords[pointer].el;
+      if(w){
+        w.classList.add('now');
+        w.classList.remove('future');
+      }
+    }
+    if(pointer > _maxPointerReached) _maxPointerReached = pointer;
+    _prevPastEnd = _maxPointerReached;
+    _lastHighlightedPointer = pointer;
   }
 
   // ==== SPEECH RECOGNITION ====
   let recognition = null;
+  window.__hifzappSessionId = 0;
   let listening = false;
   const micBtn = document.getElementById('micBtn');
   const micLabel = document.getElementById('micLabel');
@@ -1250,27 +1412,46 @@
       return;
     }
     recognition = new Ctor();
-    recognition.continuous = false;     // Android fix
-    recognition.interimResults = false; // Android fix
+    recognition.continuous = true;       // production's working setting
+    recognition.interimResults = true;   // production's working setting (rAF throttles)
     recognition.maxAlternatives = 1;
     recognition.lang = 'ar-SA';
+    // session id — used to ignore the auto-restart setTimeout if the user
+    // has already stopped the mic
+    const sessionId = ++window.__hifzappSessionId;
+    // PRODUCTION'S onresult: accumulate finalized + interim text,
+    // stash in module-scope, and schedule rAF-throttled re-processing.
+    // This is the exact pattern from the working production website.
     recognition.onresult = (event) => {
-      let txt = '';
+      let interim = '';
       for(let i = event.resultIndex; i < event.results.length; i++){
-        txt += event.results[i][0].transcript + ' ';
+        const res = event.results[i];
+        if(res.isFinal){
+          _pendingFinalized += res[0].transcript + ' ';
+        } else {
+          interim += res[0].transcript + ' ';
+        }
       }
-      txt = txt.trim();
-      if(txt) _simpleMatch(txt);
+      const fullText = (_pendingFinalized + interim).trim();
+      if(!fullText) return;
+      // Update the transcript display
+      const transcriptBox = document.getElementById('transcriptBox');
+      const transcriptText = document.getElementById('transcriptText');
+      if(transcriptBox) transcriptBox.classList.remove('hidden');
+      if(transcriptText) transcriptText.textContent = fullText;
+      // Stash and schedule rAF re-process
+      _pendingFullText = fullText;
+      _pendingWords = fullText.length ? fullText.split(/\s+/) : [];
+      _scheduleReProcess();
     };
     recognition.onend = () => {
-      listening = false;
-      if(micBtn) micBtn.classList.remove('listening','mic-armed');
-      if(micLabel) micLabel.textContent = 'Start reciting';
-      if(statusEl) statusEl.textContent = 'Tap the mic to start reciting';
-      // Auto-restart while user is mid-recitation. The user only
-      // stops the mic by clicking the button again.
-      if(window.__isReciting){
+      // Only auto-restart if the user is still reciting AND this
+      // session hasn't been replaced by a newer one
+      if(window.__isReciting && sessionId === window.__hifzappSessionId){
         setTimeout(() => {
+          // Re-check the token inside the setTimeout (in case the
+          // user clicked stop between the original onend and now)
+          if(!window.__isReciting || sessionId !== window.__hifzappSessionId) return;
           try{
             recognition.start();
             listening = true;
@@ -1281,6 +1462,12 @@
             if(statusEl) statusEl.textContent = 'Mic restart failed: ' + e.message;
           }
         }, 100);
+      } else {
+        // User has stopped — turn off the UI
+        listening = false;
+        if(micBtn) micBtn.classList.remove('listening','mic-armed');
+        if(micLabel) micLabel.textContent = 'Start reciting';
+        if(statusEl) statusEl.textContent = 'Tap the mic to start reciting';
       }
     };
     recognition.onerror = (e) => {
@@ -1309,17 +1496,25 @@
     }
   }
   function stopRecognition(){
-    window.__shouldKeepListening = false;
+    // Bump the session id FIRST so any pending auto-restart setTimeouts
+    // from the previous session are invalidated
+    window.__hifzappSessionId = (window.__hifzappSessionId || 0) + 1;
+    // Mark the user as NOT reciting — this is the source of truth
+    window.__isReciting = false;
     if(recognition){
       try{ recognition.abort(); }catch(e){}
+      try{ recognition.stop(); }catch(e){}
     }
     listening = false;
     if(micBtn) micBtn.classList.remove('listening','mic-armed');
     if(micLabel) micLabel.textContent = 'Start reciting';
+    if(statusEl) statusEl.textContent = 'Tap the mic to start reciting';
   }
   if(micBtn){
     micBtn.addEventListener('click', () => {
-      if(listening) stopRecognition();
+      // Use __isReciting as the source of truth (not 'listening',
+      // which can be in a transitional state during onend)
+      if(window.__isReciting) stopRecognition();
       else startRecognition();
     });
   }
@@ -1331,6 +1526,33 @@
     toggleScriptBtn.addEventListener('click', () => {
       page.classList.toggle('script-hidden');
       toggleScriptBtn.textContent = page.classList.contains('script-hidden') ? 'Show Script' : 'Hide Script';
+    });
+  }
+
+  // ==== SKIP BUTTON — manually advance the pointer ====
+  const skipBtn = document.getElementById('skipBtn');
+  if(skipBtn){
+    skipBtn.addEventListener('click', () => {
+      if(pointer < refWords.length){
+        // Mark current word as 'skipped' (yellow) and advance
+        if(refWords[pointer].el){
+          refWords[pointer].el.dataset.status = 'unclear';
+          refWords[pointer].status = 'unclear';
+        }
+        pointer++;
+        // Update _maxPointerReached so we don't re-process this
+        if(pointer > _maxPointerReached) _maxPointerReached = pointer;
+        _lastHighlightedPointer = -1;  // force highlightCurrent to re-run
+        highlightCurrent();
+        updateStatsUI();
+        // Page-flip if needed
+        if(pointer >= pageEnd){
+          const newPageNum = Math.floor(pointer / PAGE_SIZE);
+          pageStart = newPageNum * PAGE_SIZE;
+          pageEnd   = Math.min(refWords.length, pageStart + PAGE_SIZE);
+          renderPage();
+        }
+      }
     });
   }
 
