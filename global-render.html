@@ -576,7 +576,7 @@
 </head>
 <body class="theme-dark">
 
-<div class="ver" id="ver">v3.11</div>
+<div class="ver" id="ver">v3.12</div>
 
 <button class="settings-btn" id="settingsBtn" title="Settings">⚙</button>
 <div class="settings-menu" id="settingsMenu">
@@ -756,13 +756,21 @@
   for(const s of SURAH_META) SURAH_BY_NUM[s.num] = s;
 
   // ====== Same data build as global-words.html ======
-  function normalize(s){
-    return (s||'')
-      .replace(/[\u064B-\u0652\u0670\u0640]/g, '')
+  // PRODUCTION'S EXACT NORMALIZE (copied verbatim)
+  // Normalizes Arabic text for matching: strips diacritics/tatweel,
+  // unifies alef/ya/kaf/ha variants, removes non-Arabic chars.
+  // Critical for matching user recitation against the Quran text.
+  function normalize(word){
+    if(!word) return '';
+    return word
+      .normalize('NFKC')
+      .replace(/[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED\u0640]/g, '')
       .replace(/[إأآاٱ]/g, 'ا')
-      .replace(/ى/g, 'ي')
+      .replace(/[يىی]/g, 'ي')
+      .replace(/[كک]/g, 'ك')
+      .replace(/[هھ]/g, 'ه')
       .replace(/ة/g, 'ه')
-      .replace(/[^\u0600-\u06FF\s]/g, '')
+      .replace(/[^\u0600-\u06FF]/g, '')
       .trim();
   }
   const BISMILLAH = [
@@ -1167,9 +1175,9 @@
   //   - far-window search (only after RESYNC_THRESHOLD misses)
   //   - no match → log + don't advance pointer
   // Plus the applyMatch function that marks words as correct/unclear.
-  const NEAR_WINDOW = 8;
-  const FAR_WINDOW = 8;
-  const RESYNC_THRESHOLD = 6;
+  const NEAR_WINDOW = 12;       // was 8 — more lenient lookahead
+  const FAR_WINDOW = 16;        // was 8 — search further on resync
+  const RESYNC_THRESHOLD = 3;   // was 6 — trigger far-window sooner
   const LEVENSHTEIN_RATIO = 0.30;
   const PHONEME_LEVENSHTEIN_RATIO = 0.40;
   let _maxPointerReached = 0;
@@ -1240,8 +1248,12 @@
     const norm = normalize(rawWord);
     if(!norm) return;
     if(pointer >= refWords.length) return;
-    // FIRST-WORD BIAS: when pointer is at pageStart, be lenient
-    if(pointer === pageStart && consecutiveMisses === 0){
+    // FIRST-WORD BIAS: when pointer is at pageStart OR after a long
+    // pause (consecutiveMisses === 0), be lenient — the user is
+    // probably starting a new phrase. This handles the case where
+    // the recognition delivers background noise as the first word
+    // and then the actual recitation.
+    if(pointer === pageStart || consecutiveMisses === 0){
       const head = isFuzzyMatch(norm, refWords[pointer].norm, refWords[pointer].phoneme, 0.40);
       if(head.matched){
         applyMatch(pointer, head, rawWord);
