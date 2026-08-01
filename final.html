@@ -1348,6 +1348,13 @@ async function startListening(){
     } else if(e.error === 'network'){
       statusEl.textContent = 'Speech recognition needs internet — Chrome sends audio to Google\'s servers. Check your connection.';
       statusEl.classList.add('warn');
+    } else if(e.error === 'aborted'){
+      // 'aborted' fires when the recognition is stopped/reset
+      // (e.g., auto-restart, quick stop). This is EXPECTED and
+      // should NOT show a warning to the user.
+      console.log('[recognition] aborted (expected on stop/restart)');
+      // If we're still supposed to be listening, the onend handler
+      // will auto-restart. No action needed here.
     } else {
       statusEl.textContent = 'Recognition error: ' + e.error + '. Tap Start to retry.';
       statusEl.classList.add('warn');
@@ -1356,15 +1363,17 @@ async function startListening(){
 
   recognition.onend = () => {
     if(!listening) return;
-    // Chrome sometimes fires onend even with continuous=true; restart with a small delay
-    // (well-known race condition documented in the original code, kept here).
+    // Chrome sometimes fires onend even with continuous=true; restart
+    // with a small delay. The onend handler auto-restarts, so the
+    // 'aborted' error from the restart is expected and handled silently.
     setTimeout(() => {
       if(!listening) return;
       try { recognition.start(); }
       catch(e){
+        // If start() throws (e.g., already started), try again after 400ms
         setTimeout(() => { if(listening){ try{ recognition.start(); }catch(_){} } }, 400);
       }
-    }, 250);
+    }, 300);
   };
 
   // Diagnostic: surface context info so the user knows if mobile is blocking us.
