@@ -1404,6 +1404,12 @@
       const display = words.map((w,i) => `<span style="color:${i===words.length-1?'var(--primary)':'var(--text-dim)'}">${i}:${w}</span>`).join(' ');
       mdT.innerHTML = `transcript (${words.length} words): ${display}`;
     }
+    if(typeof _pendingWords !== 'undefined'){
+      const mdP2 = document.getElementById('mdPending');
+      if(mdP2){
+        mdP2.textContent = `_pendingWords.length=${_pendingWords.length} | fullText.length=${transcript ? transcript.length : 0} | _pendingFinalized.length=${(_pendingFinalized||'').length}`;
+      }
+    }
   }
   function traceMatch(heardWord, result, extra){
     _traceLog.push({
@@ -1472,8 +1478,10 @@
     // This is the exact pattern from the working production website.
     recognition.onresult = (event) => {
       let interim = '';
+      const results = [];
       for(let i = event.resultIndex; i < event.results.length; i++){
         const res = event.results[i];
+        results.push({i, isFinal: res.isFinal, text: res[0].transcript.slice(0, 40)});
         if(res.isFinal){
           _pendingFinalized += res[0].transcript + ' ';
         } else {
@@ -1481,6 +1489,12 @@
         }
       }
       const fullText = (_pendingFinalized + interim).trim();
+      // Log to onresult debug
+      const mdO = document.getElementById('mdOnResult');
+      if(mdO){
+        const log = results.map(r => `[${r.i}] ${r.isFinal ? 'FINAL' : 'interim'}: "${r.text}${r.text.length>=40?'…':''}"`).join(' | ');
+        mdO.innerHTML = `event.results.length=${event.results.length} event.resultIndex=${event.resultIndex}<br>${log}<br>fullText="${fullText.slice(0,80)}${fullText.length>80?'…':''}" (${fullText.split(/\s+/).length} words)`;
+      }
       if(!fullText) return;
       // Update the transcript display
       const transcriptBox = document.getElementById('transcriptBox');
