@@ -267,7 +267,7 @@
 </style>
 </head>
 <body>
-<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v3.24.5</div>
+<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v3.24.6</div>
 
 <!-- VERSION BADGE — increment on every push so user can confirm fresh load -->
 
@@ -1368,19 +1368,28 @@ async function startListening(){
     }
   };
 
+  // DEBOUNCED auto-restart: track last restart time to prevent
+  // tight loops where start() fires onend immediately, causing
+  // repeated 'aborted' errors.
+  let _lastRestartTime = 0;
   recognition.onend = () => {
     if(!listening) return;
-    // Chrome sometimes fires onend even with continuous=true; restart
-    // with a small delay. The onend handler auto-restarts, so the
-    // 'aborted' error from the restart is expected and handled silently.
+    const now = Date.now();
+    // If we just restarted within the last 1500ms, don't restart again
+    if(now - _lastRestartTime < 1500) return;
+    _lastRestartTime = now;
     setTimeout(() => {
       if(!listening) return;
       try { recognition.start(); }
       catch(e){
-        // If start() throws (e.g., already started), try again after 400ms
-        setTimeout(() => { if(listening){ try{ recognition.start(); }catch(_){} } }, 400);
+        // If start() throws, try again after 500ms
+        setTimeout(() => {
+          if(listening){
+            try{ recognition.start(); }catch(_){}
+          }
+        }, 500);
       }
-    }, 300);
+    }, 500);
   };
 
   // Diagnostic: surface context info so the user knows if mobile is blocking us.
