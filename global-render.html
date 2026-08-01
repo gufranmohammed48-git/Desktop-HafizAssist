@@ -314,27 +314,31 @@
     font-size:12px;
     font-family:system-ui,-apple-system,sans-serif;
   }
-  /* Hide Script mode for the page — display:none (NOT blur).
-     Muslims don't blur the Quran — when Hide Script is pressed,
-     the entire text is hidden, and only the .now word shows
-     (so the user can still see what they need to recite next). */
-  #page.script-hidden .word.future{display:none}
-  #page.script-hidden .verse-marker{display:none}
-  #page.script-hidden .word.past{display:none}
-  #page.script-hidden .bismillah-block{display:none}
-  #page.script-hidden .surah-header{display:none}
-  /* The .now word stays visible so the user can see the next word */
+  /* Hide Script mode for the page — use visibility:hidden
+     (NOT display:none, NOT blur) so the .now word stays
+     in its ORIGINAL position when everything else is hidden.
+     Muslims don't blur the Quran — when Hide Script is
+     pressed, the text is hidden, but the layout is
+     preserved so the active .now word doesn't jump. */
+  #page.script-hidden .word.future{visibility:hidden}
+  #page.script-hidden .verse-marker{visibility:hidden}
+  #page.script-hidden .word.past{visibility:hidden}
+  #page.script-hidden .bismillah-block{visibility:hidden}
+  #page.script-hidden .surah-header{visibility:hidden}
+  /* The .now word stays visible (and in its position) so the
+     user can see the next word to recite */
   #page.script-hidden .word.now{
     color:#0a1f12!important;
     background:var(--primary)!important;
     border:3px solid #fff!important;
     box-shadow:0 0 16px var(--now-glow),0 0 4px #fff inset!important;
     text-shadow:none!important;
+    visibility:visible!important;
   }
   /* The .unclear and .wrong words also stay visible (user needs
      to see what they've recited) */
-  #page.script-hidden .word[data-status="unclear"]{opacity:1;color:var(--yellow);background:var(--yellow-soft);border:2px solid rgba(241,196,15,.6);font-weight:600}
-  #page.script-hidden .word.wrong{opacity:1;color:#e74c3c;background:rgba(231,76,60,.3);font-weight:600}
+  #page.script-hidden .word[data-status="unclear"]{visibility:visible;opacity:1;color:var(--yellow);background:var(--yellow-soft);border:2px solid rgba(241,196,15,.6);font-weight:600}
+  #page.script-hidden .word.wrong{visibility:visible;opacity:1;color:#e74c3c;background:rgba(231,76,60,.3);font-weight:600}
 
   #page{
     background:var(--card);
@@ -569,7 +573,7 @@
 </head>
 <body class="theme-dark">
 
-<div class="ver" id="ver">v3.4</div>
+<div class="ver" id="ver">v3.5</div>
 
 <button class="settings-btn" id="settingsBtn" title="Settings">⚙</button>
 <div class="settings-menu" id="settingsMenu">
@@ -796,7 +800,7 @@
   const PAGE_KEEP_BEHIND = 30;   // keep this many words behind the pointer
   const PAGE_KEEP_AHEAD = 70;    // and this many ahead
   let pageStart = 0;
-  let pageEnd = 0;  // initial value; will be set in initState() below
+  let pageEnd = PAGE_SIZE;  // initial: render page 1 (PAGE_SIZE words) on startup
 
   // ====== Render ======
   function emitSurahHeader(surahNum, isFirst){
@@ -1228,10 +1232,9 @@
       pageStart = newPageNum * PAGE_SIZE;
       pageEnd   = Math.min(refWords.length, pageStart + PAGE_SIZE);
       renderPage();
-    } else {
-      // Just re-render the current page so the .now word is up to date
-      renderPage();
     }
+    // (else: no re-render needed — the .now class was set
+    //  on the affected word element directly above)
   }
 
   // ==== SPEECH RECOGNITION ====
@@ -1250,8 +1253,8 @@
       return;
     }
     recognition = new Ctor();
-    recognition.continuous = false;     // Android fix
-    recognition.interimResults = false; // Android fix
+    recognition.continuous = true;       // keep the session alive for longer recitations
+    recognition.interimResults = true;   // get partial results so highlighting happens AS user recites
     recognition.maxAlternatives = 1;
     recognition.lang = 'ar-SA';
     recognition.onresult = (event) => {
@@ -1319,7 +1322,9 @@
   }
   if(micBtn){
     micBtn.addEventListener('click', () => {
-      if(listening) stopRecognition();
+      // Use __isReciting as the source of truth (not 'listening',
+      // which can be in a transitional state during onend)
+      if(window.__isReciting) stopRecognition();
       else startRecognition();
     });
   }
