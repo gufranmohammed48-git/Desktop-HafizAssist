@@ -578,7 +578,7 @@
 </head>
 <body class="theme-dark">
 
-<div class="ver" id="ver">v3.23</div>
+<div class="ver" id="ver">v3.24</div>
 
 <button class="settings-btn" id="settingsBtn" title="Settings">⚙</button>
 <div class="settings-menu" id="settingsMenu">
@@ -1199,7 +1199,7 @@
   let _pendingFullText = '';
   let _pendingWords = [];
   let _pendingReProcess = false;
-  let _pendingFinalized = '';
+  let _pendingFinalized = '';  // (legacy, unused since v3.24)
   function isFuzzyMatch(heardNorm, expectedNorm, expectedPhoneme, lenientRatio){
     if(!heardNorm || !expectedNorm) return {matched:false, kind:'none'};
     lenientRatio = lenientRatio || LEVENSHTEIN_RATIO;
@@ -1476,25 +1476,22 @@
     // PRODUCTION'S onresult: accumulate finalized + interim text,
     // stash in module-scope, and schedule rAF-throttled re-processing.
     // This is the exact pattern from the working production website.
+    // FIX v3.24: Use ONLY the latest full text from this event,
+    // not the accumulated _pendingFinalized. The accumulation was
+    // causing the matcher to see the SAME words repeatedly because
+    // _pendingFinalized persisted across session restarts, but the
+    // new session's interim results didn't include them. Now the
+    // matcher always sees the full text that was just recognized.
     recognition.onresult = (event) => {
-      let interim = '';
-      const results = [];
-      for(let i = event.resultIndex; i < event.results.length; i++){
+      // Use ONLY event.results for this event — the browser gives us
+      // ALL results (final + interim) for the current recognition.
+      // This is the same approach production uses.
+      let fullText = '';
+      for(let i = 0; i < event.results.length; i++){
         const res = event.results[i];
-        results.push({i, isFinal: res.isFinal, text: res[0].transcript.slice(0, 40)});
-        if(res.isFinal){
-          _pendingFinalized += res[0].transcript + ' ';
-        } else {
-          interim += res[0].transcript + ' ';
-        }
+        fullText += res[0].transcript + ' ';
       }
-      const fullText = (_pendingFinalized + interim).trim();
-      // Log to onresult debug
-      const mdO = document.getElementById('mdOnResult');
-      if(mdO){
-        const log = results.map(r => `[${r.i}] ${r.isFinal ? 'FINAL' : 'interim'}: "${r.text}${r.text.length>=40?'…':''}"`).join(' | ');
-        mdO.innerHTML = `event.results.length=${event.results.length} event.resultIndex=${event.resultIndex}<br>${log}<br>fullText="${fullText.slice(0,80)}${fullText.length>80?'…':''}" (${fullText.split(/\s+/).length} words)`;
-      }
+      fullText = fullText.trim();
       if(!fullText) return;
       // Update the transcript display
       const transcriptBox = document.getElementById('transcriptBox');
@@ -1503,7 +1500,7 @@
       if(transcriptText) transcriptText.textContent = fullText;
       // Stash and schedule rAF re-process
       _pendingFullText = fullText;
-      _pendingWords = fullText.length ? fullText.split(/\s+/) : [];
+      _pendingWords = fullText.split(/\s+/);
       _scheduleReProcess();
     };
     // PRODUCTION'S onend: use `listening` flag with 250ms delay.
