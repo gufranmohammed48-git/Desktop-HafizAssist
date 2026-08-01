@@ -309,6 +309,8 @@
     transition:all .15s ease;
   }
   .toggle-script-btn:hover{border-color:var(--primary);color:var(--primary)}
+  .skip-btn{background:rgba(241,196,15,.15);color:var(--yellow);border:1px solid var(--yellow);padding:8px 14px;border-radius:8px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s ease}
+  .skip-btn:hover{background:rgba(241,196,15,.3);transform:translateY(-1px)}
   .status-text{
     color:var(--text-dim);
     font-size:12px;
@@ -576,7 +578,7 @@
 </head>
 <body class="theme-dark">
 
-<div class="ver" id="ver">v3.15</div>
+<div class="ver" id="ver">v3.16</div>
 
 <button class="settings-btn" id="settingsBtn" title="Settings">⚙</button>
 <div class="settings-menu" id="settingsMenu">
@@ -616,6 +618,7 @@
     <span class="mic-dot"></span>
     <span id="micLabel">Start reciting</span>
   </button>
+  <button class="skip-btn" id="skipBtn" title="Skip current word (advance pointer)">Skip →</button>
   <button class="toggle-script-btn" id="toggleScriptBtn">Hide Script</button>
   <span class="status-text" id="status">Pick a surah from the above list and track your recitation</span>
 </div>
