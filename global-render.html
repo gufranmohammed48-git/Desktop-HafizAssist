@@ -573,7 +573,7 @@
 </head>
 <body class="theme-dark">
 
-<div class="ver" id="ver">v3.5</div>
+<div class="ver" id="ver">v3.6</div>
 
 <button class="settings-btn" id="settingsBtn" title="Settings">⚙</button>
 <div class="settings-menu" id="settingsMenu">
@@ -1239,6 +1239,7 @@
 
   // ==== SPEECH RECOGNITION ====
   let recognition = null;
+  window.__hifzappSessionId = 0;
   let listening = false;
   const micBtn = document.getElementById('micBtn');
   const micLabel = document.getElementById('micLabel');
@@ -1253,10 +1254,13 @@
       return;
     }
     recognition = new Ctor();
-    recognition.continuous = true;       // keep the session alive for longer recitations
-    recognition.interimResults = true;   // get partial results so highlighting happens AS user recites
+    recognition.continuous = false;      // Android-safe (continuous=true causes rapid onend beeps)
+    recognition.interimResults = false;  // Android-safe (interimResults=true breaks final result delivery)
     recognition.maxAlternatives = 1;
     recognition.lang = 'ar-SA';
+    // session id — used to ignore the auto-restart setTimeout if the user
+    // has already stopped the mic
+    const sessionId = ++window.__hifzappSessionId;
     recognition.onresult = (event) => {
       let txt = '';
       for(let i = event.resultIndex; i < event.results.length; i++){
@@ -1266,14 +1270,13 @@
       if(txt) _simpleMatch(txt);
     };
     recognition.onend = () => {
-      listening = false;
-      if(micBtn) micBtn.classList.remove('listening','mic-armed');
-      if(micLabel) micLabel.textContent = 'Start reciting';
-      if(statusEl) statusEl.textContent = 'Tap the mic to start reciting';
-      // Auto-restart while user is mid-recitation. The user only
-      // stops the mic by clicking the button again.
-      if(window.__isReciting){
+      // Only auto-restart if the user is still reciting AND this
+      // session hasn't been replaced by a newer one
+      if(window.__isReciting && sessionId === window.__hifzappSessionId){
         setTimeout(() => {
+          // Re-check the token inside the setTimeout (in case the
+          // user clicked stop between the original onend and now)
+          if(!window.__isReciting || sessionId !== window.__hifzappSessionId) return;
           try{
             recognition.start();
             listening = true;
@@ -1284,6 +1287,12 @@
             if(statusEl) statusEl.textContent = 'Mic restart failed: ' + e.message;
           }
         }, 100);
+      } else {
+        // User has stopped — turn off the UI
+        listening = false;
+        if(micBtn) micBtn.classList.remove('listening','mic-armed');
+        if(micLabel) micLabel.textContent = 'Start reciting';
+        if(statusEl) statusEl.textContent = 'Tap the mic to start reciting';
       }
     };
     recognition.onerror = (e) => {
@@ -1312,13 +1321,19 @@
     }
   }
   function stopRecognition(){
-    window.__shouldKeepListening = false;
+    // Bump the session id FIRST so any pending auto-restart setTimeouts
+    // from the previous session are invalidated
+    window.__hifzappSessionId = (window.__hifzappSessionId || 0) + 1;
+    // Mark the user as NOT reciting — this is the source of truth
+    window.__isReciting = false;
     if(recognition){
       try{ recognition.abort(); }catch(e){}
+      try{ recognition.stop(); }catch(e){}
     }
     listening = false;
     if(micBtn) micBtn.classList.remove('listening','mic-armed');
     if(micLabel) micLabel.textContent = 'Start reciting';
+    if(statusEl) statusEl.textContent = 'Tap the mic to start reciting';
   }
   if(micBtn){
     micBtn.addEventListener('click', () => {
