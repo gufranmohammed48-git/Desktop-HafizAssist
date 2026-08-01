@@ -578,7 +578,7 @@
 </head>
 <body class="theme-dark">
 
-<div class="ver" id="ver">v3.16</div>
+<div class="ver" id="ver">v3.17</div>
 
 <button class="settings-btn" id="settingsBtn" title="Settings">⚙</button>
 <div class="settings-menu" id="settingsMenu">
@@ -1184,9 +1184,9 @@
   //   - far-window search (only after RESYNC_THRESHOLD misses)
   //   - no match → log + don't advance pointer
   // Plus the applyMatch function that marks words as correct/unclear.
-  const NEAR_WINDOW = 12;       // was 8 — more lenient lookahead
-  const FAR_WINDOW = 16;        // was 8 — search further on resync
-  const RESYNC_THRESHOLD = 3;   // was 6 — trigger far-window sooner
+  const NEAR_WINDOW = 8;        // production's value
+  const FAR_WINDOW = 8;         // production's value
+  const RESYNC_THRESHOLD = 6;   // production's value
   const LEVENSHTEIN_RATIO = 0.30;
   const PHONEME_LEVENSHTEIN_RATIO = 0.40;
   let _maxPointerReached = 0;
@@ -1236,46 +1236,39 @@
     }
     return {idx:-1, match:{matched:false, kind:'none'}};
   }
+  // PRODUCTION'S applyMatch (always marks skipped words as unclear,
+  // no guard). This is critical for the re-derivation to work
+  // correctly — production's _runReProcess only clears status from
+  // _maxPointerReached onwards, so words below _maxPointerReached
+  // keep their status. The re-derivation can safely re-mark
+  // skipped words as unclear because they're between the current
+  // pointer and the match (which is always <= pointer + 3).
   function applyMatch(matchAt, matchInfo, heardWord){
-    // Mark skipped words as 'unclear' (yellow). Skip already-correct
-    // words so the re-derivation doesn't re-mark them.
     for(let i = pointer; i < matchAt; i++){
       const w = refWords[i];
-      if(w.el && w.el.dataset.status !== 'correct' && w.el.dataset.status !== 'past'){
+      if(w.el){
         w.el.dataset.status = 'unclear';
-        if(w.status !== 'correct') w.status = 'unclear';
+        stats.unclear++;
       }
     }
     if(refWords[matchAt] && refWords[matchAt].el){
       refWords[matchAt].el.dataset.status = 'correct';
-      refWords[matchAt].status = 'correct';
+      stats.correct++;
     }
     pointer = matchAt + 1;
     consecutiveMisses = 0;
   }
+  // PRODUCTION'S processNewWord (copied verbatim + adapted for pageStart)
   function processNewWord(rawWord){
     const norm = normalize(rawWord);
     if(!norm) return;
     if(pointer >= refWords.length) return;
-    // PAST REGION CHECK: if the heard word matches a word in the
-    // past region (already recited and correct), skip it. This
-    // prevents duplicate words from the recognition transcript
-    // (e.g., "الرحمن الرحيم" appearing twice) from confusing
-    // the matcher. Without this, the matcher would try to
-    // re-match the duplicate and could send the pointer
-    // backwards or get stuck.
-    for(let i = pageStart; i < pointer; i++){
-      if(refWords[i] && refWords[i].norm === norm && refWords[i].status === 'correct'){
-        if(typeof updateMatcherDebug === 'function') updateMatcherDebug(_pendingFullText, rawWord, 'skip(past)');
-        return;
-      }
-    }
-    // FIRST-WORD BIAS: ONLY at pageStart (the very first word of
-    // the page). Removed the `consecutiveMisses === 0` condition
-    // because it was triggering for EVERY word at the start of
-    // each tick, which caused the pointer to oscillate when
-    // duplicate words appeared in the transcript.
-    if(pointer === pageStart){
+
+    // FIRST-WORD BIAS: when pointer is at pageStart (the very
+    // first word of the current page) AND no recent misses,
+    // be lenient. This handles Chrome splitting the first
+    // word weirdly. After the first word, this doesn't trigger.
+    if(pointer === pageStart && consecutiveMisses === 0){
       const head = isFuzzyMatch(norm, refWords[pointer].norm, refWords[pointer].phoneme, 0.40);
       if(head.matched){
         applyMatch(pointer, head, rawWord);
@@ -1283,14 +1276,16 @@
         return;
       }
     }
-    // 1) near-window search
+
+    // 1) near-window search (production's tight lookahead: <= 3)
     const near = findMatch(norm, pointer, pointer + NEAR_WINDOW);
-    if(near.idx !== -1 && (near.idx - pointer) <= 8){
+    if(near.idx !== -1 && (near.idx - pointer) <= 3){
       applyMatch(near.idx, near.match, rawWord);
       if(typeof updateMatcherDebug === 'function') updateMatcherDebug(_pendingFullText, rawWord, 'match');
       return;
     }
-    // 2) far-window search
+
+    // 2) far-window search (only after RESYNC_THRESHOLD misses)
     consecutiveMisses++;
     if(consecutiveMisses >= RESYNC_THRESHOLD){
       const far = findMatch(norm, pointer + NEAR_WINDOW, pointer + FAR_WINDOW);
@@ -1300,6 +1295,7 @@
         return;
       }
     }
+
     // 3) no match — don't advance, don't mark
     if(typeof updateMatcherDebug === 'function') updateMatcherDebug(_pendingFullText, rawWord, 'miss');
   }
