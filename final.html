@@ -473,6 +473,12 @@ let consecutiveMisses = 0;
 let _lastHighlightedPointer = -1;
 let _prevPastEnd = 0;  // index of first non-.past word
 let _maxPointerReached = 0;  // furthest pointer reached this surah
+
+// MUSHAF MODE: pagination state (outer scope so boot IIFE can access)
+const PAGE_SIZE = 70;         // words per mushaf page (~11 lines)
+let pageStart = 0;            // start index of current page
+let pageEnd = PAGE_SIZE;      // end index of current page
+let allRefWords = [];         // the full 77,877-word global array
 let _lastProcessedWordCount = 0;  // unused, kept for legacy
 let _pendingReProcess = false;  // rAF throttle for the heavy re-processing
 let _pendingFullText  = "";     // latest fullText waiting to be re-processed
@@ -891,11 +897,7 @@ async function selectSurah(num, cardEl){
 function resetState(){
   refWords = [];         // ALL 77,877 words (built on init)
   ayahEndIndex = [];     // index where each ayah ends
-  // Mushaf pagination: 70 words per page, 1113 pages total
-  const PAGE_SIZE = 70;
-  let pageStart = 0;     // start index of current page
-  let pageEnd = PAGE_SIZE;  // end index of current page
-  let allRefWords = [];  // the full global array (77,877 words with Bismillah prepended)
+  // (PAGE_SIZE, pageStart, pageEnd, allRefWords are declared in outer scope)
   pointer = 0;
   consecutiveMisses = 0;
   stats = {correct:0, mistake:0, unclear:0};
