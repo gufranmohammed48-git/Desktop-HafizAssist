@@ -578,7 +578,7 @@
 </head>
 <body class="theme-dark">
 
-<div class="ver" id="ver">v4</div>
+<div class="ver" id="ver">v5</div>
 
 <button class="settings-btn" id="settingsBtn" title="Settings">⚙</button>
 <div class="settings-menu" id="settingsMenu">
@@ -964,14 +964,13 @@
       w.el = span;
       w.norm = w.norm || normalize(w.text);
       inner.appendChild(span);
-      // TEMPORARILY DISABLED verse markers — user wants to test if
-      // these are causing the matcher to get stuck at ayah boundaries.
-      // if(isLastWordOfAyah && w.ayah !== 'bismillah'){
-      //   const m = document.createElement('span');
-      //   m.className = 'verse-marker';
-      //   m.textContent = w.ayah;
-      //   inner.appendChild(m);
-      // }
+      // === If this is the last word of the ayah, emit the verse marker ===
+      if(isLastWordOfAyah && w.ayah !== 'bismillah'){
+        const m = document.createElement('span');
+        m.className = 'verse-marker';
+        m.textContent = w.ayah;
+        inner.appendChild(m);
+      }
     }
     // Update the page info display
     updateStats();
