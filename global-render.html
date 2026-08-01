@@ -1454,13 +1454,6 @@
           }, 400);
         }
       }, 250);
-      // (removed the old __isReciting/sessionId-based logic)
-        // User has stopped — turn off the UI
-        listening = false;
-        if(micBtn) micBtn.classList.remove('listening','mic-armed');
-        if(micLabel) micLabel.textContent = 'Start reciting';
-        if(statusEl) statusEl.textContent = 'Tap the mic to start reciting';
-      }
     };
     recognition.onerror = (e) => {
       if(statusEl) statusEl.textContent = 'Mic error: ' + (e.error || 'unknown');
