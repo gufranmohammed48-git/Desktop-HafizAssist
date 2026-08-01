@@ -576,7 +576,7 @@
 </head>
 <body class="theme-dark">
 
-<div class="ver" id="ver">v3.12</div>
+<div class="ver" id="ver">v3.13</div>
 
 <button class="settings-btn" id="settingsBtn" title="Settings">⚙</button>
 <div class="settings-menu" id="settingsMenu">
@@ -618,6 +618,12 @@
   </button>
   <button class="toggle-script-btn" id="toggleScriptBtn">Hide Script</button>
   <span class="status-text" id="status">Pick a surah from the above list and track your recitation</span>
+</div>
+<div id="matcherDebug" style="max-width:700px;margin:0 auto 12px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:12px;line-height:1.6">
+  <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">🔍 Matcher Debug</div>
+  <div id="mdPointer" style="font-family:monospace;color:var(--primary)">pointer: —</div>
+  <div id="mdLastWords" style="font-family:monospace;color:var(--text);margin-top:4px">last 5: —</div>
+  <div id="mdTranscript" style="font-family:monospace;color:var(--text-dim);margin-top:4px">transcript: —</div>
 </div>
 <div id="transcriptBox" class="transcript-box hidden">
   <span class="label">Live transcript — what the app heard from you</span>
@@ -1257,6 +1263,7 @@
       const head = isFuzzyMatch(norm, refWords[pointer].norm, refWords[pointer].phoneme, 0.40);
       if(head.matched){
         applyMatch(pointer, head, rawWord);
+        if(typeof updateMatcherDebug === 'function') updateMatcherDebug(_pendingFullText, rawWord, 'match(bias)');
         return;
       }
     }
@@ -1264,6 +1271,7 @@
     const near = findMatch(norm, pointer, pointer + NEAR_WINDOW);
     if(near.idx !== -1 && (near.idx - pointer) <= 3){
       applyMatch(near.idx, near.match, rawWord);
+      if(typeof updateMatcherDebug === 'function') updateMatcherDebug(_pendingFullText, rawWord, 'match');
       return;
     }
     // 2) far-window search
@@ -1272,10 +1280,12 @@
       const far = findMatch(norm, pointer + NEAR_WINDOW, pointer + FAR_WINDOW);
       if(far.idx !== -1){
         applyMatch(far.idx, far.match, rawWord);
+        if(typeof updateMatcherDebug === 'function') updateMatcherDebug(_pendingFullText, rawWord, 'match(far)');
         return;
       }
     }
     // 3) no match — don't advance, don't mark
+    if(typeof updateMatcherDebug === 'function') updateMatcherDebug(_pendingFullText, rawWord, 'miss');
   }
   // === rAF-throttled re-processing (production's pattern) ===
   function _scheduleReProcess(){
@@ -1315,6 +1325,34 @@
       renderPage();
     }
   }
+  // === updateMatcherDebug: show real-time matcher state ===
+  let _lastWordsLog = [];
+  function updateMatcherDebug(transcript, heardWord, matchResult){
+    if(heardWord){
+      _lastWordsLog.push({word:heardWord, result:matchResult, time:Date.now()});
+      if(_lastWordsLog.length > 5) _lastWordsLog.shift();
+    }
+    const mdP = document.getElementById('mdPointer');
+    const mdL = document.getElementById('mdLastWords');
+    const mdT = document.getElementById('mdTranscript');
+    if(mdP){
+      const w = refWords[pointer];
+      const wTxt = w ? `${w.text} (norm: ${w.norm || '?'})` : '(end)';
+      mdP.textContent = `pointer: ${pointer} → "${wTxt}"`;
+    }
+    if(mdL){
+      mdL.innerHTML = _lastWordsLog.map(e => {
+        const color = e.result === 'match' ? 'var(--primary)' :
+                      e.result === 'skip'  ? 'var(--yellow)'  :
+                      e.result === 'miss'  ? '#e74c3c' : 'var(--text-dim)';
+        return `<span style="color:${color}">"${e.word}" [${e.result}]</span>`;
+      }).join(' · ');
+    }
+    if(mdT && transcript){
+      mdT.textContent = `transcript: "${transcript.length > 60 ? transcript.slice(0,60) + '…' : transcript}"`;
+    }
+  }
+
   // === highlightCurrent: incremental DOM updates (production's pattern) ===
   function highlightCurrent(){
     if(pointer === _lastHighlightedPointer) return;
