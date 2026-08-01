@@ -578,7 +578,7 @@
 </head>
 <body class="theme-dark">
 
-<div class="ver" id="ver">v3.18</div>
+<div class="ver" id="ver">v3.19</div>
 
 <button class="settings-btn" id="settingsBtn" title="Settings">⚙</button>
 <div class="settings-menu" id="settingsMenu">
@@ -1439,25 +1439,22 @@
       _pendingWords = fullText.length ? fullText.split(/\s+/) : [];
       _scheduleReProcess();
     };
+    // PRODUCTION'S onend: use `listening` flag with 250ms delay.
     recognition.onend = () => {
-      // Only auto-restart if the user is still reciting AND this
-      // session hasn't been replaced by a newer one
-      if(window.__isReciting && sessionId === window.__hifzappSessionId){
-        setTimeout(() => {
-          // Re-check the token inside the setTimeout (in case the
-          // user clicked stop between the original onend and now)
-          if(!window.__isReciting || sessionId !== window.__hifzappSessionId) return;
-          try{
-            recognition.start();
-            listening = true;
-            if(micBtn) micBtn.classList.add('listening');
-            if(micLabel) micLabel.textContent = 'Listening... tap to stop';
-            if(statusEl) statusEl.textContent = 'Listening (Arabic) — recite naturally.';
-          }catch(e){
-            if(statusEl) statusEl.textContent = 'Mic restart failed: ' + e.message;
-          }
-        }, 100);
-      } else {
+      if(!listening) return;
+      setTimeout(() => {
+        if(!listening) return;
+        try {
+          recognition.start();
+        } catch(e) {
+          setTimeout(() => {
+            if(listening){
+              try{ recognition.start(); }catch(_){}
+            }
+          }, 400);
+        }
+      }, 250);
+      // (removed the old __isReciting/sessionId-based logic)
         // User has stopped — turn off the UI
         listening = false;
         if(micBtn) micBtn.classList.remove('listening','mic-armed');
