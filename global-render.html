@@ -578,7 +578,7 @@
 </head>
 <body class="theme-dark">
 
-<div class="ver" id="ver">v7c</div>
+<div class="ver" id="ver">v8</div>
 
 <button class="settings-btn" id="settingsBtn" title="Settings">⚙</button>
 <div class="settings-menu" id="settingsMenu">
@@ -1202,6 +1202,32 @@
   let _pendingWords = [];
   let _pendingReProcess = false;
   let _pendingFinalized = '';  // (legacy, unused since v3.24)
+  // CRITICAL: levRatio was missing! This caused the matcher to crash
+  // when trying to fuzzy-match "العالمين" (and any word that didn't
+  // exact-match or substring-match). Production has this function —
+  // we forgot to copy it over.
+  function levRatio(a, b){
+    if(!a || !b) return 0;
+    if(a === b) return 1;
+    const la = a.length, lb = b.length;
+    if(!la || !lb) return 0;
+    // Levenshtein distance
+    const dp = Array.from({length: la+1}, () => new Array(lb+1).fill(0));
+    for(let i = 0; i <= la; i++) dp[i][0] = i;
+    for(let j = 0; j <= lb; j++) dp[0][j] = j;
+    for(let i = 1; i <= la; i++){
+      for(let j = 1; j <= lb; j++){
+        const cost = a[i-1] === b[j-1] ? 0 : 1;
+        dp[i][j] = Math.min(
+          dp[i-1][j] + 1,      // deletion
+          dp[i][j-1] + 1,      // insertion
+          dp[i-1][j-1] + cost  // substitution
+        );
+      }
+    }
+    const dist = dp[la][lb];
+    return 1 - (dist / Math.max(la, lb));
+  }
   function isFuzzyMatch(heardNorm, expectedNorm, expectedPhoneme, lenientRatio){
     if(!heardNorm || !expectedNorm) return {matched:false, kind:'none'};
     lenientRatio = lenientRatio || LEVENSHTEIN_RATIO;
