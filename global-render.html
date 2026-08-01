@@ -515,7 +515,7 @@
 </head>
 <body class="theme-dark">
 
-<div class="ver" id="ver">v3.1</div>
+<div class="ver" id="ver">v3.2</div>
 
 <button class="settings-btn" id="settingsBtn" title="Settings">⚙</button>
 <div class="settings-menu" id="settingsMenu">
@@ -1012,7 +1012,6 @@
     // Find the surah's first word in refWords
     const startIdx = refWords.findIndex(w => w.surah === num);
     if(startIdx < 0) return;
-    pointer = startIdx;
     // MUSHAF-STYLE NAVIGATION: find the PAGE that contains the
     // surah's start word. The surah title will be rendered at
     // its natural position in that page (which may be middle
@@ -1021,6 +1020,13 @@
     const pageNum = Math.floor(startIdx / PAGE_SIZE);
     pageStart = pageNum * PAGE_SIZE;
     pageEnd   = Math.min(refWords.length, pageStart + PAGE_SIZE);
+    // Reset the pointer to the TOP of the visible page so the
+    // user can recite from the start of what's visible. This way
+    // they see the .now word highlighted immediately.
+    pointer = pageStart;
+    // Reset stats for the new surah
+    stats = {correct:0, mistake:0, unclear:0};
+    if(typeof updateStatsUI === 'function') updateStatsUI();
     renderPage();
   }
   // Search filter
@@ -1161,6 +1167,17 @@
     }
     stats = newStats;
     updateStatsUI();
+    // Follow the pointer: if it moved out of the current page
+    // slice, advance the page slice to keep the .now word visible.
+    if(pointer >= pageEnd){
+      const newPageNum = Math.floor(pointer / PAGE_SIZE);
+      pageStart = newPageNum * PAGE_SIZE;
+      pageEnd   = Math.min(refWords.length, pageStart + PAGE_SIZE);
+      renderPage();
+    } else {
+      // Just re-render the current page so the .now word is up to date
+      renderPage();
+    }
   }
 
   // ==== SPEECH RECOGNITION ====
@@ -1196,9 +1213,20 @@
       if(micBtn) micBtn.classList.remove('listening','mic-armed');
       if(micLabel) micLabel.textContent = 'Start reciting';
       if(statusEl) statusEl.textContent = 'Tap the mic to start reciting';
-      // Auto-restart if user is mid-recitation (was listening)
-      if(window.__shouldKeepListening){
-        try{ recognition.start(); listening = true; if(micBtn) micBtn.classList.add('listening'); }catch(e){}
+      // Auto-restart while user is mid-recitation. The user only
+      // stops the mic by clicking the button again.
+      if(window.__isReciting){
+        setTimeout(() => {
+          try{
+            recognition.start();
+            listening = true;
+            if(micBtn) micBtn.classList.add('listening');
+            if(micLabel) micLabel.textContent = 'Listening... tap to stop';
+            if(statusEl) statusEl.textContent = 'Listening (Arabic) — recite naturally.';
+          }catch(e){
+            if(statusEl) statusEl.textContent = 'Mic restart failed: ' + e.message;
+          }
+        }, 100);
       }
     };
     recognition.onerror = (e) => {
@@ -1221,7 +1249,7 @@
       if(micBtn) micBtn.classList.add('listening');
       if(micLabel) micLabel.textContent = 'Listening... tap to stop';
       if(statusEl) statusEl.textContent = 'Listening (Arabic) — recite naturally.';
-      window.__shouldKeepListening = false;
+      window.__isReciting = true;
     }catch(e){
       if(statusEl) statusEl.textContent = "Couldn't start microphone: " + e.message;
     }
