@@ -576,7 +576,7 @@
 </head>
 <body class="theme-dark">
 
-<div class="ver" id="ver">v3.13</div>
+<div class="ver" id="ver">v3.14</div>
 
 <button class="settings-btn" id="settingsBtn" title="Settings">⚙</button>
 <div class="settings-menu" id="settingsMenu">
@@ -1254,12 +1254,25 @@
     const norm = normalize(rawWord);
     if(!norm) return;
     if(pointer >= refWords.length) return;
-    // FIRST-WORD BIAS: when pointer is at pageStart OR after a long
-    // pause (consecutiveMisses === 0), be lenient — the user is
-    // probably starting a new phrase. This handles the case where
-    // the recognition delivers background noise as the first word
-    // and then the actual recitation.
-    if(pointer === pageStart || consecutiveMisses === 0){
+    // PAST REGION CHECK: if the heard word matches a word in the
+    // past region (already recited and correct), skip it. This
+    // prevents duplicate words from the recognition transcript
+    // (e.g., "الرحمن الرحيم" appearing twice) from confusing
+    // the matcher. Without this, the matcher would try to
+    // re-match the duplicate and could send the pointer
+    // backwards or get stuck.
+    for(let i = pageStart; i < pointer; i++){
+      if(refWords[i] && refWords[i].norm === norm && refWords[i].status === 'correct'){
+        if(typeof updateMatcherDebug === 'function') updateMatcherDebug(_pendingFullText, rawWord, 'skip(past)');
+        return;
+      }
+    }
+    // FIRST-WORD BIAS: ONLY at pageStart (the very first word of
+    // the page). Removed the `consecutiveMisses === 0` condition
+    // because it was triggering for EVERY word at the start of
+    // each tick, which caused the pointer to oscillate when
+    // duplicate words appeared in the transcript.
+    if(pointer === pageStart){
       const head = isFuzzyMatch(norm, refWords[pointer].norm, refWords[pointer].phoneme, 0.40);
       if(head.matched){
         applyMatch(pointer, head, rawWord);
@@ -1269,7 +1282,7 @@
     }
     // 1) near-window search
     const near = findMatch(norm, pointer, pointer + NEAR_WINDOW);
-    if(near.idx !== -1 && (near.idx - pointer) <= 3){
+    if(near.idx !== -1 && (near.idx - pointer) <= 8){
       applyMatch(near.idx, near.match, rawWord);
       if(typeof updateMatcherDebug === 'function') updateMatcherDebug(_pendingFullText, rawWord, 'match');
       return;
