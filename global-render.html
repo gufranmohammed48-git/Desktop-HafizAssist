@@ -393,11 +393,43 @@
   }
   .surah-header.first{margin-top:0}
   .word{display:inline-block;padding:2px 5px;border-radius:5px;margin:0 1px;transition:all .15s}
-  .word.future{color:var(--text-dim);opacity:.75}
-  .word.now{background:var(--primary);color:var(--bg);font-weight:700;transform:scale(1.08);box-shadow:0 0 14px var(--now-glow);position:relative;z-index:2}
-  .word.past{color:var(--primary);opacity:.9}
-  .word.wrong{color:#e74c3c;background:rgba(231,76,60,.18);text-decoration:line-through}
-  .word.unclear{color:var(--yellow);background:var(--yellow-soft)}
+  /* .past: dimmed (so .now stands out clearly against them) */
+  .word.past{color:var(--text-dim);opacity:.55}
+  /* .future: very dim (about to be recited) */
+  .word.future{color:var(--text-dim);opacity:.7}
+  /* .now: STRONG highlight — bright background, dark text, glow, border,
+     scale up. This is the active word the user is reciting. */
+  .word.now{
+    background:var(--primary);
+    color:#0a1f12;
+    font-weight:800;
+    font-size:1.15em;
+    padding:6px 10px;
+    margin:0 4px;
+    border-radius:8px;
+    transform:scale(1.15);
+    box-shadow:0 0 0 3px var(--primary),0 0 24px var(--now-glow),0 4px 12px rgba(0,0,0,.3);
+    position:relative;
+    z-index:10;
+    transition:all .15s ease;
+  }
+  /* .wrong: red strikethrough */
+  .word.wrong{
+    color:#e74c3c;
+    background:rgba(231,76,60,.25);
+    text-decoration:line-through;
+    font-weight:600;
+    border-radius:6px;
+    padding:4px 8px;
+  }
+  /* .unclear: yellow background */
+  .word.unclear{
+    color:var(--yellow);
+    background:var(--yellow-soft);
+    font-weight:600;
+    border-radius:6px;
+    padding:4px 8px;
+  }
 
   /* Bismillah word — highlighted as a soft yellow pre-chapter marker */
   /* Bismillah words: darker green (matches the surah script's green
@@ -515,7 +547,7 @@
 </head>
 <body class="theme-dark">
 
-<div class="ver" id="ver">v3.2</div>
+<div class="ver" id="ver">v3.3</div>
 
 <button class="settings-btn" id="settingsBtn" title="Settings">⚙</button>
 <div class="settings-menu" id="settingsMenu">
