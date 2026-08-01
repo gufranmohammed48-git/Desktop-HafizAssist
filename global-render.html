@@ -241,6 +241,87 @@
      Was: min-height:510px + overflow:hidden — but with 100 words the
      content grew past 510px and the page expanded (no internal scroll).
      Now: height:510px (FIXED) + overflow-y:auto (internal scroll). */
+  /* === STATS ROW (4 boxes) === */
+  .stats-row{
+    max-width:700px;margin:0 auto 10px;
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:8px;
+  }
+  .stat-box{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:10px 8px;
+    text-align:center;
+  }
+  .stat-box .stat-label{
+    font-family:system-ui,-apple-system,sans-serif;
+    font-size:10px;font-weight:700;
+    color:var(--text-dim);
+    text-transform:uppercase;letter-spacing:1px;
+    margin-bottom:4px;
+  }
+  .stat-box .stat-val{
+    font-family:system-ui,-apple-system,sans-serif;
+    font-size:20px;font-weight:700;
+    color:var(--text);
+    line-height:1;
+  }
+  .stat-box .stat-val.green{color:var(--primary)}
+  .stat-box .stat-val.red{color:#e74c3c}
+  .stat-box .stat-val.yellow{color:var(--yellow)}
+  /* === MIC + CONTROLS ROW === */
+  .mic-row{
+    max-width:700px;margin:0 auto 12px;
+    display:flex;gap:8px;align-items:center;
+    flex-wrap:wrap;
+  }
+  .mic-btn{
+    background:var(--primary);
+    color:#0a1f12;
+    border:none;
+    padding:12px 22px;
+    border-radius:30px;
+    font-family:inherit;
+    font-size:15px;font-weight:600;
+    cursor:pointer;
+    transition:all .15s ease;
+    display:flex;align-items:center;gap:8px;
+  }
+  .mic-btn:hover{filter:brightness(1.1)}
+  .mic-btn.listening{animation:pulse 1.5s ease-in-out infinite}
+  .mic-btn.listening.mic-armed{background:linear-gradient(135deg,#2ecc71,#27ae60)!important;box-shadow:0 0 0 8px rgba(46,204,113,.4),0 6px 20px rgba(46,204,113,.5)!important;position:relative}
+  .mic-btn.listening.mic-armed::after{content:'\f130 MIC LIVE \2014 speak now';position:absolute;top:-38px;left:50%;transform:translateX(-50%);background:var(--primary);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:4px;white-space:nowrap;letter-spacing:.5px;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+  .mic-btn .mic-dot{width:10px;height:10px;border-radius:50%;background:#0a1f12}
+  .mic-btn.listening .mic-dot{animation:mic-pulse 1s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.85}}
+  @keyframes mic-pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.3);opacity:.7}}
+  .toggle-script-btn{
+    background:var(--card);
+    color:var(--text);
+    border:1px solid var(--border);
+    padding:10px 18px;
+    border-radius:30px;
+    font-family:inherit;
+    font-size:13px;font-weight:600;
+    cursor:pointer;
+    transition:all .15s ease;
+  }
+  .toggle-script-btn:hover{border-color:var(--primary);color:var(--primary)}
+  .status-text{
+    color:var(--text-dim);
+    font-size:12px;
+    font-family:system-ui,-apple-system,sans-serif;
+  }
+  /* Hide Script mode for the page */
+  #page.script-hidden .word.future{filter:blur(6px);opacity:.25}
+  #page.script-hidden .verse-marker{filter:blur(4px);opacity:.3}
+  #page.script-hidden .word.now{color:transparent!important;background:var(--primary)!important;border:3px solid #fff!important;box-shadow:0 0 16px var(--now-glow),0 0 4px #fff inset!important;text-shadow:none!important}
+  #page.script-hidden .word[data-status="unclear"]{opacity:1;color:var(--yellow);background:var(--yellow-soft);border:2px solid rgba(241,196,15,.6);font-weight:600;filter:none}
+  #page.script-hidden .bismillah-block{filter:blur(3px);opacity:.6}
+  #page.script-hidden .surah-header{filter:blur(2px);opacity:.7}
+
   #page{
     background:var(--card);
     border:1px solid var(--border);
@@ -434,7 +515,7 @@
 </head>
 <body class="theme-dark">
 
-<div class="ver" id="ver">v2.9</div>
+<div class="ver" id="ver">v3.1</div>
 
 <button class="settings-btn" id="settingsBtn" title="Settings">⚙</button>
 <div class="settings-menu" id="settingsMenu">
@@ -463,6 +544,20 @@
   <div class="surah-grid" id="surahGrid"></div>
 </section>
 
+<div class="stats-row">
+  <div class="stat-box"><div class="stat-label">Correct</div><div class="stat-val green" id="statCorrect">0</div></div>
+  <div class="stat-box"><div class="stat-label">Mistakes</div><div class="stat-val red" id="statMistake">0</div></div>
+  <div class="stat-box"><div class="stat-label">Unclear</div><div class="stat-val yellow" id="statUnclear">0</div></div>
+  <div class="stat-box"><div class="stat-label">Pointer</div><div class="stat-val" id="statPointer">0 / 0</div></div>
+</div>
+<div class="mic-row">
+  <button class="mic-btn" id="micBtn">
+    <span class="mic-dot"></span>
+    <span id="micLabel">Start reciting</span>
+  </button>
+  <button class="toggle-script-btn" id="toggleScriptBtn">Hide Script</button>
+  <span class="status-text" id="status">Pick a surah from the above list and track your recitation</span>
+</div>
 <div style="max-width:700px;margin:0 auto 12px;display:flex;justify-content:space-between;gap:8px">
   <button id="prevPageBtn" style="flex:1;background:var(--card);color:var(--primary);border:1px solid var(--primary);padding:10px 16px;border-radius:8px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer">← Previous page</button>
   <button id="nextPageBtn" style="flex:1;background:var(--card);color:var(--primary);border:1px solid var(--primary);padding:10px 16px;border-radius:8px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer">Next page →</button>
@@ -957,6 +1052,224 @@
 
   // Render the surah grid
   renderSurahGrid();
+
+  // ==== RECITATION: stats + matcher + speech recognition ====
+  let stats = {correct:0, mistake:0, unclear:0};
+  function updateStatsUI(){
+    const statCorrect = document.getElementById('statCorrect');
+    const statMistake = document.getElementById('statMistake');
+    const statUnclear = document.getElementById('statUnclear');
+    const statPointer = document.getElementById('statPointer');
+    if(statCorrect) statCorrect.textContent = stats.correct;
+    if(statMistake) statMistake.textContent = stats.mistake;
+    if(statUnclear) statUnclear.textContent = stats.unclear;
+    if(statPointer) statPointer.textContent = (pointer + 1) + ' / ' + refWords.length;
+  }
+
+  // ==== MATCHER: ported from index.html v47.5 (with past-region fix) ====
+  function levenshtein(a, b){
+    const m = a.length, n = b.length;
+    if(!m) return n; if(!n) return m;
+    const dp = Array.from({length:m+1}, () => new Array(n+1).fill(0));
+    for(let i=0;i<=m;i++) dp[i][0] = i;
+    for(let j=0;j<=n;j++) dp[0][j] = j;
+    for(let i=1;i<=m;i++){
+      for(let j=1;j<=n;j++){
+        dp[i][j] = a[i-1] === b[j-1]
+          ? dp[i-1][j-1]
+          : 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
+      }
+    }
+    return dp[m][n];
+  }
+  function _simpleFindMatch(w, p){
+    // Past region: if the heard word is already recited, skip it
+    for(let i = 0; i < p; i++){
+      if(refWords[i].norm === w) return {idx:i, kind:'past'};
+    }
+    const NEAR = 12;
+    const end = Math.min(refWords.length, p + NEAR);
+    for(let i = p; i < end; i++){
+      if(refWords[i].norm === w) return {idx:i, kind:'exact'};
+    }
+    for(let i = p; i < end; i++){
+      if(refWords[i].norm.startsWith(w) && w.length >= 2) return {idx:i, kind:'prefix'};
+      if(w.startsWith(refWords[i].norm) && refWords[i].norm.length >= 2) return {idx:i, kind:'prefix'};
+    }
+    for(let i = p; i < end; i++){
+      const d = levenshtein(refWords[i].norm, w);
+      const tol = Math.max(1, Math.floor(Math.max(refWords[i].norm.length, w.length) * 0.25));
+      if(d <= tol) return {idx:i, kind:'fuzzy', dist:d};
+    }
+    return {idx:-1, kind:'none'};
+  }
+  function _simpleMatch(text){
+    const heard = (text||'').split(/\s+/).map(normalize).filter(Boolean);
+    if(!heard.length) return;
+    let p = pointer;
+    for(const w of heard){
+      const m = _simpleFindMatch(w, p);
+      if(m.kind === 'past') continue;
+      if(m.idx >= 0){
+        for(let i = p; i < m.idx; i++){
+          if(refWords[i].status !== 'correct'){
+            refWords[i].status = 'unclear';
+            if(refWords[i].el){
+              refWords[i].el.dataset.status = 'unclear';
+              refWords[i].el.classList.remove('now','future','wrong');
+              refWords[i].el.classList.add('past','unclear');
+            }
+          }
+        }
+        refWords[m.idx].status = 'correct';
+        if(refWords[m.idx].el){
+          refWords[m.idx].el.dataset.status = 'correct';
+          refWords[m.idx].el.classList.remove('now','future','unclear','wrong');
+          refWords[m.idx].el.classList.add('past');
+        }
+        p = m.idx + 1;
+      } else {
+        if(p < refWords.length){
+          refWords[p].status = 'wrong';
+          if(refWords[p].el){
+            refWords[p].el.dataset.status = 'wrong';
+            refWords[p].el.classList.remove('now','future','past','unclear');
+            refWords[p].el.classList.add('wrong');
+          }
+          p++;
+        }
+      }
+    }
+    pointer = Math.min(p, refWords.length);
+    if(pointer < refWords.length){
+      refWords[pointer].status = 'now';
+      if(refWords[pointer].el){
+        refWords[pointer].el.classList.remove('future');
+        refWords[pointer].el.classList.add('now');
+      }
+    }
+    if(pointer > 0 && refWords[pointer-1].status === 'now'){
+      refWords[pointer-1].status = 'past';
+    }
+    // Recount stats across the WHOLE active surah
+    const newStats = {correct:0, mistake:0, unclear:0};
+    for(let i = pageStart; i < pageEnd; i++){
+      const s = refWords[i].status;
+      if(s === 'correct' || s === 'past') newStats.correct++;
+      else if(s === 'wrong') newStats.mistake++;
+      else if(s === 'unclear') newStats.unclear++;
+    }
+    stats = newStats;
+    updateStatsUI();
+  }
+
+  // ==== SPEECH RECOGNITION ====
+  let recognition = null;
+  let listening = false;
+  const micBtn = document.getElementById('micBtn');
+  const micLabel = document.getElementById('micLabel');
+  const statusEl = document.getElementById('status');
+  function getRecognitionCtor(){
+    return window.SpeechRecognition || window.webkitSpeechRecognition || null;
+  }
+  function startRecognition(){
+    const Ctor = getRecognitionCtor();
+    if(!Ctor){
+      if(statusEl) statusEl.textContent = 'Speech recognition not supported in this browser.';
+      return;
+    }
+    recognition = new Ctor();
+    recognition.continuous = false;     // Android fix
+    recognition.interimResults = false; // Android fix
+    recognition.maxAlternatives = 1;
+    recognition.lang = 'ar-SA';
+    recognition.onresult = (event) => {
+      let txt = '';
+      for(let i = event.resultIndex; i < event.results.length; i++){
+        txt += event.results[i][0].transcript + ' ';
+      }
+      txt = txt.trim();
+      if(txt) _simpleMatch(txt);
+    };
+    recognition.onend = () => {
+      listening = false;
+      if(micBtn) micBtn.classList.remove('listening','mic-armed');
+      if(micLabel) micLabel.textContent = 'Start reciting';
+      if(statusEl) statusEl.textContent = 'Tap the mic to start reciting';
+      // Auto-restart if user is mid-recitation (was listening)
+      if(window.__shouldKeepListening){
+        try{ recognition.start(); listening = true; if(micBtn) micBtn.classList.add('listening'); }catch(e){}
+      }
+    };
+    recognition.onerror = (e) => {
+      if(statusEl) statusEl.textContent = 'Mic error: ' + (e.error || 'unknown');
+    };
+    // onaudiostart/onspeechstart for the 'mic-armed' indicator
+    ['onaudiostart','onspeechstart','onsoundstart'].forEach(ev => {
+      recognition[ev] = () => {
+        if(micBtn) micBtn.classList.add('mic-armed');
+      };
+    });
+    ['onaudioend','onspeechend'].forEach(ev => {
+      recognition[ev] = () => {
+        if(micBtn) micBtn.classList.remove('mic-armed');
+      };
+    });
+    try{
+      recognition.start();
+      listening = true;
+      if(micBtn) micBtn.classList.add('listening');
+      if(micLabel) micLabel.textContent = 'Listening... tap to stop';
+      if(statusEl) statusEl.textContent = 'Listening (Arabic) — recite naturally.';
+      window.__shouldKeepListening = false;
+    }catch(e){
+      if(statusEl) statusEl.textContent = "Couldn't start microphone: " + e.message;
+    }
+  }
+  function stopRecognition(){
+    window.__shouldKeepListening = false;
+    if(recognition){
+      try{ recognition.abort(); }catch(e){}
+    }
+    listening = false;
+    if(micBtn) micBtn.classList.remove('listening','mic-armed');
+    if(micLabel) micLabel.textContent = 'Start reciting';
+  }
+  if(micBtn){
+    micBtn.addEventListener('click', () => {
+      if(listening) stopRecognition();
+      else startRecognition();
+    });
+  }
+
+  // ==== HIDE SCRIPT TOGGLE ====
+  const toggleScriptBtn = document.getElementById('toggleScriptBtn');
+  const page = document.getElementById('page');
+  if(toggleScriptBtn && page){
+    toggleScriptBtn.addEventListener('click', () => {
+      page.classList.toggle('script-hidden');
+      toggleScriptBtn.textContent = page.classList.contains('script-hidden') ? 'Show Script' : 'Hide Script';
+    });
+  }
+
+  // ==== NORMALIZE (used by matcher) ====
+  // Already defined earlier in the IIFE; if not, define a minimal version
+  if(typeof normalize !== 'function'){
+    window.__normalize = function(word){
+      if(!word) return '';
+      return (word||'')
+        .normalize('NFKC')
+        .replace(/[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED\u0640]/g, '')
+        .replace(/[إأآاٱ]/g, 'ا')
+        .replace(/[يىی]/g, 'ي')
+        .replace(/ة/g, 'ه')
+        .replace(/[^\u0600-\u06FF]/g, '')
+        .trim();
+    };
+  }
+
+  // Initial stats
+  updateStatsUI();
 
   // Initial render (page starts empty — user picks a surah to begin)
   renderPage();
