@@ -631,7 +631,10 @@ function cacheEls() {
     'stat-correct','stat-wrong','stat-unclear','stat-pointer',
     'diag-content','overlay','popup','popup-close','popup-word',
     'popup-phoneme','popup-tajweed','popup-ayah'];
-  ids.forEach(id => els[id.replace(/-/g,'')] = document.getElementById(id));
+  ids.forEach(id => {
+    const key = id.replace(/-([a-z])/g, (_, ch) => ch.toUpperCase());
+    els[key] = document.getElementById(id);
+  });
 }
 
 // ===== INIT =====
