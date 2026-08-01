@@ -434,7 +434,7 @@
 </head>
 <body class="theme-dark">
 
-<div class="ver" id="ver">v2.8</div>
+<div class="ver" id="ver">v2.9</div>
 
 <button class="settings-btn" id="settingsBtn" title="Settings">⚙</button>
 <div class="settings-menu" id="settingsMenu">
@@ -712,7 +712,15 @@
     for(let i = pageStart; i < pageEnd; i++){
       const w = refWords[i];
       // === Surah transition ===
-      if(w.surah !== lastSurah){
+      // Only emit the surah header / bismillah block when this is the
+      // ACTUAL first word of the surah in the global refWords flow
+      // (i.e., the previous word in the global flow is from a different
+      // surah, or we're at the very start of refWords). Without this
+      // check, every page that contains a new surah's first word would
+      // re-emit the header — so a 10-page surah would show the title
+      // 10 times. We want it ONCE, at the start of the surah.
+      const isActualSurahStart = (i === 0) || (refWords[i-1].surah !== w.surah);
+      if(isActualSurahStart){
         // Close out the previous ayah's marker (if any)
         if(ayahNum !== null && lastSurah !== null){
           // (handled at ayah-end below)
