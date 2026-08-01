@@ -578,7 +578,7 @@
 </head>
 <body class="theme-dark">
 
-<div class="ver" id="ver">v5</div>
+<div class="ver" id="ver">v6</div>
 
 <button class="settings-btn" id="settingsBtn" title="Settings">⚙</button>
 <div class="settings-menu" id="settingsMenu">
@@ -1265,6 +1265,8 @@
     const norm = normalize(rawWord);
     if(!norm) return;
     if(pointer >= refWords.length) return;
+    // DEBUG: show what we're about to try
+    console.log(`[matcher] try: pointer=${pointer} word="${rawWord}" norm="${norm}" target="${refWords[pointer] ? refWords[pointer].norm : 'OOB'}" target.text="${refWords[pointer] ? refWords[pointer].text : 'OOB'}"`);
 
     // FIRST-WORD BIAS: when pointer is at pageStart (the very
     // first word of the current page) AND no recent misses,
@@ -1425,6 +1427,9 @@
 
   // === highlightCurrent: incremental DOM updates (production's pattern) ===
   function highlightCurrent(){
+    // DEBUG: show pointer and DOM state
+    const curEl = (pointer < refWords.length && refWords[pointer]) ? refWords[pointer].el : null;
+    console.log(`[highlight] pointer=${pointer} word="${curEl ? curEl.textContent : 'OOB'}" el=${curEl ? 'YES' : 'NO'} class="${curEl ? curEl.className : 'N/A'}" status="${curEl ? (curEl.dataset.status || 'none') : 'N/A'}"`);
     if(pointer === _lastHighlightedPointer) return;
     if(_lastHighlightedPointer >= 0 && _lastHighlightedPointer < refWords.length){
       const oldEl = refWords[_lastHighlightedPointer] && refWords[_lastHighlightedPointer].el;
