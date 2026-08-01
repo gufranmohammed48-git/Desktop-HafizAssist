@@ -434,7 +434,7 @@
 </head>
 <body class="theme-dark">
 
-<div class="ver" id="ver">v2.7</div>
+<div class="ver" id="ver">v2.8</div>
 
 <button class="settings-btn" id="settingsBtn" title="Settings">⚙</button>
 <div class="settings-menu" id="settingsMenu">
@@ -784,13 +784,16 @@
   }
 
   function updateStats(){
-    // Show the surah at the TOP of the current visible page slice
+    // Show the current mushaf page (page X of Y) + the surah at the
+    // top of the visible page slice
+    const pageNum = Math.floor(pageStart / PAGE_SIZE) + 1;
+    const totalPages = Math.ceil(refWords.length / PAGE_SIZE);
     const firstWord = refWords[pageStart] || refWords[0];
     if(!firstWord) return;
     const meta = SURAH_META.find(s => s.num === firstWord.surah);
-    const surahLabel = meta ? (meta.translit + ' (' + firstWord.surah + '/114)') : 'Surah ?';
+    const surahLabel = meta ? meta.translit + ' (' + firstWord.surah + '/114)' : 'Surah ?';
     const el = document.getElementById('pageInfo');
-    if(el) el.textContent = surahLabel + '  ·  words ' + (pageStart + 1) + '–' + pageEnd;
+    if(el) el.textContent = 'Page ' + pageNum + ' of ' + totalPages + '  ·  ' + surahLabel;
   }
 
   function maybePaginate(){
@@ -818,21 +821,20 @@
     renderPage();
   }
   function prevPage(){
-    // Move the page slice BACKWARD by PAGE_SIZE words
-    const newStart = Math.max(0, pageStart - PAGE_SIZE);
-    const newEnd   = Math.min(refWords.length, newStart + PAGE_SIZE);
-    if(newStart === pageStart) return;
-    pageStart = newStart;
-    pageEnd   = newEnd;
+    // Flip to the previous page (move slice BACKWARD by PAGE_SIZE)
+    const pageNum = Math.floor(pageStart / PAGE_SIZE);
+    if(pageNum === 0) return;  // already at first page
+    pageStart = (pageNum - 1) * PAGE_SIZE;
+    pageEnd   = Math.min(refWords.length, pageStart + PAGE_SIZE);
     renderPage();
   }
   function nextPage(){
-    // Move the page slice FORWARD by PAGE_SIZE words
-    const newStart = Math.min(refWords.length, pageEnd);
-    const newEnd   = Math.min(refWords.length, newStart + PAGE_SIZE);
-    if(newStart === pageStart) return;
-    pageStart = newStart;
-    pageEnd   = newEnd;
+    // Flip to the next page (move slice FORWARD by PAGE_SIZE)
+    const pageNum = Math.floor(pageStart / PAGE_SIZE);
+    const totalPages = Math.ceil(refWords.length / PAGE_SIZE);
+    if(pageNum >= totalPages - 1) return;  // already at last page
+    pageStart = (pageNum + 1) * PAGE_SIZE;
+    pageEnd   = Math.min(refWords.length, pageStart + PAGE_SIZE);
     renderPage();
   }
   function reset(){
@@ -908,25 +910,14 @@
     const startIdx = refWords.findIndex(w => w.surah === num);
     if(startIdx < 0) return;
     pointer = startIdx;
-    // CONTINUOUS FLOW: the surah should appear in the page wherever
-    // it lands in the flow, NOT as the top of a new page.
-    // 1) If the surah is BEFORE the current page: navigate to it
-    //    (so the user can see it)
-    // 2) If the surah is AFTER the current page: extend pageEnd to
-    //    include the surah's start (so the surah's content appears
-    //    at the bottom of the current visible page)
-    // 3) If the surah is WITHIN the current page: do nothing
-    //    (it's already visible)
-    if(startIdx < pageStart){
-      // Surah is before the current view — navigate to it
-      pageStart = startIdx;
-      pageEnd   = Math.min(refWords.length, pageStart + PAGE_SIZE);
-    } else if(startIdx >= pageEnd){
-      // Surah is after the current view — extend pageEnd
-      // Keep pageStart, extend pageEnd to include the surah + one page
-      pageEnd   = Math.min(refWords.length, startIdx + PAGE_SIZE);
-    }
-    // else: surah is within the current view, do nothing
+    // MUSHAF-STYLE NAVIGATION: find the PAGE that contains the
+    // surah's start word. The surah title will be rendered at
+    // its natural position in that page (which may be middle
+    // of the page, NOT at the top). The user flips pages to
+    // read the rest of the surah.
+    const pageNum = Math.floor(startIdx / PAGE_SIZE);
+    pageStart = pageNum * PAGE_SIZE;
+    pageEnd   = Math.min(refWords.length, pageStart + PAGE_SIZE);
     renderPage();
   }
   // Search filter
