@@ -478,7 +478,6 @@
     .page-container { padding: 20px; }
   }
 </style>
-<base target="_blank">
 </head>
 <body class="theme-dark-green">
 <div class="container">
@@ -621,7 +620,7 @@ let state = {
   hideScript: false,
   theme: 'theme-dark-green',
   stats: {correct:0, wrong:0, unclear:0},
-  lastProcessed: {} // resultIndex -> transcript
+  lastProcessed: {}
 };
 
 // ===== DOM REFS =====
@@ -643,18 +642,24 @@ document.addEventListener('DOMContentLoaded', () => {
   initEventListeners();
   runDiagnostics();
 
-  if (typeof SURAH_PHONEMES === 'undefined') {
-    els.pageContainer.innerHTML = '<div class="empty-state">⏳ Loading phoneme data…<br><small>Make sure <code>phonemes-data.js</code> is in the same folder and loaded before this script.</small></div>';
-    const check = setInterval(() => {
-      if (typeof SURAH_PHONEMES !== 'undefined') {
-        clearInterval(check);
-        loadSurah(1);
-      }
-    }, 500);
-  } else {
-    loadSurah(1);
-  }
+  // Wait for phonemes-data.js to load (it's a large file)
+  const checkData = () => {
+    const data = getPhonemeData();
+    if (data) {
+      loadSurah(1);
+    } else {
+      els.pageContainer.innerHTML = '<div class="empty-state">⏳ Loading phoneme data…<br><small>Make sure <code>phonemes-data.js</code> is in the same folder.</small></div>';
+      setTimeout(checkData, 500);
+    }
+  };
+  checkData();
 });
+
+function getPhonemeData() {
+  // The data file sets window.SURAH_PHONEMES as an object with string keys
+  return (typeof window !== 'undefined' && window.SURAH_PHONEMES) || 
+         (typeof SURAH_PHONEMES !== 'undefined' ? SURAH_PHONEMES : null);
+}
 
 function populateSurahSelect() {
   els.surahSelect.innerHTML = '';
@@ -715,23 +720,44 @@ function loadSurah(num) {
   updateStats();
   updatePointer();
 
-  if (typeof SURAH_PHONEMES === 'undefined' || !SURAH_PHONEMES[num]) {
-    els.pageContainer.innerHTML = '<div class="empty-state">❌ Phoneme data not available for this surah.<br><small>Ensure phonemes-data.js is loaded.</small></div>';
+  const DATA = getPhonemeData();
+  if (!DATA) {
+    els.pageContainer.innerHTML = '<div class="empty-state">❌ Phoneme data not loaded.<br><small>Ensure <code>phonemes-data.js</code> is in the same folder and loaded before this script.</small></div>';
     els.pagination.style.display = 'none';
     return;
   }
 
-  const surahData = SURAH_PHONEMES[num];
+  const surahData = DATA[String(num)];
+  if (!surahData) {
+    els.pageContainer.innerHTML = '<div class="empty-state">❌ No data for Surah ' + num + '.</div>';
+    els.pagination.style.display = 'none';
+    return;
+  }
+
   els.pageContainer.innerHTML = '';
 
   // Flatten words with metadata
+  // surahData is {ayahNum: {posNum: [text, phoneme, tajweed], ...}, ...}
   let allWords = [];
-  surahData.forEach((ayah, ayahIdx) => {
-    ayah.forEach((wordData, wordIdx) => {
+  const ayahKeys = Object.keys(surahData).map(Number).sort((a,b) => a-b);
+
+  ayahKeys.forEach(ayahNum => {
+    const ayahObj = surahData[String(ayahNum)];
+    if (!ayahObj) return;
+    const posKeys = Object.keys(ayahObj).map(Number).sort((a,b) => a-b);
+    posKeys.forEach(posNum => {
+      const wordData = ayahObj[String(posNum)];
+      if (!wordData || !Array.isArray(wordData)) return;
       const [text, phoneme, tajweed] = wordData;
-      allWords.push({text, phoneme, tajweed, ayah: ayahIdx + 1, position: wordIdx});
+      allWords.push({text, phoneme, tajweed, ayah: ayahNum, position: posNum});
     });
   });
+
+  if (allWords.length === 0) {
+    els.pageContainer.innerHTML = '<div class="empty-state">⚠️ No words found for this surah.</div>';
+    els.pagination.style.display = 'none';
+    return;
+  }
 
   // Build pages — ALL words stay in DOM, only active page is visible
   const totalPages = Math.max(1, Math.ceil(allWords.length / CONFIG.wordsPerPage));
@@ -932,7 +958,7 @@ function processTranscript(transcript, isFinal) {
       }
     } else if (cur && cur.status === 'correct') {
       state.wordIndex++;
-      matched = true; // Already matched, just advance
+      matched = true;
     }
     if (matched) continue;
 
@@ -949,14 +975,12 @@ function processTranscript(transcript, isFinal) {
     }
 
     if (bestScore >= CONFIG.matchThreshold) {
-      // Mark skipped words as unclear
       for (let i = state.wordIndex; i < bestIdx; i++) {
         if (!state.words[i].status) markWord(i, 'unclear');
       }
       markWord(bestIdx, 'correct');
       state.wordIndex = bestIdx + 1;
     } else if (isFinal) {
-      // Final result with no match → mark current as wrong and move on
       if (state.wordIndex < state.words.length && !state.words[state.wordIndex].status) {
         markWord(state.wordIndex, 'wrong');
       }
@@ -976,7 +1000,6 @@ function matchScore(spoken, expected) {
   if (s === e) return 1.0;
   if (s.includes(e) || e.includes(s)) return 0.88;
 
-  // Jaccard similarity on character sets
   const sSet = new Set(s);
   const eSet = new Set(e);
   const inter = new Set([...sSet].filter(x => eSet.has(x)));
@@ -1000,7 +1023,7 @@ function normalizeArabic(text) {
 function markWord(idx, status) {
   if (idx < 0 || idx >= state.words.length) return;
   const w = state.words[idx];
-  if (w.status === 'correct' && status !== 'correct') return; // Don't demote correct
+  if (w.status === 'correct' && status !== 'correct') return;
   if (w.status && w.status !== status) state.stats[w.status]--;
 
   w.status = status;
@@ -1051,8 +1074,8 @@ function runDiagnostics() {
   out.push('Protocol: ' + location.protocol + ' ' + (location.protocol === 'https:' ? '✅' : '⚠️ (Speech API needs HTTPS except localhost)'));
   const hasSpeech = 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window;
   out.push('Speech API: ' + (hasSpeech ? '✅ Available' : '❌ Not available'));
-  const hasData = typeof SURAH_PHONEMES !== 'undefined';
-  out.push('Phoneme data: ' + (hasData ? '✅ Loaded (' + (SURAH_PHONEMES ? SURAH_PHONEMES.length - 1 : 0) + ' surahs)' : '⏳ Not yet loaded'));
+  const DATA = getPhonemeData();
+  out.push('Phoneme data: ' + (DATA ? '✅ Loaded (' + (Object.keys(DATA).length) + ' surahs)' : '⏳ Not yet loaded'));
   out.push('Microphone API: ' + (navigator.mediaDevices ? '✅ Available' : '❌ Not available'));
   els.diagContent.innerHTML = out.map(s => '<div class="diag-item">' + s + '</div>').join('');
 }
