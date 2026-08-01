@@ -576,7 +576,7 @@
 </head>
 <body class="theme-dark">
 
-<div class="ver" id="ver">v3.14</div>
+<div class="ver" id="ver">v3.15</div>
 
 <button class="settings-btn" id="settingsBtn" title="Settings">⚙</button>
 <div class="settings-menu" id="settingsMenu">
@@ -1523,6 +1523,33 @@
     toggleScriptBtn.addEventListener('click', () => {
       page.classList.toggle('script-hidden');
       toggleScriptBtn.textContent = page.classList.contains('script-hidden') ? 'Show Script' : 'Hide Script';
+    });
+  }
+
+  // ==== SKIP BUTTON — manually advance the pointer ====
+  const skipBtn = document.getElementById('skipBtn');
+  if(skipBtn){
+    skipBtn.addEventListener('click', () => {
+      if(pointer < refWords.length){
+        // Mark current word as 'skipped' (yellow) and advance
+        if(refWords[pointer].el){
+          refWords[pointer].el.dataset.status = 'unclear';
+          refWords[pointer].status = 'unclear';
+        }
+        pointer++;
+        // Update _maxPointerReached so we don't re-process this
+        if(pointer > _maxPointerReached) _maxPointerReached = pointer;
+        _lastHighlightedPointer = -1;  // force highlightCurrent to re-run
+        highlightCurrent();
+        updateStatsUI();
+        // Page-flip if needed
+        if(pointer >= pageEnd){
+          const newPageNum = Math.floor(pointer / PAGE_SIZE);
+          pageStart = newPageNum * PAGE_SIZE;
+          pageEnd   = Math.min(refWords.length, pageStart + PAGE_SIZE);
+          renderPage();
+        }
+      }
     });
   }
 
