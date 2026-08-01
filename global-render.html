@@ -576,7 +576,7 @@
 </head>
 <body class="theme-dark">
 
-<div class="ver" id="ver">v3.10</div>
+<div class="ver" id="ver">v3.11</div>
 
 <button class="settings-btn" id="settingsBtn" title="Settings">⚙</button>
 <div class="settings-menu" id="settingsMenu">
@@ -938,6 +938,12 @@
       else if(i === pointer) span.classList.add('now');
       else span.classList.add('future');
       span.textContent = w.text;
+      // CRITICAL: link this DOM element back to the refWord so the
+      // matcher can highlight it. Without this, applyMatch and
+      // highlightCurrent silently fail because refWords[i].el is
+      // undefined. Also ensure .norm is set (matcher needs it).
+      w.el = span;
+      w.norm = w.norm || normalize(w.text);
       inner.appendChild(span);
       // === If this is the last word of the ayah, emit the verse marker ===
       if(isLastWordOfAyah && w.ayah !== 'bismillah'){
