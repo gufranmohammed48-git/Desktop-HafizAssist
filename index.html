@@ -34,7 +34,7 @@
   }
   *{box-sizing:border-box}
   body{margin:0;font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-  .app{max-width:1200px;margin:0 auto;padding:8px 20px;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+  .app{max-width:1200px;margin:0 auto;padding:8px 20px}
   /* VERSION BADGE — top right, easy to spot for cache-busting checks */
   .version-badge{
     position:fixed;top:14px;right:14px;z-index:1000;
@@ -244,7 +244,7 @@
 .page-controls button{background:var(--card);color:var(--primary);border:1px solid var(--primary);padding:8px 16px;border-radius:8px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer}
 .page-controls button:hover{background:var(--primary-soft)}
 .page-controls #pageInfo{color:var(--text-dim);font-size:12px;padding:0 8px}
-#page{font-family:var(--quran-font, 'Amiri'),serif;font-size:20px;line-height:2;direction:rtl;text-align:right;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;flex:1;min-height:200px;overflow:hidden;transition:filter .2s ease,opacity .2s ease}
+#page{font-family:var(--quran-font, 'Amiri'),serif;font-size:20px;line-height:2;direction:rtl;text-align:right;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;height:calc(100vh - 32px);min-height:400px;overflow:hidden;transition:filter .2s ease,opacity .2s ease;display:flex;flex-direction:column}
 #page::-webkit-scrollbar{width:8px}
 #page::-webkit-scrollbar-track{background:transparent}
 #page::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
@@ -257,7 +257,7 @@
 #page.script-hidden .word.future{visibility:hidden}
 #page.script-hidden .word.past{visibility:hidden}
 #page.script-hidden .verse-marker{visibility:hidden}
-#page.script-hidden .surah-header{visibility:hidden}
+
 #page.script-hidden .word.now{visibility:visible!important;background:var(--primary)!important;color:#0a1f12!important;border:3px solid #fff!important;box-shadow:0 0 16px var(--now-glow)!important}
 
 
@@ -283,8 +283,7 @@ body.theme-light{--bg:#fafaf5;--card:#ffffff;--border:rgba(46,125,50,.2);--text:
 body.theme-dark{--bg:#0a1f12;--card:rgba(255,255,255,.04);--border:rgba(46,204,113,.25);--text:#e8f5e9;--text-dim:#a5d6a7;--primary:#2ecc71;--primary-soft:rgba(46,204,113,.18);--yellow:#f1c40f;--yellow-soft:rgba(241,196,15,.18);--accent:#3498db;--now-glow:rgba(46,204,113,.55);--shadow:rgba(0,0,0,.5);--bismillah-bg:rgba(46,204,113,.10);--bismillah-border:rgba(46,204,113,.35);--bismillah-color:#2ecc71}
 body.theme-sepia{--bg:#f4ecd8;--card:#faf3e0;--border:rgba(139,90,43,.25);--text:#3e2c1c;--text-dim:#7a6045;--primary:#8b5a2b;--primary-soft:rgba(139,90,43,.14);--yellow:#a67c00;--yellow-soft:rgba(166,124,0,.14);--accent:#5d4e8e;--now-glow:rgba(139,90,43,.5);--shadow:rgba(0,0,0,.18);--bismillah-bg:rgba(139,90,43,.10);--bismillah-border:rgba(139,90,43,.35);--bismillah-color:#8b5a2b}
 body.theme-royal{--bg:#0d1b2a;--card:rgba(255,255,255,.05);--border:rgba(212,175,55,.30);--text:#f5f0e0;--text-dim:#a89e7e;--primary:#d4af37;--primary-soft:rgba(212,175,55,.15);--yellow:#e8c547;--yellow-soft:rgba(232,197,71,.15);--accent:#c0a96e;--now-glow:rgba(212,175,55,.55);--shadow:rgba(0,0,0,.5);--bismillah-bg:rgba(212,175,55,.10);--bismillah-border:rgba(212,175,55,.40);--bismillah-color:#d4af37}
-html,body{height:100%;overflow:hidden;margin:0;padding:0}
-body{background:var(--bg);color:var(--text);transition:background .3s ease,color .3s ease}
+body{background:var(--bg);color:var(--text);transition:background .3s ease,color .3s ease;margin:0;padding:0}
 #page,#ayahContainer,.stat,.mic-row,#statsRow{background:var(--card);border-color:var(--border);color:var(--text);transition:background .3s ease,color .3s ease,border-color .3s ease}
 .surah-header{border-bottom-color:var(--bismillah-border)}
 .surah-header .ar-name{color:var(--bismillah-color)}
@@ -330,7 +329,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
     </div>
   </div>
 </div>
-<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v23</div>
+<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v25</div>
 
 <!-- VERSION BADGE — increment on every push so user can confirm fresh load -->
 
@@ -1087,59 +1086,55 @@ function renderPage(){
         // (track via the page where the surah starts)
         const surahStartPage = Math.floor(surahStartIndex[w.surah] / PAGE_SIZE);
         const isFirstPageOfSurah = (Math.floor(pageStart / PAGE_SIZE) === surahStartPage);
-        if(!isFirstPageOfSurah){
-          // Skip header — it was already emitted on the first page
-          lastSurah = w.surah;
-          // Still need to handle Bismillah on subsequent pages if they're
-          // on this slice. But for simplicity, only emit Bismillah on
-          // the first page of the surah.
-          continue;
-        }
-        const header = document.createElement('div');
-        header.className = 'surah-header' + (isFirstSurah ? ' first' : '');
-        isFirstSurah = false;
-        const arName = document.createElement('span');
-        arName.className = 'ar-name';
-        arName.textContent = meta.name;
-        const enName = document.createElement('span');
-        enName.className = 'en-name';
-        enName.textContent = `${w.surah}. Surah ${meta.translit}`;
-        const meaning = document.createElement('span');
-        meaning.className = 'meaning';
-        meaning.textContent = meta.meaning;
-        header.appendChild(arName);
-        header.appendChild(enName);
-        header.appendChild(meaning);
-        frag.appendChild(header);
-        // For surahs 2-114 (except 9), emit Bismillah as regular words
-        // so the matcher can highlight them during recitation.
-        // The CSS will style them as a centered group.
-        if(w.surah !== 1 && w.surah !== 9){
-          // Wrap Bismillah in a centered div (per user request 2026-08-01)
-          const bisContainer = document.createElement('div');
-          bisContainer.className = 'bismillah-line';
-          for(let bi = 0; bi < BISMILLAH_WORDS.length; bi++){
-            const idx = i + bi;
-            if(idx >= pageEnd) break;  // page boundary
-            const bw = allRefWords[idx];
-            if(!bw || bw.ayah !== 'bismillah') break;
-            const span = document.createElement('span');
-            span.className = 'word bismillah-word';
-            if(idx < pointer) span.classList.add('past');
-            else if(idx === pointer) span.classList.add('now');
-            else span.classList.add('future');
-            span.textContent = bw.text;
-            bw.el = span;  // CRITICAL: link DOM element to refWord
-            bisContainer.appendChild(span);
+        if(isFirstPageOfSurah){
+          const header = document.createElement('div');
+          header.className = 'surah-header' + (isFirstSurah ? ' first' : '');
+          isFirstSurah = false;
+          const arName = document.createElement('span');
+          arName.className = 'ar-name';
+          arName.textContent = meta.name;
+          const enName = document.createElement('span');
+          enName.className = 'en-name';
+          enName.textContent = `${w.surah}. Surah ${meta.translit}`;
+          const meaning = document.createElement('span');
+          meaning.className = 'meaning';
+          meaning.textContent = meta.meaning;
+          header.appendChild(arName);
+          header.appendChild(enName);
+          header.appendChild(meaning);
+          frag.appendChild(header);
+          // For surahs 2-114 (except 9), emit Bismillah as regular words
+          // so the matcher can highlight them during recitation.
+          // The CSS will style them as a centered group.
+          if(w.surah !== 1 && w.surah !== 9){
+            // Wrap Bismillah in a centered div (per user request 2026-08-01)
+            const bisContainer = document.createElement('div');
+            bisContainer.className = 'bismillah-line';
+            for(let bi = 0; bi < BISMILLAH_WORDS.length; bi++){
+              const idx = i + bi;
+              if(idx >= pageEnd) break;  // page boundary
+              const bw = allRefWords[idx];
+              if(!bw || bw.ayah !== 'bismillah') break;
+              const span = document.createElement('span');
+              span.className = 'word bismillah-word';
+              if(idx < pointer) span.classList.add('past');
+              else if(idx === pointer) span.classList.add('now');
+              else span.classList.add('future');
+              span.textContent = bw.text;
+              bw.el = span;  // CRITICAL: link DOM element to refWord
+              bisContainer.appendChild(span);
+            }
+            frag.appendChild(bisContainer);
+            // Skip past the Bismillah words
+            i += BISMILLAH_WORDS.length - 1;
+            lastSurah = w.surah;
+            continue;
           }
-          frag.appendChild(bisContainer);
-          // Skip past the Bismillah words
-          i += BISMILLAH_WORDS.length - 1;
-          lastSurah = w.surah;
-          continue;
         }
+        // On non-first pages, just update lastSurah and fall through
+        // to render the first word as a regular word
+        lastSurah = w.surah;
       }
-      lastSurah = w.surah;
     }
     // Skip Bismillah words (they're rendered above for surahs 2-114)
     if(w.ayah === 'bismillah' && w.surah > 1){

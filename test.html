@@ -6,9 +6,7 @@
 <title>Live Recitation Tracker v2.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Amiri+Quran&family=Scheherazade+New:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=KFGQPC+Uthmanic+Script+HAFS&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg: #0A1220;
@@ -34,7 +32,7 @@
   }
   *{box-sizing:border-box}
   body{margin:0;font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-  .app{max-width:1200px;margin:0 auto;padding:8px 20px;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+  .app{max-width:1200px;margin:0 auto;padding:24px}
   /* VERSION BADGE — top right, easy to spot for cache-busting checks */
   .version-badge{
     position:fixed;top:14px;right:14px;z-index:1000;
@@ -65,7 +63,7 @@
   .section-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
   .section-header h2{margin:0}
   header{display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:18px;text-align:center}
-  header .bismillah{width:100%;max-width:300px;height:auto;filter:drop-shadow(0 4px 18px rgba(46,204,113,.25));margin:0 auto}
+  header .bismillah{width:100%;max-width:480px;height:auto;filter:drop-shadow(0 4px 18px rgba(46,204,113,.25));margin:0 auto}
   h1{margin:0;font-size:22px;font-weight:700;text-align:center}
   h1 .arabic{font-family:'Amiri',serif;font-size:26px;margin-left:8px;color:#2ecc71}
   .lede{margin:0 auto 24px;color:var(--text-dim);font-size:14px;line-height:1.5;max-width:780px;text-align:center}
@@ -174,10 +172,6 @@
   .word .phoneme-tooltip .ipa{font-family:ui-monospace,monospace;color:var(--accent);font-size:13px}
   .word .phoneme-tooltip .rules{margin-top:6px;color:var(--text-dim)}
   .mic-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
-.sensitivity-control{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:4px 10px}
-.sensitivity-control .difficulty-end{font-size:11px;color:var(--text-dim);font-weight:500;letter-spacing:.3px;text-transform:uppercase;min-width:60px}
-.sensitivity-control .difficulty-end:first-child{text-align:right}
-.sensitivity-control input[type=range]{accent-color:var(--primary);height:4px}
   .mic-btn{display:flex;align-items:center;gap:10px;background:var(--primary);color:#0a1f12;border:none;padding:12px 22px;border-radius:30px;font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;transition:all .15s ease}
   .mic-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(46,204,113,.35)}
   .mic-btn.listening{background:var(--red);color:#fff}
@@ -214,13 +208,8 @@
   .transcript-box .text{font-family:'Amiri',serif;font-size:18px;direction:rtl;text-align:right}
   .transcript-box .conf{color:var(--text-dim);font-size:11px;margin-top:6px}
   /* DEBUG PANEL — at the bottom, lists all marked-as-error words with context */
-  .debug-panel{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:12px;margin-top:18px}
-  .debug-panel-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;padding:2px 0;margin:0;gap:8px}
-  .debug-panel-header h2{margin:0;padding:2px 0;font-size:14px;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:.8px;transition:color .15s ease;line-height:1.2}
-  .debug-panel-header:hover h2{color:var(--primary)}
-  .debug-panel.collapsed .debug-panel-body{display:none}
-  .debug-close-btn{background:transparent;border:none;color:var(--text-dim);width:24px;height:24px;border-radius:4px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .15s ease;padding:0;line-height:1;flex-shrink:0}
-  .debug-close-btn:hover{background:var(--primary-soft);color:var(--primary)}
+  .debug-panel{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:18px;margin-top:18px}
+  .debug-panel h2{margin:0 0 6px;font-size:14px;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:.8px}
   .debug-panel .hint{font-size:12px;color:var(--text-dim);margin-bottom:14px}
   .debug-list{display:flex;flex-direction:column;gap:10px;max-height:520px;overflow-y:auto;padding-right:6px}
   .debug-list::-webkit-scrollbar{width:8px}
@@ -244,11 +233,11 @@
 .page-controls button{background:var(--card);color:var(--primary);border:1px solid var(--primary);padding:8px 16px;border-radius:8px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer}
 .page-controls button:hover{background:var(--primary-soft)}
 .page-controls #pageInfo{color:var(--text-dim);font-size:12px;padding:0 8px}
-#page{font-family:var(--quran-font, 'Amiri'),serif;font-size:20px;line-height:2;direction:rtl;text-align:right;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;flex:1;min-height:200px;overflow:hidden;transition:filter .2s ease,opacity .2s ease}
+#page{font-family:'Amiri',serif;font-size:26px;line-height:2.4;direction:rtl;text-align:right;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;height:510px;overflow-y:auto;transition:filter .2s ease,opacity .2s ease;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
 #page::-webkit-scrollbar{width:8px}
 #page::-webkit-scrollbar-track{background:transparent}
 #page::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
-.surah-header{text-align:center;padding:4px 0;margin:4px 0 8px;border-bottom:1px solid var(--bismillah-border);font-family:'Inter',sans-serif}
+.surah-header{text-align:center;padding:8px 0;margin:12px 0;border-bottom:1px solid rgba(46,125,50,.2);font-family:'Inter',sans-serif}
 .surah-header.first{margin-top:0}
 .surah-header .ar-name{font-family:'Amiri',serif;font-size:1.4em;color:var(--primary);display:block}
 .surah-header .en-name{font-size:1.1em;font-weight:700;color:var(--text);display:block;margin:4px 0}
@@ -262,75 +251,14 @@
 
 
 /* Bismillah words rendered as regular words but styled as a centered group */
-.bismillah-line{text-align:center;margin:4px auto;padding:2px 0;width:100%;display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:2px}
-.bismillah-line .word.bismillah-word{display:inline-block;color:var(--primary);font-weight:600;font-size:1.1em;background:transparent!important;opacity:1!important}
+.word.bismillah-word{color:var(--primary);font-weight:600;font-size:1.1em;background:transparent!important;opacity:1!important}
 .word.bismillah-word.past{color:var(--primary);background:var(--primary-soft)!important}
 .word.bismillah-word.now{background:var(--primary)!important;color:#0a1f12!important}
 
-
-/* ==== THEME SYSTEM (4 themes) ==== */
-:root{
-  --bg:#fafaf5;--card:#ffffff;--border:rgba(46,125,50,.2);
-  --text:#1a3a1a;--text-dim:#6a7a6a;
-  --primary:#2e7d32;--primary-soft:rgba(46,125,50,.12);
-  --yellow:#b8860b;--yellow-soft:rgba(184,134,11,.10);
-  --accent:#1565c0;--now-glow:rgba(46,125,50,.45);
-  --shadow:rgba(0,0,0,.15);
-  --bismillah-bg:rgba(46,125,50,.08);--bismillah-border:rgba(46,125,50,.30);
-  --bismillah-color:#2e7d32;
-}
-body.theme-light{--bg:#fafaf5;--card:#ffffff;--border:rgba(46,125,50,.2);--text:#1a3a1a;--text-dim:#6a7a6a;--primary:#2e7d32;--primary-soft:rgba(46,125,50,.12);--yellow:#b8860b;--yellow-soft:rgba(184,134,11,.10);--accent:#1565c0;--now-glow:rgba(46,125,50,.45);--shadow:rgba(0,0,0,.15);--bismillah-bg:rgba(46,125,50,.08);--bismillah-border:rgba(46,125,50,.30);--bismillah-color:#2e7d32}
-body.theme-dark{--bg:#0a1f12;--card:rgba(255,255,255,.04);--border:rgba(46,204,113,.25);--text:#e8f5e9;--text-dim:#a5d6a7;--primary:#2ecc71;--primary-soft:rgba(46,204,113,.18);--yellow:#f1c40f;--yellow-soft:rgba(241,196,15,.18);--accent:#3498db;--now-glow:rgba(46,204,113,.55);--shadow:rgba(0,0,0,.5);--bismillah-bg:rgba(46,204,113,.10);--bismillah-border:rgba(46,204,113,.35);--bismillah-color:#2ecc71}
-body.theme-sepia{--bg:#f4ecd8;--card:#faf3e0;--border:rgba(139,90,43,.25);--text:#3e2c1c;--text-dim:#7a6045;--primary:#8b5a2b;--primary-soft:rgba(139,90,43,.14);--yellow:#a67c00;--yellow-soft:rgba(166,124,0,.14);--accent:#5d4e8e;--now-glow:rgba(139,90,43,.5);--shadow:rgba(0,0,0,.18);--bismillah-bg:rgba(139,90,43,.10);--bismillah-border:rgba(139,90,43,.35);--bismillah-color:#8b5a2b}
-body.theme-royal{--bg:#0d1b2a;--card:rgba(255,255,255,.05);--border:rgba(212,175,55,.30);--text:#f5f0e0;--text-dim:#a89e7e;--primary:#d4af37;--primary-soft:rgba(212,175,55,.15);--yellow:#e8c547;--yellow-soft:rgba(232,197,71,.15);--accent:#c0a96e;--now-glow:rgba(212,175,55,.55);--shadow:rgba(0,0,0,.5);--bismillah-bg:rgba(212,175,55,.10);--bismillah-border:rgba(212,175,55,.40);--bismillah-color:#d4af37}
-html,body{height:100%;overflow:hidden;margin:0;padding:0}
-body{background:var(--bg);color:var(--text);transition:background .3s ease,color .3s ease}
-#page,#ayahContainer,.stat,.mic-row,#statsRow{background:var(--card);border-color:var(--border);color:var(--text);transition:background .3s ease,color .3s ease,border-color .3s ease}
-.surah-header{border-bottom-color:var(--bismillah-border)}
-.surah-header .ar-name{color:var(--bismillah-color)}
-.word{color:var(--text)}
-.word.future{color:var(--text-dim);opacity:.75}
-.word.past{color:var(--primary);background:var(--primary-soft)}
-.word[data-status="unclear"]{color:var(--yellow);background:var(--yellow-soft)}
-.word.now{background:var(--primary)!important;color:#0a1f12!important;box-shadow:0 0 0 3px var(--primary),0 0 24px var(--now-glow)}
-.verse-marker{background:var(--primary-soft);color:var(--primary)}
-/* Theme picker */
-.settings-picker{position:fixed;top:8px;left:8px;z-index:9999}
-.settings-picker button{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:6px 10px;cursor:pointer;font-size:14px}
-.settings-picker .dropdown{display:none;position:absolute;top:100%;left:0;background:var(--card);border:1px solid var(--border);border-radius:6px;margin-top:4px;min-width:140px;box-shadow:0 4px 12px var(--shadow)}
-.settings-picker.open .dropdown{display:block}
-.theme-option{padding:8px 12px;cursor:pointer;display:flex;align-items:center;gap:8px;color:var(--text)}
-.theme-option:hover{background:var(--primary-soft)}
-.theme-option.font-option{font-size:16px}
-.dropdown-divider{height:1px;background:var(--border);margin:6px 0}
-.dropdown-section{padding:4px 0}
-.dropdown-section .dropdown-label{font-size:10px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:.8px;padding:6px 12px 4px;margin:0}
-.dropdown-section .theme-option{padding:6px 12px}
-.theme-option .swatch{width:14px;height:14px;border-radius:3px;border:1px solid var(--border)}
-
 </style>
 </head>
-<body class="theme-light">
-<div class="settings-picker" id="settingsPicker">
-  <button id="settingsBtn" title="Settings">⚙ Settings</button>
-  <div class="dropdown">
-    <div class="dropdown-section">
-      <div class="dropdown-label">Theme</div>
-      <div class="theme-option" data-theme="dark"><span class="swatch" style="background:#0a1f12"></span>Dark Green</div>
-      <div class="theme-option" data-theme="light"><span class="swatch" style="background:#fafaf5"></span>Light</div>
-      <div class="theme-option" data-theme="sepia"><span class="swatch" style="background:#f4ecd8"></span>Sepia (Mushaf)</div>
-      <div class="theme-option" data-theme="royal"><span class="swatch" style="background:#0d1b2a"></span>Royal Blue</div>
-    </div>
-    <div class="dropdown-divider"></div>
-    <div class="dropdown-section">
-      <div class="dropdown-label">Quran Font</div>
-      <div class="theme-option font-option" data-font="Amiri" style="font-family:'Amiri',serif">Amiri (Classic)</div>
-      <div class="theme-option font-option" data-font="KFGQPC Uthmanic Script HAFS" style="font-family:'KFGQPC Uthmanic Script HAFS',serif;font-size:14px">KFGQPC Uthmanic</div>
-      <div class="theme-option font-option" data-font="Scheherazade New" style="font-family:'Scheherazade New',serif">Scheherazade New</div>
-    </div>
-  </div>
-</div>
-<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v23</div>
+<body>
+<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v7</div>
 
 <!-- VERSION BADGE — increment on every push so user can confirm fresh load -->
 
@@ -370,7 +298,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
     <div class="stat"><div class="stat-label">Correct</div><div class="stat-val green" id="statCorrect">0</div></div>
     <div class="stat"><div class="stat-label">Mistakes</div><div class="stat-val red" id="statMistake">0</div></div>
     <div class="stat"><div class="stat-label">Unclear</div><div class="stat-val yellow" id="statUnclear">0</div></div>
-    <div class="stat"><div class="stat-label">Accuracy</div><div class="stat-val green" id="statAccuracy">100%</div></div>
+    <div class="stat"><div class="stat-label">Pointer</div><div class="stat-val" id="statPointer">0 / 0</div></div>
   </div>
 
   <div class="mic-row">
@@ -379,11 +307,6 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
       <span id="micLabel">Start reciting</span>
     </button>
     <button class="toggle-script-btn" id="toggleScriptBtn" title="Toggle the visible mushaf text">Hide Script</button>
-    <div class="sensitivity-control">
-      <span class="difficulty-end">Forgiving</span>
-      <input type="range" id="sensitivitySlider" min="0" max="100" value="50" style="width:120px" title="Match difficulty">
-      <span class="difficulty-end">Strict</span>
-    </div>
     <span class="status" id="status">Pick a surah from the above list and track your recitation</span>
   </div>
 
@@ -410,18 +333,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
   </div>
 </section>
 
-<!-- Collapsible Mistake Statistics (closed by default) -->
-<div class="debug-panel" id="debugPanel">
-  <div class="debug-panel-header" id="debugPanelHeader">
-    <h2>📊 Mistake Statistics</h2>
-    <button class="debug-close-btn" id="debugCloseBtn" title="Collapse this section">✕</button>
-  </div>
-  <div class="debug-panel-body" id="debugPanelBody">
-    <p class="hint">Each row shows a word that was marked <b style="color:var(--red)">wrong</b> or <b style="color:var(--yellow)">unclear</b>: what the script <b>expected</b> (the Quranic text), what was <b>recited</b> (what was heard), and <b>why</b> it didn't match.</p>
-    <div id="debugList"></div>
-    <button class="clear-btn" id="clearDebugBtn">Clear mistake log</button>
-  </div>
-</div>
+<!-- Debug panel removed for production -->
 
 </div>
 
@@ -876,10 +788,11 @@ function processNewWord(rawWord){
 // DEBUG PANEL — render every mistake/unclear with full context.
 // =========================================================================
 function renderDebugPanel(){
+  // Debug panel removed for production. No-op.
+  return;
   const list = document.getElementById('debugList');
-  if(!list) return;  // panel not in DOM
   if(!debugLog.length){
-    list.innerHTML = '<div class="debug-empty">No mistakes yet. Start reciting and any mismatches will appear here.</div>';
+    list.innerHTML = '<div class="debug-empty">No errors yet. Start reciting and any mismatches will appear here.</div>';
     return;
   }
   // newest first
@@ -893,13 +806,13 @@ function renderDebugPanel(){
     return `
       <div class="${cls}">
         <div>
-          <div class="col-label">Expected (Quran)</div>
+          <div class="col-label">Expected (canonical)</div>
           <div class="arabic">${e.expected||'—'}</div>
           <div class="norm">${e.expectedNorm||'—'}</div>
           <div class="phoneme">IPA: ${e.expectedPhoneme||'—'}</div>
         </div>
         <div>
-          <div class="col-label">Recited (heard)</div>
+          <div class="col-label">Recited (Chrome heard)</div>
           <div class="arabic">${e.heard||'—'}</div>
           <div class="norm">${e.heardNorm||'—'}</div>
           <div class="phoneme">IPA: ${e.heardPhoneme||'—'}</div>
@@ -1115,9 +1028,6 @@ function renderPage(){
         // so the matcher can highlight them during recitation.
         // The CSS will style them as a centered group.
         if(w.surah !== 1 && w.surah !== 9){
-          // Wrap Bismillah in a centered div (per user request 2026-08-01)
-          const bisContainer = document.createElement('div');
-          bisContainer.className = 'bismillah-line';
           for(let bi = 0; bi < BISMILLAH_WORDS.length; bi++){
             const idx = i + bi;
             if(idx >= pageEnd) break;  // page boundary
@@ -1130,9 +1040,8 @@ function renderPage(){
             else span.classList.add('future');
             span.textContent = bw.text;
             bw.el = span;  // CRITICAL: link DOM element to refWord
-            bisContainer.appendChild(span);
+            frag.appendChild(span);
           }
-          frag.appendChild(bisContainer);
           // Skip past the Bismillah words
           i += BISMILLAH_WORDS.length - 1;
           lastSurah = w.surah;
@@ -1295,10 +1204,7 @@ function updateStats(){
   document.getElementById('statCorrect').textContent = stats.correct;
   document.getElementById('statMistake').textContent = stats.mistake;
   document.getElementById('statUnclear').textContent = stats.unclear;
-  // Accuracy = correct / (correct + mistakes + unclear) — includes unclear
-  const _total = stats.correct + stats.mistake + stats.unclear;
-  const _statAccuracy = document.getElementById('statAccuracy');
-  if(_statAccuracy) _statAccuracy.textContent = _total > 0 ? Math.round((stats.correct / _total) * 100) + '%' : '—';
+  document.getElementById('statPointer').textContent = `${pointer} / ${refWords.length}`;
 }
 
 function highlightCurrent(){
@@ -1741,136 +1647,6 @@ window.__matcher__ = {
     statusEl.textContent = 'Failed to load phoneme data: ' + e.message;
   }
 })();
-
-// ==== THEME PICKER ====
-const settingsPicker = document.getElementById('settingsPicker');
-const settingsBtn = document.getElementById('settingsBtn');
-if(settingsBtn){
-  settingsBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    settingsPicker.classList.toggle('open');
-  });
-  document.addEventListener('click', () => settingsPicker.classList.remove('open'));
-}
-document.querySelectorAll('.theme-option').forEach(opt => {
-  opt.addEventListener('click', () => {
-    const theme = opt.dataset.theme;
-    document.body.className = 'theme-' + theme;
-    try { localStorage.setItem('hifzapp-theme', theme); } catch(e){}
-    settingsPicker.classList.remove('open');
-  });
-});
-// Load saved theme or default to light
-let _savedTheme = null;
-try { _savedTheme = localStorage.getItem('hifzapp-theme'); } catch(e){}
-if(_savedTheme && ['dark','light','sepia','royal'].includes(_savedTheme)){
-  document.body.className = 'theme-' + _savedTheme;
-}
-// ==== END THEME PICKER ====
-
-// ==== QURAN FONT PICKER ====
-const FONT_OPTIONS = {
-  'Amiri': "'Amiri', serif",
-  'KFGQPC Uthmanic Script HAFS': "'KFGQPC Uthmanic Script HAFS', 'Amiri', serif",
-  'Scheherazade New': "'Scheherazade New', 'Amiri', serif"
-};
-function applyQuranFont(fontName){
-  const fontValue = FONT_OPTIONS[fontName] || FONT_OPTIONS['Amiri'];
-  document.documentElement.style.setProperty('--quran-font', fontValue);
-  try { localStorage.setItem('hifzapp-font', fontName); } catch(e){}
-}
-document.querySelectorAll('.font-option').forEach(opt => {
-  opt.addEventListener('click', () => {
-    const fontName = opt.dataset.font;
-    applyQuranFont(fontName);
-    settingsPicker.classList.remove('open');
-  });
-});
-// Load saved font
-let _savedFont = null;
-try { _savedFont = localStorage.getItem('hifzapp-font'); } catch(e){}
-if(_savedFont && FONT_OPTIONS[_savedFont]){
-  applyQuranFont(_savedFont);
-} else {
-  applyQuranFont('Amiri');  // default
-}
-// ==== END QURAN FONT PICKER ====
-
-// ==== SENSITIVITY SLIDER ====
-// Range: 0 = easy (0.05 = very lenient), 100 = strict (0.50 = very strict)
-// Maps slider value 0-100 to LEVENSHTEIN_RATIO 0.05-0.50
-const sensitivitySlider = document.getElementById('sensitivitySlider');
-const sensitivityValue = document.getElementById('sensitivityValue');
-function updateSensitivity(){
-  const v = parseInt(sensitivitySlider.value);
-  // Map 0-100 to 0.05-0.50
-  const ratio = 0.05 + (v / 100) * 0.45;
-  if(sensitivityValue) sensitivityValue.textContent = ratio.toFixed(2);
-  window.LEVENSHTEIN_RATIO = ratio;
-  // Save to localStorage
-  try { localStorage.setItem('hifzapp-sensitivity', v); } catch(e){}
-}
-if(sensitivitySlider){
-  sensitivitySlider.addEventListener('input', updateSensitivity);
-  // Load saved sensitivity
-  let _savedSens = null;
-  try { _savedSens = localStorage.getItem('hifzapp-sensitivity'); } catch(e){}
-  if(_savedSens !== null){
-    sensitivitySlider.value = _savedSens;
-  }
-  updateSensitivity();
-}
-
-// ==== COLLAPSIBLE MISTAKE STATISTICS ====
-// Direct approach: attach handlers by ID at the right time
-function _setupCollapsibleMistakePanel(){
-  const debugPanel = document.getElementById('debugPanel');
-  const debugPanelHeader = document.getElementById('debugPanelHeader');
-  const debugCloseBtn = document.getElementById('debugCloseBtn');
-  if(!debugPanel || !debugPanelHeader){
-    console.warn('[debug-panel] elements not found, retrying...');
-    setTimeout(_setupCollapsibleMistakePanel, 100);
-    return;
-  }
-  // Load saved state (default: closed)
-  let _debugOpen = false;
-  try {
-    const _saved = localStorage.getItem('hifzapp-debug-open');
-    _debugOpen = _saved === '1';  // closed by default
-  } catch(e){}
-  function updateDebugPanel(){
-    if(_debugOpen){
-      debugPanel.classList.remove('collapsed');
-    } else {
-      debugPanel.classList.add('collapsed');
-    }
-    try { localStorage.setItem('hifzapp-debug-open', _debugOpen ? '1' : '0'); } catch(e){}
-  }
-  // Close button: collapse to just the title
-  if(debugCloseBtn){
-    debugCloseBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      _debugOpen = false;
-      updateDebugPanel();
-    });
-  }
-  // Click on the title: open the panel
-  debugPanelHeader.addEventListener('click', (e) => {
-    if(debugCloseBtn && (e.target === debugCloseBtn || debugCloseBtn.contains(e.target))) return;
-    if(!_debugOpen){
-      _debugOpen = true;
-      updateDebugPanel();
-    }
-  });
-  updateDebugPanel();
-}
-// Run after DOM is fully loaded
-if(document.readyState === 'loading'){
-  document.addEventListener('DOMContentLoaded', _setupCollapsibleMistakePanel);
-} else {
-  _setupCollapsibleMistakePanel();
-}
 </script>
 
 </body>
