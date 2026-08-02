@@ -309,8 +309,6 @@
     transition:all .15s ease;
   }
   .toggle-script-btn:hover{border-color:var(--primary);color:var(--primary)}
-  .skip-btn{background:rgba(241,196,15,.15);color:var(--yellow);border:1px solid var(--yellow);padding:8px 14px;border-radius:8px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s ease}
-  .skip-btn:hover{background:rgba(241,196,15,.3);transform:translateY(-1px)}
   .status-text{
     color:var(--text-dim);
     font-size:12px;
@@ -578,7 +576,7 @@
 </head>
 <body class="theme-light">
 
-<div class="ver" id="ver">v9</div>
+<div class="ver" id="ver">v9.1</div>
 
 <button class="settings-btn" id="settingsBtn" title="Settings">⚙</button>
 <div class="settings-menu" id="settingsMenu">
@@ -618,7 +616,7 @@
     <span class="mic-dot"></span>
     <span id="micLabel">Start reciting</span>
   </button>
-  <button class="skip-btn" id="skipBtn" title="Skip current word (advance pointer)">Skip →</button>
+
   <button class="toggle-script-btn" id="toggleScriptBtn">Hide Script</button>
   <span class="status-text" id="status">Pick a surah from the above list and track your recitation</span>
 </div>
@@ -1611,31 +1609,6 @@
   }
 
   // ==== SKIP BUTTON — manually advance the pointer ====
-  const skipBtn = document.getElementById('skipBtn');
-  if(skipBtn){
-    skipBtn.addEventListener('click', () => {
-      if(pointer < refWords.length){
-        // Mark current word as 'skipped' (yellow) and advance
-        if(refWords[pointer].el){
-          refWords[pointer].el.dataset.status = 'unclear';
-          refWords[pointer].status = 'unclear';
-        }
-        pointer++;
-        // Update _maxPointerReached so we don't re-process this
-        if(pointer > _maxPointerReached) _maxPointerReached = pointer;
-        _lastHighlightedPointer = -1;  // force highlightCurrent to re-run
-        highlightCurrent();
-        updateStatsUI();
-        // Page-flip if needed
-        if(pointer >= pageEnd){
-          const newPageNum = Math.floor(pointer / PAGE_SIZE);
-          pageStart = newPageNum * PAGE_SIZE;
-          pageEnd   = Math.min(refWords.length, pageStart + PAGE_SIZE);
-          renderPage();
-        }
-      }
-    });
-  }
 
   // ==== NORMALIZE (used by matcher) ====
   // Already defined earlier in the IIFE; if not, define a minimal version
