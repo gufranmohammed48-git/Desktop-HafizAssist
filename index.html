@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📖</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Amiri+Quran&family=Scheherazade+New:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=KFGQPC+Uthmanic+Script+HAFS&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -329,7 +330,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
     </div>
   </div>
 </div>
-<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v37</div>
+<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v38</div>
 
 <!-- VERSION BADGE — increment on every push so user can confirm fresh load -->
 
@@ -1207,10 +1208,16 @@ function renderPage(){
     w.el = span;  // CRITICAL: link DOM element to refWord
     frag.appendChild(span);
     // === Verse marker at end of each ayah ===
-    const isLastWordOfAyah = (i === pageEnd - 1) ||
-      (allRefWords[i+1] && allRefWords[i+1].ayah !== w.ayah) ||
-      (allRefWords[i+1] && allRefWords[i+1].surah !== w.surah);
-    if(isLastWordOfAyah && w.ayah !== 'bismillah'){
+    // ONLY show if the next word (in allRefWords, not just this page) has
+    // a different ayah or surah. If the next word is on the next page but
+    // is the SAME ayah, the verse continues — don't show the marker here
+    // (it will be shown at the actual end of the verse on the next page).
+    const nextW = allRefWords[i+1];
+    const isEndOfAyah = nextW && (
+      nextW.ayah !== w.ayah ||
+      nextW.surah !== w.surah
+    );
+    if(isEndOfAyah && w.ayah !== 'bismillah'){
       const vm = document.createElement('span');
       vm.className = 'verse-marker';
       vm.textContent = toArabicDigits(w.ayah);
