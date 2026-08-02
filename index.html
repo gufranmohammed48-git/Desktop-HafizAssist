@@ -329,7 +329,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
     </div>
   </div>
 </div>
-<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v34</div>
+<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v36</div>
 
 <!-- VERSION BADGE — increment on every push so user can confirm fresh load -->
 
@@ -572,6 +572,13 @@ let _pendingFullText  = "";     // latest fullText waiting to be re-processed
 let _pendingWords     = [];     // latest words array waiting to be re-processed
 let stats          = {correct:0, mistake:0, unclear:0};
 let debugLog       = [];     // every mistake/unclear pushed here for the debug panel
+const MAX_DEBUG_LOG = 50;     // cap to prevent memory bloat during long recitations
+function _pushDebug(entry){
+  debugLog.push(entry);
+  if(debugLog.length > MAX_DEBUG_LOG){
+    debugLog.shift();  // remove oldest entry
+  }
+}
 let recognition    = null;
 let listening      = false;
 let committedWordCount = 0;
@@ -747,7 +754,7 @@ function applyMatch(matchAt, matchInfo, heardWord){
     // becoming a wall. stats.unclear++ still counts the skip.
     w.el.dataset.status = 'unclear';
     stats.unclear++;
-    debugLog.push({
+    _pushDebug({
       kind:'unclear',
       heard:heardWord || '', heardNorm:heardWord ? normalize(heardWord) : '',
       expected:w.text, expectedNorm:w.norm,
@@ -816,7 +823,7 @@ function applyMatch(matchAt, matchInfo, heardWord){
 function processNewWord(rawWord){
   const norm = normalize(rawWord);
   if(!norm){
-    debugLog.push({
+    _pushDebug({
       kind:'empty',
       heard:rawWord, heardNorm:'',
       expected:'', expectedNorm:'',
@@ -827,7 +834,7 @@ function processNewWord(rawWord){
     return;
   }
   if(pointer >= refWords.length){
-    debugLog.push({
+    _pushDebug({
       kind:'overflow',
       heard:rawWord, heardNorm:norm,
       expected:'(surah complete)', expectedNorm:'',
@@ -887,7 +894,7 @@ function processNewWord(rawWord){
     phRatio = levRatio(heardPh, expectedPhoneme);
   }
   const textRatio = levRatio(norm, expected.norm);
-  debugLog.push({
+  _pushDebug({
     kind:'miss',
     heard:rawWord, heardNorm:norm, heardPhoneme:heardPh,
     expected:expected.text, expectedNorm:expected.norm, expectedPhoneme,
@@ -909,7 +916,17 @@ function processNewWord(rawWord){
 // =========================================================================
 // DEBUG PANEL — render every mistake/unclear with full context.
 // =========================================================================
+let _renderDebugPanelScheduled = false;
 function renderDebugPanel(){
+  // Debounce: only render once per 500ms to avoid O(n) rebuilds on every match
+  if(_renderDebugPanelScheduled) return;
+  _renderDebugPanelScheduled = true;
+  setTimeout(() => {
+    _renderDebugPanelScheduled = false;
+    _doRenderDebugPanel();
+  }, 500);
+}
+function _doRenderDebugPanel(){
   const list = document.getElementById('debugList');
   if(!list) return;  // panel not in DOM
   if(!debugLog.length){
@@ -1466,7 +1483,10 @@ async function startListening(){
       const res = event.results[i];
       if(res.isFinal){
         finalizedText += res[0].transcript + ' ';
-        if(res[0].confidence > 0) confidences.push(res[0].confidence);
+        if(res[0].confidence > 0){
+          confidences.push(res[0].confidence);
+          if(confidences.length > 100) confidences.shift();  // cap to 100
+        }
       } else {
         interim += res[0].transcript + ' ';
       }
