@@ -1371,11 +1371,9 @@ async function startListening(){
     for(let i = _maxPointerReached; i < refWords.length; i++){
       refWords[i].el.dataset.status = '';
     }
-    // Reset to current surah start (mushaf: don't search the whole Quran)
-    const _resetStart = (typeof allRefWords !== 'undefined' && allRefWords.length > 0 && refWords.length > 0)
-      ? allRefWords.findIndex(w => w.surah === (refWords[0] ? refWords[0].surah : 1))
-      : 0;
-    pointer = _resetStart >= 0 ? _resetStart : 0;
+    // Reset to 0 (relative to refWords, which is the current surah's words).
+    // This is what production does — refWords is always the current surah.
+    pointer = 0;
     _lastHighlightedPointer = -1;
     _maxPointerReached = pointer;
     _prevPastEnd = pointer;
