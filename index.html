@@ -1819,9 +1819,11 @@ if(settingsBtn){
   });
   document.addEventListener('click', () => settingsPicker.classList.remove('open'));
 }
-document.querySelectorAll('.theme-option').forEach(opt => {
-  opt.addEventListener('click', () => {
+document.querySelectorAll('.theme-option:not(.font-option)').forEach(opt => {
+  opt.addEventListener('click', (e) => {
+    e.stopPropagation();
     const theme = opt.dataset.theme;
+    if(!theme) return;  // safety: skip if no data-theme
     document.body.className = 'theme-' + theme;
     try { localStorage.setItem('hifzapp-theme', theme); } catch(e){}
     settingsPicker.classList.remove('open');
@@ -1843,11 +1845,20 @@ const FONT_OPTIONS = {
 };
 function applyQuranFont(fontName){
   const fontValue = FONT_OPTIONS[fontName] || FONT_OPTIONS['Amiri'];
+  // Set on both html and body for maximum compatibility
   document.documentElement.style.setProperty('--quran-font', fontValue);
+  document.body.style.setProperty('--quran-font', fontValue);
   try { localStorage.setItem('hifzapp-font', fontName); } catch(e){}
+  // Force re-render of words by toggling a class
+  requestAnimationFrame(() => {
+    document.body.style.display = 'none';
+    void document.body.offsetHeight;
+    document.body.style.display = '';
+  });
 }
 document.querySelectorAll('.font-option').forEach(opt => {
-  opt.addEventListener('click', () => {
+  opt.addEventListener('click', (e) => {
+    e.stopPropagation();  // prevent the .theme-option handler from also firing
     const fontName = opt.dataset.font;
     applyQuranFont(fontName);
     settingsPicker.classList.remove('open');
