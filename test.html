@@ -213,7 +213,12 @@
   .transcript-box .conf{color:var(--text-dim);font-size:11px;margin-top:6px}
   /* DEBUG PANEL — at the bottom, lists all marked-as-error words with context */
   .debug-panel{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:18px;margin-top:18px}
-  .debug-panel h2{margin:0 0 6px;font-size:14px;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:.8px}
+  .debug-panel-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none;padding:4px 0}
+  .debug-panel-header h2{margin:0;font-size:14px;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:.8px;transition:color .15s ease}
+  .debug-panel-header:hover h2{color:var(--primary)}
+  .debug-panel.collapsed .debug-panel-body{display:none}
+  .debug-close-btn{background:transparent;border:1px solid var(--border);color:var(--text-dim);width:30px;height:30px;border-radius:6px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .15s ease}
+  .debug-close-btn:hover{background:var(--primary-soft);color:var(--primary);border-color:var(--primary)}
   .debug-panel .hint{font-size:12px;color:var(--text-dim);margin-bottom:14px}
   .debug-list{display:flex;flex-direction:column;gap:10px;max-height:520px;overflow-y:auto;padding-right:6px}
   .debug-list::-webkit-scrollbar{width:8px}
@@ -307,7 +312,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
     <div class="theme-option" data-theme="royal"><span class="swatch" style="background:#0d1b2a"></span>Royal Blue</div>
   </div>
 </div>
-<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v13</div>
+<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v14</div>
 
 <!-- VERSION BADGE — increment on every push so user can confirm fresh load -->
 
