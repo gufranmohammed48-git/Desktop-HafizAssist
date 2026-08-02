@@ -329,7 +329,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
     </div>
   </div>
 </div>
-<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v30</div>
+<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v31</div>
 
 <!-- VERSION BADGE — increment on every push so user can confirm fresh load -->
 
@@ -768,7 +768,12 @@ function applyMatch(matchAt, matchInfo, heardWord){
   highlightCurrent();
   renderDebugPanel();
   // Auto-flip to next page when user reaches the end of current page
-  if(pointer >= pageEnd && pageEnd < allRefWords.length){
+  // CRITICAL: pointer is LOCAL (relative to refWords, the surah's slice)
+  // but pageEnd is GLOBAL (relative to allRefWords).
+  // We need to compute the local page end for the current surah.
+  const surahGlobalStart = (activeSurah && surahStartIndex[activeSurah]) || 0;
+  const localPageEnd = Math.min(refWords.length, pageEnd - surahGlobalStart);
+  if(pointer >= localPageEnd && pageEnd < allRefWords.length){
     statusEl.textContent = 'Page complete. Flipping to next page...';
     setTimeout(() => {
       nextPage();
@@ -1281,11 +1286,15 @@ function nextPage(){
   if(pageEnd >= allRefWords.length) return;
   pageStart = pageEnd;
   pageEnd = Math.min(allRefWords.length, pageStart + PAGE_SIZE);
-  // Reset pointer to top of new page
-  pointer = pageStart;
-  _maxPointerReached = pageStart;
+  // Reset pointer to local index of new page's first word
+  // CRITICAL: pointer is LOCAL (relative to refWords, the surah's slice)
+  // The new page's first word is at global pageStart, which corresponds
+  // to local index (pageStart - surahGlobalStart) in refWords
+  const surahGlobalStart = (activeSurah && surahStartIndex[activeSurah]) || 0;
+  pointer = Math.max(0, pageStart - surahGlobalStart);
+  _maxPointerReached = pointer;
   _lastHighlightedPointer = -1;
-  _prevPastEnd = pageStart;
+  _prevPastEnd = pointer;
   consecutiveMisses = 0;
   renderPage();
   updateStats();
@@ -1296,10 +1305,12 @@ function prevPage(){
   if(pageStart === 0) return;
   pageStart = Math.max(0, pageStart - PAGE_SIZE);
   pageEnd = pageStart + PAGE_SIZE;
-  pointer = pageStart;
-  _maxPointerReached = pageStart;
+  // Reset pointer to local index of new page's first word
+  const surahGlobalStart = (activeSurah && surahStartIndex[activeSurah]) || 0;
+  pointer = Math.max(0, pageStart - surahGlobalStart);
+  _maxPointerReached = pointer;
   _lastHighlightedPointer = -1;
-  _prevPastEnd = pageStart;
+  _prevPastEnd = pointer;
   consecutiveMisses = 0;
   renderPage();
   updateStats();
