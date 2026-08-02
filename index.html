@@ -579,7 +579,7 @@
 </head>
 <body class="theme-light">
 
-<div class="ver" id="ver">v9.7</div>
+<div class="ver" id="ver">v9.8</div>
 
 <button class="settings-btn" id="settingsBtn" title="Settings">⚙</button>
 <div class="settings-menu" id="settingsMenu">
@@ -1157,116 +1157,91 @@
     if(statAccuracy) statAccuracy.textContent = total > 0 ? Math.round((stats.correct / total) * 100) + '%' : '—';
   }
 
-  // ==== MATCHER: ported from index.html v47.5 (with past-region fix) ====
-  function levenshtein(a, b){
-    const m = a.length, n = b.length;
-    if(!m) return n; if(!n) return m;
-    const dp = Array.from({length:m+1}, () => new Array(n+1).fill(0));
-    for(let i=0;i<=m;i++) dp[i][0] = i;
-    for(let j=0;j<=n;j++) dp[0][j] = j;
-    for(let i=1;i<=m;i++){
-      for(let j=1;j<=n;j++){
-        dp[i][j] = a[i-1] === b[j-1]
-          ? dp[i-1][j-1]
-          : 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
-      }
+// PRODUCTION v2.0 SIMPLE MATCHER — always advances the pointer
+// Copied verbatim from production. Strategy: exact → prefix → fuzzy, in a
+// 12-word lookahead. ALWAYS advances pointer on miss (marks as 'wrong'),
+// so the matcher NEVER gets stuck. User can always recover.
+// =========================================================================
+function levenshtein(a, b){
+  const m = a.length, n = b.length;
+  if(!m) return n; if(!n) return m;
+  const dp = Array.from({length:m+1}, () => new Array(n+1).fill(0));
+  for(let i=0;i<=m;i++) dp[i][0] = i;
+  for(let j=0;j<=n;j++) dp[0][j] = j;
+  for(let i=1;i<=m;i++){
+    for(let j=1;j<=n;j++){
+      dp[i][j] = a[i-1] === b[j-1]
+        ? dp[i-1][j-1]
+        : 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
     }
-    return dp[m][n];
   }
-  // === PRODUCTION'S MATCHER (copied verbatim from production index.html v38.0) ===
-  // This is the exact matcher logic that works perfectly on the live
-  // production website. It uses:
-  //   - first-word bias (lenient match for the first word)
-  //   - near-window search (pointer to pointer + NEAR_WINDOW)
-  //   - far-window search (only after RESYNC_THRESHOLD misses)
-  //   - no match → log + don't advance pointer
-  // Plus the applyMatch function that marks words as correct/unclear.
-  const NEAR_WINDOW = 8;        // production's value
-  const FAR_WINDOW = 8;         // production's value
-  const RESYNC_THRESHOLD = 6;   // production's value
-  const LEVENSHTEIN_RATIO = 0.30;
-  const PHONEME_LEVENSHTEIN_RATIO = 0.40;
-  let _maxPointerReached = 0;
-  let _lastHighlightedPointer = -1;
-  let _prevPastEnd = 0;
-  let consecutiveMisses = 0;
-  let committedWordCount = 0;
-  let _pendingFullText = '';
-  let _pendingWords = [];
-  let _pendingReProcess = false;
-  let _pendingFinalized = '';  // (legacy, unused since v3.24)
-  // CRITICAL: levRatio was missing! This caused the matcher to crash
-  // when trying to fuzzy-match "العالمين" (and any word that didn't
-  // exact-match or substring-match). Production has this function —
-  // we forgot to copy it over.
-  function levRatio(a, b){
-    if(!a || !b) return 0;
-    if(a === b) return 1;
-    const la = a.length, lb = b.length;
-    if(!la || !lb) return 0;
-    // Levenshtein distance
-    const dp = Array.from({length: la+1}, () => new Array(lb+1).fill(0));
-    for(let i = 0; i <= la; i++) dp[i][0] = i;
-    for(let j = 0; j <= lb; j++) dp[0][j] = j;
-    for(let i = 1; i <= la; i++){
-      for(let j = 1; j <= lb; j++){
-        const cost = a[i-1] === b[j-1] ? 0 : 1;
-        dp[i][j] = Math.min(
-          dp[i-1][j] + 1,      // deletion
-          dp[i][j-1] + 1,      // insertion
-          dp[i-1][j-1] + cost  // substitution
-        );
-      }
-    }
-    const dist = dp[la][lb];
-    return 1 - (dist / Math.max(la, lb));
+  return dp[m][n];
+}
+function _simpleFindMatch(w, p){
+  const NEAR = 12;
+  const end = Math.min(refWords.length, p + NEAR);
+  // 1) exact
+  for(let i = p; i < end; i++){
+    if(refWords[i].norm === w) return {idx:i, kind:'exact'};
   }
-  function isFuzzyMatch(heardNorm, expectedNorm, expectedPhoneme, lenientRatio){
-    if(!heardNorm || !expectedNorm) return {matched:false, kind:'none'};
-    lenientRatio = lenientRatio || LEVENSHTEIN_RATIO;
-    // 1) exact match
-    if(heardNorm === expectedNorm) return {matched:true, kind:'text', ratio:1};
-    // 2) substring — Chrome often merges "ال" + next word
-    const minLen = Math.min(heardNorm.length, expectedNorm.length);
-    const maxLen = Math.max(heardNorm.length, expectedNorm.length);
-    if(minLen >= 3){
-      if(heardNorm.includes(expectedNorm) || expectedNorm.includes(heardNorm)){
-        return {matched:true, kind:'substring', ratio: minLen/maxLen};
-      }
-    }
-    // 3) text Levenshtein ratio
-    const textRatio = levRatio(heardNorm, expectedNorm);
-    if(textRatio >= 1 - lenientRatio){
-      return {matched:true, kind:'text', ratio:textRatio};
-    }
-    // 4) phoneme fallback
-    if(expectedPhoneme){
-      const heardPh = phonemizeArabic(heardNorm);
-      if(heardPh && heardPh.length >= 3 && expectedPhoneme.length >= 3){
-        const phRatio = levRatio(heardPh, expectedPhoneme);
-        if(phRatio >= 1 - PHONEME_LEVENSHTEIN_RATIO){
-          return {matched:true, kind:'phoneme', ratio:phRatio};
+  // 2) prefix
+  for(let i = p; i < end; i++){
+    if(refWords[i].norm.startsWith(w) && w.length >= 2) return {idx:i, kind:'prefix'};
+    if(w.startsWith(refWords[i].norm) && refWords[i].norm.length >= 2) return {idx:i, kind:'prefix'};
+  }
+  // 3) fuzzy (Levenshtein)
+  for(let i = p; i < end; i++){
+    const d = levenshtein(refWords[i].norm, w);
+    const tol = Math.max(1, Math.floor(Math.max(refWords[i].norm.length, w.length) * 0.25));
+    if(d <= tol) return {idx:i, kind:'fuzzy', dist:d};
+  }
+  return {idx:-1, kind:'none'};
+}
+function _simpleMatch(text){
+  const heard = (text||'').split(/\s+/).map(normalize).filter(Boolean);
+  if(!heard.length) return;
+  let p = pointer;
+  for(const w of heard){
+    const m = _simpleFindMatch(w, p);
+    if(m.idx >= 0){
+      // mark skipped words as unclear
+      for(let i = p; i < m.idx; i++){
+        if(refWords[i] && refWords[i].el && refWords[i].el.dataset.status !== 'correct'){
+          refWords[i].el.dataset.status = 'unclear';
+          stats.unclear++;
         }
       }
+      // mark matched word as correct
+      if(refWords[m.idx] && refWords[m.idx].el){
+        refWords[m.idx].el.dataset.status = 'correct';
+        stats.correct++;
+      }
+      p = m.idx + 1;
+    } else {
+      // NO MATCH — always advance (production v2.0 behavior)
+      if(p < refWords.length && refWords[p] && refWords[p].el){
+        if(refWords[p].el.dataset.status !== 'correct'){
+          refWords[p].el.dataset.status = 'unclear';
+          stats.unclear++;
+        }
+      }
+      p++;
     }
-    return {matched:false, kind:'none'};
   }
-  function findMatch(heardNorm, from, to){
-    const end = Math.min(refWords.length, to);
-    for(let i = from; i < end; i++){
-      const m = isFuzzyMatch(heardNorm, refWords[i].norm, refWords[i].phoneme);
-      if(m.matched) return {idx:i, match:m};
-    }
-    return {idx:-1, match:{matched:false, kind:'none'}};
+  pointer = Math.min(p, refWords.length);
+  // Update highlight
+  if(typeof highlightCurrent === 'function') highlightCurrent();
+  if(typeof updateStatsUI === 'function') updateStatsUI();
+  // Page-flip if needed
+  if(pointer >= pageEnd){
+    const newPageNum = Math.floor(pointer / PAGE_SIZE);
+    pageStart = newPageNum * PAGE_SIZE;
+    pageEnd   = Math.min(refWords.length, pageStart + PAGE_SIZE);
+    renderPage();
   }
-  // PRODUCTION'S applyMatch (always marks skipped words as unclear,
-  // no guard). This is critical for the re-derivation to work
-  // correctly — production's _runReProcess only clears status from
-  // _maxPointerReached onwards, so words below _maxPointerReached
-  // keep their status. The re-derivation can safely re-mark
-  // skipped words as unclear because they're between the current
-  // pointer and the match (which is always <= pointer + 3).
-  function applyMatch(matchAt, matchInfo, heardWord){
+}
+
+function applyMatch(matchAt, matchInfo, heardWord){
     for(let i = pointer; i < matchAt; i++){
       const w = refWords[i];
       if(w.el){
@@ -1282,101 +1257,6 @@
     consecutiveMisses = 0;
   }
   // PRODUCTION'S processNewWord (copied verbatim + adapted for pageStart)
-  function processNewWord(rawWord){
-    const norm = normalize(rawWord);
-    if(!norm) return;
-    if(pointer >= refWords.length) return;
-    // DEBUG: show what we're about to try
-    console.log(`[matcher] try: pointer=${pointer} word="${rawWord}" norm="${norm}" target="${refWords[pointer] ? refWords[pointer].norm : 'OOB'}" target.text="${refWords[pointer] ? refWords[pointer].text : 'OOB'}"`);
-    // STUCK-WORD DEBUG: if pointer is at العالمين (idx 7), show detailed info
-    if(pointer === 7 && refWords[pointer] && refWords[pointer].norm === 'العلمين'){
-      const stuckEl = document.getElementById('mdStuck');
-      if(stuckEl) stuckEl.textContent = `STUCK: trying "${rawWord}" (norm:"${norm}") at idx 7 — el=${refWords[pointer].el ? 'YES' : 'NO'} class="${refWords[pointer].el ? refWords[pointer].el.className : 'N/A'}"`;
-    }
-    const lastAtt = document.getElementById('mdLastAttempt');
-    if(lastAtt) lastAtt.textContent = `last: p=${pointer} word="${rawWord}" (norm:"${norm}") target="${refWords[pointer] ? refWords[pointer].norm : 'OOB'}"`;
-
-    // FIRST-WORD BIAS: when pointer is at pageStart (the very
-    // first word of the current page) AND no recent misses,
-    // be lenient. This handles Chrome splitting the first
-    // word weirdly. After the first word, this doesn't trigger.
-    if(pointer === pageStart && consecutiveMisses === 0){
-      const head = isFuzzyMatch(norm, refWords[pointer].norm, refWords[pointer].phoneme, 0.40);
-      if(head.matched){
-        applyMatch(pointer, head, rawWord);
-        if(typeof updateMatcherDebug === 'function'){
-          updateMatcherDebug(_pendingFullText, rawWord, 'match(bias)', `at idx ${pointer}`);
-          traceMatch(rawWord, 'match(bias)', `at idx ${pointer}`);
-        }
-        return;
-      } else {
-        if(typeof traceMatch === 'function') traceMatch(rawWord, 'bias-fail', `trying "${refWords[pointer].norm}"`);
-      }
-    }
-
-    // 1) near-window search (production's tight lookahead: <= 3)
-    const near = findMatch(norm, pointer, pointer + NEAR_WINDOW);
-    if(near.idx !== -1 && (near.idx - pointer) <= 3){
-      applyMatch(near.idx, near.match, rawWord);
-      if(typeof updateMatcherDebug === 'function'){
-        updateMatcherDebug(_pendingFullText, rawWord, 'match', `at idx ${near.idx} (delta=${near.idx-pointer})`);
-        traceMatch(rawWord, 'match', `at idx ${near.idx} (delta=${near.idx-pointer})`);
-      }
-      return;
-    } else if(near.idx !== -1){
-      // Found a match but it's too far (delta > 3)
-      if(typeof traceMatch === 'function') traceMatch(rawWord, 'too-far', `near match at ${near.idx} but delta=${near.idx-pointer} > 3`);
-    } else {
-      if(typeof traceMatch === 'function') traceMatch(rawWord, 'no-near', `nothing in [${pointer}, ${pointer+NEAR_WINDOW})`);
-    }
-
-    // 2) far-window search (only after RESYNC_THRESHOLD misses)
-    consecutiveMisses++;
-    if(consecutiveMisses >= RESYNC_THRESHOLD){
-      const far = findMatch(norm, pointer + NEAR_WINDOW, pointer + FAR_WINDOW);
-      if(far.idx !== -1){
-        applyMatch(far.idx, far.match, rawWord);
-        if(typeof updateMatcherDebug === 'function'){
-          updateMatcherDebug(_pendingFullText, rawWord, 'match(far)', `at idx ${far.idx} (delta=${far.idx-pointer})`);
-          traceMatch(rawWord, 'match(far)', `at idx ${far.idx} (delta=${far.idx-pointer})`);
-        }
-        return;
-      }
-    }
-
-    // 3) NO MATCH — ALWAYS ADVANCE (production v2.0 _simpleMatch behavior).
-    // The production's matcher never gets stuck: if a word doesn't match,
-    // it marks the current word as 'unclear' and advances by 1. The user
-    // can then catch up by reciting the correct words.
-    // Without this, the matcher stalls whenever the user says a word
-    // outside the search window — and the pointer never recovers even
-    // when the user corrects themselves.
-    if(refWords[pointer] && refWords[pointer].el){
-      // Only mark if not already marked as 'correct' (avoid double-marking)
-      if(refWords[pointer].el.dataset.status !== 'correct'){
-        refWords[pointer].el.dataset.status = 'unclear';
-        stats.unclear++;
-      }
-    }
-    pointer++;
-    if(pointer > _maxPointerReached) _maxPointerReached = pointer;
-    consecutiveMisses = 0;  // reset so next word gets a fresh window
-    _lastHighlightedPointer = -1;
-    highlightCurrent();
-    updateStatsUI();
-    if(typeof updateMatcherDebug === 'function'){
-      updateMatcherDebug(_pendingFullText, rawWord, 'auto-advance', `pointer → ${pointer} (no match, advanced)`);
-      traceMatch(rawWord, 'auto-advance', `→ ${pointer}`);
-    }
-    // Page-flip if we walked off the current page
-    if(pointer >= pageEnd){
-      const newPageNum = Math.floor(pointer / PAGE_SIZE);
-      pageStart = newPageNum * PAGE_SIZE;
-      pageEnd   = Math.min(refWords.length, pageStart + PAGE_SIZE);
-      renderPage();
-    }
-    return;
-  }
   // === rAF-throttled re-processing (production's pattern) ===
   function _scheduleReProcess(){
     if(_pendingReProcess) return;
@@ -1543,25 +1423,31 @@
     // new session's interim results didn't include them. Now the
     // matcher always sees the full text that was just recognized.
     recognition.onresult = (event) => {
-      // Use ONLY event.results for this event — the browser gives us
-      // ALL results (final + interim) for the current recognition.
-      // This is the same approach production uses.
-      let fullText = '';
-      for(let i = 0; i < event.results.length; i++){
+      // PRODUCTION v2.0 APPROACH: use _simpleMatch which ALWAYS advances
+      // the pointer. No rAF re-processing, no _pendingWords buffer.
+      // One pass, one result. The matcher never gets stuck.
+      let txt = '';
+      for(let i = event.resultIndex; i < event.results.length; i++){
         const res = event.results[i];
-        fullText += res[0].transcript + ' ';
+        txt += res[0].transcript + ' ';
       }
-      fullText = fullText.trim();
-      if(!fullText) return;
+      txt = txt.trim();
+      if(!txt) return;
       // Update the transcript display
       const transcriptBox = document.getElementById('transcriptBox');
       const transcriptText = document.getElementById('transcriptText');
       if(transcriptBox) transcriptBox.classList.remove('hidden');
-      if(transcriptText) transcriptText.textContent = fullText;
-      // Stash and schedule rAF re-process
-      _pendingFullText = fullText;
-      _pendingWords = fullText.split(/\s+/);
-      _scheduleReProcess();
+      if(transcriptText) transcriptText.textContent = txt;
+      // Reset state for clean re-derivation
+      pointer = 0;
+      _lastHighlightedPointer = -1;
+      _maxPointerReached = 0;
+      _prevPastEnd = 0;
+      consecutiveMisses = 0;
+      // Use the SIMPLE matcher from production (always advances pointer)
+      if(typeof _simpleMatch === 'function'){
+        _simpleMatch(txt);
+      }
     };
     // PRODUCTION'S onend: use `listening` flag with 250ms delay.
     recognition.onend = () => {
