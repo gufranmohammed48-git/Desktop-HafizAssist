@@ -973,19 +973,55 @@ function renderPage(){
   for(let i = pageStart; i < pageEnd; i++){
     const w = allRefWords[i];
     if(!w) continue;
-    // Emit surah header when surah changes
+    // Emit surah header (with Bismillah if applicable) when surah changes
     if(w.surah !== lastSurah){
-      // Check if the first word of this surah is Bismillah (for surahs 2-114)
-      const isBismillahPage = (w.ayah === 'bismillah' && w.surah > 1);
-      if(!isBismillahPage){
-        emitSurahHeader(w.surah, isFirstSurah, frag);
+      const meta = SURAH_META.find(s => s.num === w.surah);
+      if(meta){
+        const header = document.createElement('div');
+        header.className = 'surah-header' + (isFirstSurah ? ' first' : '');
         isFirstSurah = false;
+        const arName = document.createElement('span');
+        arName.className = 'ar-name';
+        arName.textContent = meta.name;
+        const enName = document.createElement('span');
+        enName.className = 'en-name';
+        enName.textContent = `${w.surah}. Surah ${meta.translit}`;
+        const meaning = document.createElement('span');
+        meaning.className = 'meaning';
+        meaning.textContent = meta.meaning;
+        header.appendChild(arName);
+        header.appendChild(enName);
+        header.appendChild(meaning);
+        // Add Bismillah inline for surahs 2-114 (except 9)
+        // Surah 1: Bismillah is ayah 1 (rendered as regular words below)
+        // Surah 9: NO Bismillah
+        if(w.surah !== 1 && w.surah !== 9){
+          const bisBlock = document.createElement('div');
+          bisBlock.className = 'bismillah-block';
+          for(const bw of BISMILLAH_WORDS){
+            const bwSpan = document.createElement('span');
+            bwSpan.className = 'word bismillah-word';
+            bwSpan.textContent = bw.text;
+            bisBlock.appendChild(bwSpan);
+          }
+          header.appendChild(bisBlock);
+        }
+        frag.appendChild(header);
       }
       lastSurah = w.surah;
+    }
+    // Skip Bismillah words (they're already in the header for surahs 2-114)
+    if(w.ayah === 'bismillah' && w.surah > 1){
+      w.el = null;  // no DOM element needed
+      continue;
     }
     // === Regular word ===
     const span = document.createElement('span');
     span.className = 'word';
+    // Al-Fatihah's Bismillah (surah 1, ayah 1) gets the bismillah class
+    if(w.ayah === 'bismillah' && w.surah === 1){
+      span.classList.add('bismillah-word');
+    }
     if(i < pointer) span.classList.add('past');
     else if(i === pointer) span.classList.add('now');
     else span.classList.add('future');
