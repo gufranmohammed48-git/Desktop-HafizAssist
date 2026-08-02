@@ -300,7 +300,6 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 <body class="theme-light">
 <div class="theme-picker" id="themePicker">
   <button id="themeBtn" title="Change theme">⚙ Theme</button>
-  <button id="debugToggleBtn" title="Show mistake statistics" style="margin-left:4px">📊 Error Details</button>
   <div class="dropdown">
     <div class="theme-option" data-theme="dark"><span class="swatch" style="background:#0a1f12"></span>Dark Green</div>
     <div class="theme-option" data-theme="light"><span class="swatch" style="background:#fafaf5"></span>Light</div>
@@ -308,7 +307,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
     <div class="theme-option" data-theme="royal"><span class="swatch" style="background:#0d1b2a"></span>Royal Blue</div>
   </div>
 </div>
-<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v12</div>
+<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v13</div>
 
 <!-- VERSION BADGE — increment on every push so user can confirm fresh load -->
 
@@ -388,12 +387,17 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
   </div>
 </section>
 
-<!-- Optional Debug Panel (toggleable) -->
-<div class="debug-panel" id="debugPanel" style="display:none">
-  <h2>📊 Mistake Statistics</h2>
-  <p class="hint">Each row shows a word that was marked <b style="color:var(--red)">wrong</b> or <b style="color:var(--yellow)">unclear</b>: what the script <b>expected</b> (the Quranic text), what was <b>recited</b> (what was heard), and <b>why</b> it didn't match.</p>
-  <div id="debugList"></div>
-  <button class="clear-btn" id="clearDebugBtn">Clear debug log</button>
+<!-- Collapsible Mistake Statistics (closed by default) -->
+<div class="debug-panel" id="debugPanel">
+  <div class="debug-panel-header" id="debugPanelHeader">
+    <h2>📊 Mistake Statistics</h2>
+    <button class="debug-close-btn" id="debugCloseBtn" title="Collapse this section">✕</button>
+  </div>
+  <div class="debug-panel-body" id="debugPanelBody">
+    <p class="hint">Each row shows a word that was marked <b style="color:var(--red)">wrong</b> or <b style="color:var(--yellow)">unclear</b>: what the script <b>expected</b> (the Quranic text), what was <b>recited</b> (what was heard), and <b>why</b> it didn't match.</p>
+    <div id="debugList"></div>
+    <button class="clear-btn" id="clearDebugBtn">Clear mistake log</button>
+  </div>
 </div>
 
 </div>
@@ -1766,25 +1770,40 @@ if(sensitivitySlider){
   updateSensitivity();
 }
 
-// ==== OPTIONAL DEBUG PANEL ====
-const debugToggleBtn = document.getElementById('debugToggleBtn');
+// ==== COLLAPSIBLE MISTAKE STATISTICS ====
 const debugPanel = document.getElementById('debugPanel');
-if(debugToggleBtn && debugPanel){
-  let _debugVisible = false;
-  // Load saved state
+const debugPanelHeader = document.getElementById('debugPanelHeader');
+const debugCloseBtn = document.getElementById('debugCloseBtn');
+if(debugPanel && debugPanelHeader){
+  // Load saved state (true = open, false = closed)
+  let _debugOpen = false;
   try {
-    _debugVisible = localStorage.getItem('hifzapp-debug') === '1';
+    _debugOpen = localStorage.getItem('hifzapp-debug-open') !== '0';
   } catch(e){}
-  function updateDebugVisibility(){
-    debugPanel.style.display = _debugVisible ? 'block' : 'none';
-    debugToggleBtn.classList.toggle('active', _debugVisible);
-    try { localStorage.setItem('hifzapp-debug', _debugVisible ? '1' : '0'); } catch(e){}
+  function updateDebugPanel(){
+    if(_debugOpen){
+      debugPanel.classList.remove('collapsed');
+    } else {
+      debugPanel.classList.add('collapsed');
+    }
+    try { localStorage.setItem('hifzapp-debug-open', _debugOpen ? '1' : '0'); } catch(e){}
   }
-  debugToggleBtn.addEventListener('click', () => {
-    _debugVisible = !_debugVisible;
-    updateDebugVisibility();
+  // Close button: collapse to just the title
+  if(debugCloseBtn){
+    debugCloseBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      _debugOpen = false;
+      updateDebugPanel();
+    });
+  }
+  // Click on the title: open the panel
+  debugPanelHeader.addEventListener('click', () => {
+    if(!_debugOpen){
+      _debugOpen = true;
+      updateDebugPanel();
+    }
   });
-  updateDebugVisibility();
+  updateDebugPanel();
 }
 </script>
 
