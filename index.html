@@ -578,7 +578,7 @@
 </head>
 <body class="theme-light">
 
-<div class="ver" id="ver">v9</div>
+<div class="ver" id="ver">v10</div>
 
 <button class="settings-btn" id="settingsBtn" title="Settings">⚙</button>
 <div class="settings-menu" id="settingsMenu">
@@ -1536,8 +1536,14 @@
       _scheduleReProcess();
     };
     // PRODUCTION'S onend: use `listening` flag with 250ms delay.
+    // DEBOUNCED auto-restart (prevents tight restart loop on Android)
+    let _lastRestartTime = 0;
     recognition.onend = () => {
       if(!listening) return;
+      const now = Date.now();
+      // Don't restart more than once per 1500ms
+      if(now - _lastRestartTime < 1500) return;
+      _lastRestartTime = now;
       setTimeout(() => {
         if(!listening) return;
         try {
@@ -1547,11 +1553,16 @@
             if(listening){
               try{ recognition.start(); }catch(_){}
             }
-          }, 400);
+          }, 500);
         }
-      }, 250);
+      }, 500);
     };
     recognition.onerror = (e) => {
+      // 'aborted' is expected during auto-restart — don't show as an error
+      if(e.error === 'aborted'){
+        console.log('[recognition] aborted (expected on stop/restart)');
+        return;
+      }
       if(statusEl) statusEl.textContent = 'Mic error: ' + (e.error || 'unknown');
     };
     // onaudiostart/onspeechstart for the 'mic-armed' indicator
