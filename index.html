@@ -329,7 +329,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
     </div>
   </div>
 </div>
-<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v32</div>
+<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v33</div>
 
 <!-- VERSION BADGE — increment on every push so user can confirm fresh load -->
 
@@ -847,9 +847,9 @@ function processNewWord(rawWord){
   // DEBUG: show what the next expected word is
   if(pointer < refWords.length){
     const w = refWords[pointer];
-    console.log(`[matcher] pointer=${pointer}/${refWords.length} surah=${w.surah} ayah=${w.ayah} expected="${w.text}" norm="${w.norm || '?'}" heard="${rawWord}" norm="${norm}"`);
+
   } else {
-    console.log(`[matcher] pointer=${pointer} OUT OF BOUNDS (refWords.length=${refWords.length}) — surah complete!`);
+
   }
   const near = findMatch(norm, pointer, pointer + NEAR_WINDOW);
   if(near.idx !== -1 && (near.idx - pointer) <= 3){
@@ -1279,9 +1279,9 @@ function setSurahPage(num){
     const elOk = refWords[i] && refWords[i].el ? 'YES' : 'NO';
     first5.push(`${i}:${refWords[i].text}(el:${elOk})`);
   }
-  console.log(`[setSurahPage] DONE surah=${num} refWords.length=${refWords.length} pointer=${pointer}`);
-  console.log(`[setSurahPage] first 5 words: ${first5.join(' ')}`);
-  console.log(`[setSurahPage] pageStart=${pageStart} pageEnd=${pageEnd}`);
+
+
+
 }
 
 function nextPage(){
@@ -1373,11 +1373,13 @@ function highlightCurrent(){
     refWords[_lastHighlightedPointer].el.classList.remove("now");
   }
   for(let i = _prevPastEnd; i < _maxPointerReached; i++){
-    const w = refWords[i].el;
-    w.classList.add("past");
-    w.classList.remove("future");  // no longer a candidate for hide-script blur
+    if(refWords[i] && refWords[i].el){
+      const w = refWords[i].el;
+      w.classList.add("past");
+      w.classList.remove("future");  // no longer a candidate for hide-script blur
+    }
   }
-  if(pointer < refWords.length){
+  if(pointer < refWords.length && refWords[pointer] && refWords[pointer].el){
     const w = refWords[pointer].el;
     w.classList.add("now");
     w.classList.remove("future");  // .now has its own (hidden) style under script-hidden
@@ -1386,7 +1388,7 @@ function highlightCurrent(){
   if(pointer > _maxPointerReached) _maxPointerReached = pointer;
   _prevPastEnd = _maxPointerReached;
   _lastHighlightedPointer = pointer;
-  if(pointer < refWords.length){
+  if(pointer < refWords.length && refWords[pointer] && refWords[pointer].el){
     const el = refWords[pointer].el;
     // Only scroll if the current word is OUTSIDE the visible area of
     // the ayah container. Use instant ('auto') scroll rather than
@@ -1551,7 +1553,7 @@ async function startListening(){
   recognition.onerror = (e) => {
     // 'aborted' is expected during auto-restart (Chrome) — don't show as error
     if(e.error === 'aborted'){
-      console.log('[recognition] aborted (expected on stop/restart)');
+
       return;
     }
     // Show a clear status for every error so the user knows what's wrong.
