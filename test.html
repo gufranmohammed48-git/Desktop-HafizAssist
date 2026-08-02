@@ -34,7 +34,7 @@
   }
   *{box-sizing:border-box}
   body{margin:0;font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-  .app{max-width:1200px;margin:0 auto;padding:24px}
+  .app{max-width:1200px;margin:0 auto;padding:12px 20px;display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;width:100%}
   /* VERSION BADGE — top right, easy to spot for cache-busting checks */
   .version-badge{
     position:fixed;top:14px;right:14px;z-index:1000;
@@ -330,7 +330,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
     </div>
   </div>
 </div>
-<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v19</div>
+<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v20</div>
 
 <!-- VERSION BADGE — increment on every push so user can confirm fresh load -->
 
