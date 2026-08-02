@@ -312,7 +312,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
     <div class="theme-option" data-theme="royal"><span class="swatch" style="background:#0d1b2a"></span>Royal Blue</div>
   </div>
 </div>
-<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v16</div>
+<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v17</div>
 
 <!-- VERSION BADGE — increment on every push so user can confirm fresh load -->
 
@@ -1759,7 +1759,7 @@ function updateSensitivity(){
   const v = parseInt(sensitivitySlider.value);
   // Map 0-100 to 0.05-0.50
   const ratio = 0.05 + (v / 100) * 0.45;
-  sensitivityValue.textContent = ratio.toFixed(2);
+  if(sensitivityValue) sensitivityValue.textContent = ratio.toFixed(2);
   window.LEVENSHTEIN_RATIO = ratio;
   // Save to localStorage
   try { localStorage.setItem('hifzapp-sensitivity', v); } catch(e){}
