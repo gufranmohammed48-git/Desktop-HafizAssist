@@ -176,7 +176,7 @@
   .word .phoneme-tooltip .rules{margin-top:6px;color:var(--text-dim)}
   .mic-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 .sensitivity-control{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:4px 10px}
-.sensitivity-control .difficulty-end{font-size:11px;color:var(--text-dim);font-weight:500;letter-spacing:.3px;text-transform:uppercase;min-width:60px}
+.sensitivity-control .difficulty-end{font-size:11px;color:var(--text-dim);font-weight:500;letter-spacing:.3px;text-transform:uppercase;min-width:60px;flex-shrink:0;white-space:nowrap}
 .sensitivity-control .difficulty-end:first-child{text-align:right}
 .sensitivity-control input[type=range]{accent-color:var(--primary);height:4px}
   .mic-btn{display:flex;align-items:center;gap:10px;background:var(--primary);color:#0a1f12;border:none;padding:12px 22px;border-radius:30px;font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;transition:all .15s ease}
@@ -331,7 +331,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
     </div>
   </div>
 </div>
-<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v50</div>
+<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v51</div>
 
 <!-- VERSION BADGE — increment on every push so user can confirm fresh load -->
 
@@ -379,8 +379,8 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
     </button>
     <button class="toggle-script-btn" id="toggleScriptBtn" title="Toggle the visible mushaf text">Hide Script</button>
     <div class="sensitivity-control">
-      <span class="difficulty-end">Forgiving</span>
-      <input type="range" id="sensitivitySlider" min="0" max="100" value="50" style="width:120px" title="Match difficulty">
+      <span class="difficulty-end">Lenient</span>
+      <input type="range" id="sensitivitySlider" min="0" max="100" value="50" style="width:120px;flex-shrink:0;flex:0 0 120px" title="Match difficulty">
       <span class="difficulty-end">Strict</span>
     </div>
     <span class="status" id="status">Pick a surah from the above list and track your recitation</span>
