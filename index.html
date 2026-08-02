@@ -579,7 +579,7 @@
 </head>
 <body class="theme-light">
 
-<div class="ver" id="ver">v10.1</div>
+<div class="ver" id="ver">v10.2</div>
 
 <button class="settings-btn" id="settingsBtn" title="Settings">⚙</button>
 <div class="settings-menu" id="settingsMenu">
@@ -1212,6 +1212,7 @@
   let committedWordCount = 0;
   let _pendingFullText = '';
   let _pendingWords = [];
+  let finalizedText = '';  // PRODUCTION: accumulates across onresult events
   let _pendingReProcess = false;
   let _pendingFinalized = '';  // (legacy, unused since v3.24)
   // CRITICAL: levRatio was missing! This caused the matcher to crash
