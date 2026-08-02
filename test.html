@@ -250,10 +250,10 @@
 #page.script-hidden .word.now{visibility:visible!important;background:var(--primary)!important;color:#0a1f12!important;border:3px solid #fff!important;box-shadow:0 0 16px var(--now-glow)!important}
 
 
-.bismillah-block{text-align:center;margin:8px 0;padding:4px 0;font-family:'Amiri',serif;font-size:1.1em;color:var(--primary);font-weight:600}
-.bismillah-block .bismillah-word{display:inline-block;margin:0 2px;padding:2px 4px}
-.word.bismillah-word{color:var(--primary);font-weight:600;background:transparent!important;opacity:1!important}
-#page.script-hidden .bismillah-block{visibility:hidden}
+/* Bismillah words rendered as regular words but styled as a centered group */
+.word.bismillah-word{color:var(--primary);font-weight:600;font-size:1.1em;background:transparent!important;opacity:1!important}
+.word.bismillah-word.past{color:var(--primary);background:var(--primary-soft)!important}
+.word.bismillah-word.now{background:var(--primary)!important;color:#0a1f12!important}
 
 </style>
 </head>
@@ -998,27 +998,36 @@ function renderPage(){
         header.appendChild(arName);
         header.appendChild(enName);
         header.appendChild(meaning);
-        // Add Bismillah inline for surahs 2-114 (except 9)
-        // Surah 1: Bismillah is ayah 1 (rendered as regular words below)
-        // Surah 9: NO Bismillah
-        if(w.surah !== 1 && w.surah !== 9){
-          const bisBlock = document.createElement('div');
-          bisBlock.className = 'bismillah-block';
-          for(const bw of BISMILLAH_WORDS){
-            const bwSpan = document.createElement('span');
-            bwSpan.className = 'word bismillah-word';
-            bwSpan.textContent = bw.text;
-            bisBlock.appendChild(bwSpan);
-          }
-          header.appendChild(bisBlock);
-        }
         frag.appendChild(header);
+        // For surahs 2-114 (except 9), emit Bismillah as regular words
+        // so the matcher can highlight them during recitation.
+        // The CSS will style them as a centered group.
+        if(w.surah !== 1 && w.surah !== 9){
+          for(let bi = 0; bi < BISMILLAH_WORDS.length; bi++){
+            const idx = i + bi;
+            if(idx >= pageEnd) break;  // page boundary
+            const bw = allRefWords[idx];
+            if(!bw || bw.ayah !== 'bismillah') break;
+            const span = document.createElement('span');
+            span.className = 'word bismillah-word';
+            if(idx < pointer) span.classList.add('past');
+            else if(idx === pointer) span.classList.add('now');
+            else span.classList.add('future');
+            span.textContent = bw.text;
+            bw.el = span;  // CRITICAL: link DOM element to refWord
+            frag.appendChild(span);
+          }
+          // Skip past the Bismillah words
+          i += BISMILLAH_WORDS.length - 1;
+          lastSurah = w.surah;
+          continue;
+        }
       }
       lastSurah = w.surah;
     }
-    // Skip Bismillah words (they're already in the header for surahs 2-114)
+    // Skip Bismillah words (they're rendered above for surahs 2-114)
     if(w.ayah === 'bismillah' && w.surah > 1){
-      w.el = null;  // no DOM element needed
+      w.el = null;  // no DOM element needed (already rendered in header)
       continue;
     }
     // === Regular word ===
