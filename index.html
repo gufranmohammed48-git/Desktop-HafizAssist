@@ -180,12 +180,12 @@
 .sensitivity-control .difficulty-end{font-size:10px;color:var(--text-dim);font-weight:500;letter-spacing:.2px;text-transform:uppercase;min-width:50px;flex-shrink:0;white-space:nowrap}
 .sensitivity-control .difficulty-end:first-child{text-align:right}
 .sensitivity-control input[type=range]{accent-color:var(--primary);height:4px}
-  .mic-btn{display:flex;align-items:center;gap:10px;background:var(--primary);color:var(--primary-text);border:none;padding:12px 22px;border-radius:30px;font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;transition:all .15s ease}
-  .mic-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(46,204,113,.35)}
+  .mic-btn{display:flex;align-items:center;gap:10px;background:var(--primary-soft);color:var(--primary);border:2px solid var(--primary);padding:12px 22px;border-radius:30px;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;transition:all .15s ease}
+  .mic-btn:hover{transform:translateY(-1px);box-shadow:0 4px 16px var(--shadow);filter:brightness(0.95)}
   .mic-btn.listening{background:var(--red);color:#fff}
   .mic-btn.listening:hover{box-shadow:0 6px 20px rgba(231,76,60,.35)}
   .mic-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
-  .mic-dot{width:10px;height:10px;border-radius:50%;background:var(--primary-text)}
+  .mic-dot{width:10px;height:10px;border-radius:50%;background:var(--primary)}
   .mic-btn.listening .mic-dot{background:#fff;animation:pulse 1s ease-in-out infinite;box-shadow:0 0 12px rgba(255,255,255,.8)}
   /* Larger visual ring on the listening button so the user can SEE it's active */
   .mic-btn.listening{box-shadow:0 0 0 6px rgba(231,76,60,.25),0 6px 20px rgba(231,76,60,.4)}
