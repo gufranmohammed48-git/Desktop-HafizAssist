@@ -976,6 +976,9 @@ function renderPage(){
   const frag = document.createDocumentFragment();
   let lastSurah = -1;
   let isFirstSurah = (pageStart === 0);
+  // Find the first surah on this page — only emit its header if
+  // the page is the first one where this surah appears
+  const firstSurahOnPage = allRefWords[pageStart] ? allRefWords[pageStart].surah : null;
   for(let i = pageStart; i < pageEnd; i++){
     const w = allRefWords[i];
     if(!w) continue;
@@ -983,6 +986,18 @@ function renderPage(){
     if(w.surah !== lastSurah){
       const meta = SURAH_META.find(s => s.num === w.surah);
       if(meta){
+        // Only emit header on the FIRST page where this surah appears
+        // (track via the page where the surah starts)
+        const surahStartPage = Math.floor(surahStartIndex[w.surah] / PAGE_SIZE);
+        const isFirstPageOfSurah = (Math.floor(pageStart / PAGE_SIZE) === surahStartPage);
+        if(!isFirstPageOfSurah){
+          // Skip header — it was already emitted on the first page
+          lastSurah = w.surah;
+          // Still need to handle Bismillah on subsequent pages if they're
+          // on this slice. But for simplicity, only emit Bismillah on
+          // the first page of the surah.
+          continue;
+        }
         const header = document.createElement('div');
         header.className = 'surah-header' + (isFirstSurah ? ' first' : '');
         isFirstSurah = false;
