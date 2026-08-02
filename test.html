@@ -1043,16 +1043,21 @@ function setSurahPage(num){
   for(let i = startIdx; i < allRefWords.length; i++){
     if(allRefWords[i].surah !== num){ endIdx = i; break; }
   }
+  // Set refWords to just this surah's words (so production matcher works)
+  refWords = allRefWords.slice(startIdx, endIdx);
+  // Recalculate .el links for the current page
+  // (renderPage will set them, but the matcher needs them too)
   // Calculate which page contains the surah start
   const pageNum = Math.floor(startIdx / PAGE_SIZE);
   pageStart = pageNum * PAGE_SIZE;
   pageEnd = Math.min(allRefWords.length, pageStart + PAGE_SIZE);
-  // Set pointer to the first word of the surah
-  pointer = startIdx;
-  _maxPointerReached = startIdx;
+  // Set pointer to the first word of the surah (relative to refWords)
+  pointer = 0;  // start at the beginning of this surah
+  _maxPointerReached = 0;
   _lastHighlightedPointer = -1;
-  _prevPastEnd = startIdx;
+  _prevPastEnd = 0;
   consecutiveMisses = 0;
+  activeSurah = num;
   renderPage();
   updateStats();
   highlightCurrent();
@@ -1060,6 +1065,11 @@ function setSurahPage(num){
   document.querySelectorAll('.surah-card').forEach(c => {
     c.classList.toggle('active', parseInt(c.dataset.num) === num);
   });
+  // Update status
+  const meta = SURAH_META.find(s => s.num === num);
+  if(meta && statusEl){
+    statusEl.textContent = `Ready to recite ${meta.translit} (${meta.meaning}). Click Start to begin.`;
+  }
 }
 
 function nextPage(){
