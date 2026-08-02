@@ -1124,6 +1124,20 @@ function setSurahPage(num){
   _prevPastEnd = 0;
   consecutiveMisses = 0;
   activeSurah = num;
+  // CRITICAL: clear stale transcript state from previous surah.
+  // Otherwise the old transcript words will be re-matched against
+  // the new surah's refWords, giving wrong results.
+  _pendingFullText = '';
+  _pendingWords = [];
+  finalizedText = '';
+  stats = {correct:0, mistake:0, unclear:0};
+  // Also clear the status of the OLD refWords (in case the user is
+  // switching back and forth)
+  for(let i = 0; i < refWords.length; i++){
+    if(refWords[i] && refWords[i].el){
+      refWords[i].el.dataset.status = '';
+    }
+  }
   renderPage();
   updateStats();
   highlightCurrent();
@@ -1136,6 +1150,8 @@ function setSurahPage(num){
   if(meta && statusEl){
     statusEl.textContent = `Ready to recite ${meta.translit} (${meta.meaning}). Click Start to begin.`;
   }
+  // DEBUG
+  console.log(`[setSurahPage] surah=${num} refWords.length=${refWords.length} pointer=${pointer} firstWord=${refWords[0] ? refWords[0].text : 'none'} firstWord.el=${refWords[0] && refWords[0].el ? 'YES' : 'NO'}`);
 }
 
 function nextPage(){
