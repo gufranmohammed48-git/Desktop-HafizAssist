@@ -172,6 +172,9 @@
   .word .phoneme-tooltip .ipa{font-family:ui-monospace,monospace;color:var(--accent);font-size:13px}
   .word .phoneme-tooltip .rules{margin-top:6px;color:var(--text-dim)}
   .mic-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.sensitivity-control{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:4px 10px}
+.sensitivity-control label{font-size:12px;color:var(--text-dim);white-space:nowrap}
+.sensitivity-control input[type=range]{accent-color:var(--primary);height:4px}
   .mic-btn{display:flex;align-items:center;gap:10px;background:var(--primary);color:#0a1f12;border:none;padding:12px 22px;border-radius:30px;font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;transition:all .15s ease}
   .mic-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(46,204,113,.35)}
   .mic-btn.listening{background:var(--red);color:#fff}
@@ -296,6 +299,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 <body class="theme-light">
 <div class="theme-picker" id="themePicker">
   <button id="themeBtn" title="Change theme">⚙ Theme</button>
+  <button id="debugToggleBtn" title="Toggle debug panel" style="margin-left:4px">🐛 Debug</button>
   <div class="dropdown">
     <div class="theme-option" data-theme="dark"><span class="swatch" style="background:#0a1f12"></span>Dark Green</div>
     <div class="theme-option" data-theme="light"><span class="swatch" style="background:#fafaf5"></span>Light</div>
@@ -303,7 +307,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
     <div class="theme-option" data-theme="royal"><span class="swatch" style="background:#0d1b2a"></span>Royal Blue</div>
   </div>
 </div>
-<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v9</div>
+<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v10</div>
 
 <!-- VERSION BADGE — increment on every push so user can confirm fresh load -->
 
@@ -352,6 +356,11 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
       <span id="micLabel">Start reciting</span>
     </button>
     <button class="toggle-script-btn" id="toggleScriptBtn" title="Toggle the visible mushaf text">Hide Script</button>
+    <div class="sensitivity-control">
+      <label for="sensitivitySlider">Match sensitivity:</label>
+      <input type="range" id="sensitivitySlider" min="0" max="100" value="50" style="width:120px">
+      <span id="sensitivityValue" style="font-size:12px;color:var(--text-dim);min-width:50px">0.15</span>
+    </div>
     <span class="status" id="status">Pick a surah from the above list and track your recitation</span>
   </div>
 
@@ -378,7 +387,13 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
   </div>
 </section>
 
-<!-- Debug panel removed for production -->
+<!-- Optional Debug Panel (toggleable) -->
+<div class="debug-panel" id="debugPanel" style="display:none">
+  <h2>🐛 DEBUG — Words Marked as Errors</h2>
+  <p class="hint">Each row shows a word that was marked <b style="color:var(--red)">wrong</b> or <b style="color:var(--yellow)">unclear</b>: what the script <b>expected</b> (the Quranic text), what was <b>recited</b> (Chrome's transcription), and <b>why</b> it didn't match.</p>
+  <div id="debugList"></div>
+  <button class="clear-btn" id="clearDebugBtn">Clear debug log</button>
+</div>
 
 </div>
 
@@ -1725,6 +1740,52 @@ if(_savedTheme && ['dark','light','sepia','royal'].includes(_savedTheme)){
   document.body.className = 'theme-' + _savedTheme;
 }
 // ==== END THEME PICKER ====
+
+// ==== SENSITIVITY SLIDER ====
+// Range: 0 = easy (0.05 = very lenient), 100 = strict (0.50 = very strict)
+// Maps slider value 0-100 to LEVENSHTEIN_RATIO 0.05-0.50
+const sensitivitySlider = document.getElementById('sensitivitySlider');
+const sensitivityValue = document.getElementById('sensitivityValue');
+function updateSensitivity(){
+  const v = parseInt(sensitivitySlider.value);
+  // Map 0-100 to 0.05-0.50
+  const ratio = 0.05 + (v / 100) * 0.45;
+  sensitivityValue.textContent = ratio.toFixed(2);
+  window.LEVENSHTEIN_RATIO = ratio;
+  // Save to localStorage
+  try { localStorage.setItem('hifzapp-sensitivity', v); } catch(e){}
+}
+if(sensitivitySlider){
+  sensitivitySlider.addEventListener('input', updateSensitivity);
+  // Load saved sensitivity
+  let _savedSens = null;
+  try { _savedSens = localStorage.getItem('hifzapp-sensitivity'); } catch(e){}
+  if(_savedSens !== null){
+    sensitivitySlider.value = _savedSens;
+  }
+  updateSensitivity();
+}
+
+// ==== OPTIONAL DEBUG PANEL ====
+const debugToggleBtn = document.getElementById('debugToggleBtn');
+const debugPanel = document.getElementById('debugPanel');
+if(debugToggleBtn && debugPanel){
+  let _debugVisible = false;
+  // Load saved state
+  try {
+    _debugVisible = localStorage.getItem('hifzapp-debug') === '1';
+  } catch(e){}
+  function updateDebugVisibility(){
+    debugPanel.style.display = _debugVisible ? 'block' : 'none';
+    debugToggleBtn.classList.toggle('active', _debugVisible);
+    try { localStorage.setItem('hifzapp-debug', _debugVisible ? '1' : '0'); } catch(e){}
+  }
+  debugToggleBtn.addEventListener('click', () => {
+    _debugVisible = !_debugVisible;
+    updateDebugVisibility();
+  });
+  updateDebugVisibility();
+}
 </script>
 
 </body>
