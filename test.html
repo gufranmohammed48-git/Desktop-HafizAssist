@@ -173,7 +173,8 @@
   .word .phoneme-tooltip .rules{margin-top:6px;color:var(--text-dim)}
   .mic-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 .sensitivity-control{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:4px 10px}
-.sensitivity-control label{font-size:12px;color:var(--text-dim);white-space:nowrap}
+.sensitivity-control .difficulty-end{font-size:11px;color:var(--text-dim);font-weight:500;letter-spacing:.3px;text-transform:uppercase;min-width:60px}
+.sensitivity-control .difficulty-end:first-child{text-align:right}
 .sensitivity-control input[type=range]{accent-color:var(--primary);height:4px}
   .mic-btn{display:flex;align-items:center;gap:10px;background:var(--primary);color:#0a1f12;border:none;padding:12px 22px;border-radius:30px;font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;transition:all .15s ease}
   .mic-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(46,204,113,.35)}
@@ -307,7 +308,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
     <div class="theme-option" data-theme="royal"><span class="swatch" style="background:#0d1b2a"></span>Royal Blue</div>
   </div>
 </div>
-<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v11</div>
+<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v12</div>
 
 <!-- VERSION BADGE — increment on every push so user can confirm fresh load -->
 
@@ -357,9 +358,9 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
     </button>
     <button class="toggle-script-btn" id="toggleScriptBtn" title="Toggle the visible mushaf text">Hide Script</button>
     <div class="sensitivity-control">
-      <label for="sensitivitySlider">Match sensitivity:</label>
-      <input type="range" id="sensitivitySlider" min="0" max="100" value="50" style="width:120px">
-      <span id="sensitivityValue" style="font-size:12px;color:var(--text-dim);min-width:50px">0.15</span>
+      <span class="difficulty-end">Forgiving</span>
+      <input type="range" id="sensitivitySlider" min="0" max="100" value="50" style="width:120px" title="Match difficulty">
+      <span class="difficulty-end">Strict</span>
     </div>
     <span class="status" id="status">Pick a surah from the above list and track your recitation</span>
   </div>
