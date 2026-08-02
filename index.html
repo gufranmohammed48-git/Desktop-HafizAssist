@@ -246,7 +246,7 @@
 .page-controls button{background:var(--card);color:var(--primary);border:1px solid var(--primary);padding:8px 16px;border-radius:8px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer}
 .page-controls button:hover{background:var(--primary-soft)}
 .page-controls #pageInfo{color:var(--text-dim);font-size:12px;padding:0 8px}
-#page{font-family:var(--quran-font, 'Amiri'),serif;font-size:20px;line-height:1.9;direction:rtl;text-align:right;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;height:auto;overflow:visible;transition:filter .2s ease,opacity .2s ease}
+#page{font-family:var(--quran-font, 'Amiri'),serif;font-size:20px;line-height:1.9;direction:rtl;text-align:right;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;min-height:calc(100vh - 200px);height:auto;overflow:visible;transition:filter .2s ease,opacity .2s ease}
 #page::-webkit-scrollbar{width:8px}
 #page::-webkit-scrollbar-track{background:transparent}
 #page::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
@@ -1849,12 +1849,8 @@ function applyQuranFont(fontName){
   document.documentElement.style.setProperty('--quran-font', fontValue);
   document.body.style.setProperty('--quran-font', fontValue);
   try { localStorage.setItem('hifzapp-font', fontName); } catch(e){}
-  // Force re-render of words by toggling a class
-  requestAnimationFrame(() => {
-    document.body.style.display = 'none';
-    void document.body.offsetHeight;
-    document.body.style.display = '';
-  });
+  // No force re-render - it was causing scroll-to-top
+  // The CSS variable change is enough; browser will re-render naturally
 }
 document.querySelectorAll('.font-option').forEach(opt => {
   opt.addEventListener('click', (e) => {
