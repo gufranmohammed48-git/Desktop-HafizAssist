@@ -576,9 +576,9 @@
   .transcript-box .label{color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;display:block}
   .transcript-box .text{font-family:'Amiri',serif;font-size:18px;direction:rtl;text-align:right}</style>
 </head>
-<body class="theme-dark">
+<body class="theme-light">
 
-<div class="ver" id="ver">v8</div>
+<div class="ver" id="ver">v9</div>
 
 <button class="settings-btn" id="settingsBtn" title="Settings">⚙</button>
 <div class="settings-menu" id="settingsMenu">
@@ -611,7 +611,7 @@
   <div class="stat-box"><div class="stat-label">Correct</div><div class="stat-val green" id="statCorrect">0</div></div>
   <div class="stat-box"><div class="stat-label">Mistakes</div><div class="stat-val red" id="statMistake">0</div></div>
   <div class="stat-box"><div class="stat-label">Unclear</div><div class="stat-val yellow" id="statUnclear">0</div></div>
-  <div class="stat-box"><div class="stat-label">Pointer</div><div class="stat-val" id="statPointer">0 / 0</div></div>
+  <div class="stat-box"><div class="stat-label">Accuracy</div><div class="stat-val green" id="statAccuracy">100%</div></div>
 </div>
 <div class="mic-row">
   <button class="mic-btn" id="micBtn">
@@ -622,16 +622,7 @@
   <button class="toggle-script-btn" id="toggleScriptBtn">Hide Script</button>
   <span class="status-text" id="status">Pick a surah from the above list and track your recitation</span>
 </div>
-<div id="matcherDebug" style="max-width:900px;margin:0 auto 12px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 16px;font-size:12px;line-height:1.5">
-  <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">🔍 Comprehensive Matcher Debug</div>
-  <div id="mdPointer" style="font-family:monospace;color:var(--primary);font-size:13px;padding:4px;background:rgba(0,0,0,.2);border-radius:4px;margin-bottom:6px">pointer: —</div>
-  <div id="mdCurrent" style="font-family:monospace;color:var(--yellow);font-size:12px;margin-bottom:6px">refWords[pointer]: —</div>
-  <div id="mdTrace" style="font-family:monospace;color:var(--text);font-size:11px;margin-bottom:6px;max-height:200px;overflow-y:auto;background:rgba(0,0,0,.2);padding:6px;border-radius:4px">trace: (empty)</div>
-  <div id="mdStuck" style="background:#e74c3c;color:#fff;padding:6px 10px;border-radius:4px;margin:4px 0;font-size:12px;font-weight:700">🔴 stuck: (empty)</div>
-  <div id="mdLastAttempt" style="background:#3498db;color:#fff;padding:6px 10px;border-radius:4px;margin:4px 0;font-size:12px;font-weight:700">🔵 last attempt: (empty)</div>
-  <div id="mdLastWords" style="font-family:monospace;color:var(--text);font-size:11px;margin-bottom:6px">last 5: —</div>
-  <div id="mdTranscript" style="font-family:monospace;color:var(--text-dim);font-size:11px">transcript: —</div>
-</div>
+
 <div id="transcriptBox" class="transcript-box hidden">
   <span class="label">Live transcript — what the app heard from you</span>
   <div id="transcriptText" class="text"></div>
@@ -1069,15 +1060,14 @@
       settingsMenu.classList.remove('open');
     });
   });
-  // Load saved theme
+  // Load saved theme — DEFAULT IS LIGHT on first visit (user's choice 2026-08-01)
   let _savedTheme = null;
   try{ _savedTheme = localStorage.getItem('hifzapp-theme'); }catch(e){}
   if(_savedTheme && ['dark','light','sepia','royal'].includes(_savedTheme)){
     setTheme(_savedTheme);
   } else {
-    // First visit — check system preference
-    const _prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
-    setTheme(_prefersLight ? 'light' : 'dark');
+    // First visit — default to LIGHT (user's preference)
+    setTheme('light');
   }
 
   // ==== SURAH PICKER ====
@@ -1157,11 +1147,13 @@
     const statCorrect = document.getElementById('statCorrect');
     const statMistake = document.getElementById('statMistake');
     const statUnclear = document.getElementById('statUnclear');
-    const statPointer = document.getElementById('statPointer');
+    const statAccuracy = document.getElementById('statAccuracy');
     if(statCorrect) statCorrect.textContent = stats.correct;
     if(statMistake) statMistake.textContent = stats.mistake;
     if(statUnclear) statUnclear.textContent = stats.unclear;
-    if(statPointer) statPointer.textContent = (pointer + 1) + ' / ' + refWords.length;
+    // Accuracy = correct / (correct + mistakes + unclear) — includes unclear per user spec
+    const total = stats.correct + stats.mistake + stats.unclear;
+    if(statAccuracy) statAccuracy.textContent = total > 0 ? Math.round((stats.correct / total) * 100) + '%' : '—';
   }
 
   // ==== MATCHER: ported from index.html v47.5 (with past-region fix) ====
