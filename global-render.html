@@ -578,7 +578,7 @@
 </head>
 <body class="theme-dark">
 
-<div class="ver" id="ver">v3.24</div>
+<div class="ver" id="ver">v8</div>
 
 <button class="settings-btn" id="settingsBtn" title="Settings">⚙</button>
 <div class="settings-menu" id="settingsMenu">
@@ -627,6 +627,8 @@
   <div id="mdPointer" style="font-family:monospace;color:var(--primary);font-size:13px;padding:4px;background:rgba(0,0,0,.2);border-radius:4px;margin-bottom:6px">pointer: —</div>
   <div id="mdCurrent" style="font-family:monospace;color:var(--yellow);font-size:12px;margin-bottom:6px">refWords[pointer]: —</div>
   <div id="mdTrace" style="font-family:monospace;color:var(--text);font-size:11px;margin-bottom:6px;max-height:200px;overflow-y:auto;background:rgba(0,0,0,.2);padding:6px;border-radius:4px">trace: (empty)</div>
+  <div id="mdStuck" style="background:#e74c3c;color:#fff;padding:6px 10px;border-radius:4px;margin:4px 0;font-size:12px;font-weight:700">🔴 stuck: (empty)</div>
+  <div id="mdLastAttempt" style="background:#3498db;color:#fff;padding:6px 10px;border-radius:4px;margin:4px 0;font-size:12px;font-weight:700">🔵 last attempt: (empty)</div>
   <div id="mdLastWords" style="font-family:monospace;color:var(--text);font-size:11px;margin-bottom:6px">last 5: —</div>
   <div id="mdTranscript" style="font-family:monospace;color:var(--text-dim);font-size:11px">transcript: —</div>
 </div>
@@ -1200,6 +1202,32 @@
   let _pendingWords = [];
   let _pendingReProcess = false;
   let _pendingFinalized = '';  // (legacy, unused since v3.24)
+  // CRITICAL: levRatio was missing! This caused the matcher to crash
+  // when trying to fuzzy-match "العالمين" (and any word that didn't
+  // exact-match or substring-match). Production has this function —
+  // we forgot to copy it over.
+  function levRatio(a, b){
+    if(!a || !b) return 0;
+    if(a === b) return 1;
+    const la = a.length, lb = b.length;
+    if(!la || !lb) return 0;
+    // Levenshtein distance
+    const dp = Array.from({length: la+1}, () => new Array(lb+1).fill(0));
+    for(let i = 0; i <= la; i++) dp[i][0] = i;
+    for(let j = 0; j <= lb; j++) dp[0][j] = j;
+    for(let i = 1; i <= la; i++){
+      for(let j = 1; j <= lb; j++){
+        const cost = a[i-1] === b[j-1] ? 0 : 1;
+        dp[i][j] = Math.min(
+          dp[i-1][j] + 1,      // deletion
+          dp[i][j-1] + 1,      // insertion
+          dp[i-1][j-1] + cost  // substitution
+        );
+      }
+    }
+    const dist = dp[la][lb];
+    return 1 - (dist / Math.max(la, lb));
+  }
   function isFuzzyMatch(heardNorm, expectedNorm, expectedPhoneme, lenientRatio){
     if(!heardNorm || !expectedNorm) return {matched:false, kind:'none'};
     lenientRatio = lenientRatio || LEVENSHTEIN_RATIO;
@@ -1265,6 +1293,15 @@
     const norm = normalize(rawWord);
     if(!norm) return;
     if(pointer >= refWords.length) return;
+    // DEBUG: show what we're about to try
+    console.log(`[matcher] try: pointer=${pointer} word="${rawWord}" norm="${norm}" target="${refWords[pointer] ? refWords[pointer].norm : 'OOB'}" target.text="${refWords[pointer] ? refWords[pointer].text : 'OOB'}"`);
+    // STUCK-WORD DEBUG: if pointer is at العالمين (idx 7), show detailed info
+    if(pointer === 7 && refWords[pointer] && refWords[pointer].norm === 'العلمين'){
+      const stuckEl = document.getElementById('mdStuck');
+      if(stuckEl) stuckEl.textContent = `STUCK: trying "${rawWord}" (norm:"${norm}") at idx 7 — el=${refWords[pointer].el ? 'YES' : 'NO'} class="${refWords[pointer].el ? refWords[pointer].el.className : 'N/A'}"`;
+    }
+    const lastAtt = document.getElementById('mdLastAttempt');
+    if(lastAtt) lastAtt.textContent = `last: p=${pointer} word="${rawWord}" (norm:"${norm}") target="${refWords[pointer] ? refWords[pointer].norm : 'OOB'}"`;
 
     // FIRST-WORD BIAS: when pointer is at pageStart (the very
     // first word of the current page) AND no recent misses,
@@ -1425,6 +1462,9 @@
 
   // === highlightCurrent: incremental DOM updates (production's pattern) ===
   function highlightCurrent(){
+    // DEBUG: show pointer and DOM state
+    const curEl = (pointer < refWords.length && refWords[pointer]) ? refWords[pointer].el : null;
+    console.log(`[highlight] pointer=${pointer} word="${curEl ? curEl.textContent : 'OOB'}" el=${curEl ? 'YES' : 'NO'} class="${curEl ? curEl.className : 'N/A'}" status="${curEl ? (curEl.dataset.status || 'none') : 'N/A'}"`);
     if(pointer === _lastHighlightedPointer) return;
     if(_lastHighlightedPointer >= 0 && _lastHighlightedPointer < refWords.length){
       const oldEl = refWords[_lastHighlightedPointer] && refWords[_lastHighlightedPointer].el;
