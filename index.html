@@ -2,2013 +2,1675 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Live Recitation Tracker v2.0</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>Live Recitation Tracker — مُتَتَبِّع التلاوة</title>
 <style>
-  :root{
-    --bg: #0A1220;
-    --panel: #101A2C;
-    --card: #131F33;
-    --card-hover: #182640;
-    --border: rgba(255,255,255,0.08);
-    --text: #E8EDF4;
-    --text-dim: #8A96A8;
-    --green: #2ECC71;
-    --green-soft: rgba(46,204,113,0.14);
-    --red: #E74C3C;
-    --red-soft: rgba(231,76,60,0.14);
-    --yellow: #F1C40F;
-    --yellow-soft: rgba(241,196,15,0.14);
-    --blue: #3498DB;
-    --blue-soft: rgba(52,152,219,0.14);
-    --purple: #B57EDC;
-    --purple-soft: rgba(181,126,220,0.14);
-    --primary: #2ECC71;
-    --primary-soft: rgba(46,204,113,0.14);
-    --accent: #B57EDC;
+  *{box-sizing:border-box;margin:0;padding:0}
+  /* === THEME VARIABLES — switchable via .theme-* classes on <body> === */
+  body{
+    font-family:system-ui,-apple-system,sans-serif;
+    padding:12px;min-height:100vh;
+    transition:background-color .3s ease, color .3s ease;
   }
-  *{box-sizing:border-box}
-  body{margin:0;font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-  .app{max-width:1200px;margin:0 auto;padding:24px}
-  /* VERSION BADGE — top right, easy to spot for cache-busting checks */
-  .version-badge{
-    position:fixed;top:14px;right:14px;z-index:1000;
-    background:var(--card);border:1px solid var(--border);border-radius:8px;
-    padding:6px 12px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
-    font-size:12px;font-weight:600;color:var(--accent);letter-spacing:.5px;
-    box-shadow:0 2px 8px rgba(0,0,0,.3);user-select:none;
+  /* Default = dark theme */
+  body{--bg:#0a1f12;--card:rgba(255,255,255,.04);--border:rgba(46,204,113,.2);--text:#e8f5e9;--text-dim:#7a8a7a;--primary:#2ecc71;--primary-soft:rgba(46,204,113,.18);--yellow:#f1c40f;--yellow-soft:rgba(241,196,15,.15);--accent:#5dade2;--now-glow:rgba(46,204,113,.55);--shadow:rgba(0,0,0,.4);--bismillah-bg:rgba(30,132,73,.10);--bismillah-border:rgba(30,132,73,.30);--bismillah-color:#1e8449;--header-bg:transparent;--header-border:rgba(46,204,113,.25);--bismillah-header-color:#2ecc71}
+  body{background:var(--bg);color:var(--text)}
+
+  /* Light theme */
+  body.theme-light{
+    --bg:#fafaf5;--card:rgba(0,0,0,.03);--border:rgba(46,125,50,.2);--text:#1a3a1a;--text-dim:#6a7a6a;--primary:#2e7d32;--primary-soft:rgba(46,125,50,.12);--yellow:#b8860b;--yellow-soft:rgba(184,134,11,.10);--accent:#1565c0;--now-glow:rgba(46,125,50,.45);--shadow:rgba(0,0,0,.15);--bismillah-bg:rgba(46,125,50,.08);--bismillah-border:rgba(46,125,50,.30);--bismillah-color:#2e7d32;--header-bg:transparent;--header-border:rgba(46,125,50,.30);--bismillah-header-color:#2e7d32;
   }
-  .version-badge::before{content:"v";opacity:.6;margin-right:1px}
-  /* CONTACT SUPPORT — inline pill, lives inside the section header so it
-     scrolls naturally with the page (not a fixed overlay). */
-  .contact-btn{
+
+  /* Sepia theme — easier on eyes, like a real mushaf */
+  body.theme-sepia{
+    --bg:#f4ecd8;--card:rgba(120,80,40,.06);--border:rgba(120,80,40,.25);--text:#3d2817;--text-dim:#8a6f4a;--primary:#8b4513;--primary-soft:rgba(139,69,19,.15);--yellow:#b8860b;--yellow-soft:rgba(184,134,11,.15);--accent:#a0522d;--now-glow:rgba(139,69,19,.5);--shadow:rgba(60,40,20,.25);--bismillah-bg:rgba(139,69,19,.10);--bismillah-border:rgba(139,69,19,.30);--bismillah-color:#8b4513;--header-bg:transparent;--header-border:rgba(139,69,19,.25);--bismillah-header-color:#8b4513;
+  }
+
+  /* Royal blue — premium / Quran.com inspired */
+  body.theme-royal{
+    --bg:#0d1b2a;--card:rgba(255,255,255,.05);--border:rgba(202,165,84,.25);--text:#f0e6d2;--text-dim:#8a9aae;--primary:#caa554;--primary-soft:rgba(202,165,84,.15);--yellow:#e0a92e;--yellow-soft:rgba(224,169,46,.15);--accent:#5dade2;--now-glow:rgba(202,165,84,.5);--shadow:rgba(0,0,0,.5);--bismillah-bg:rgba(202,165,84,.10);--bismillah-border:rgba(202,165,84,.30);--bismillah-color:#caa554;--header-bg:transparent;--header-border:rgba(202,165,84,.25);--bismillah-header-color:#caa554;
+  }
+
+  /* === HEADER (bismillah image + title) === */
+  .app-header{
+    max-width:700px;margin:0 auto 14px;text-align:center;
+  }
+  .app-header .bismillah-img{
+    display:block;max-width:340px;height:auto;margin:0 auto 8px;
+    /* In light/sepia themes the dark green bismillah looks too dark; invert
+       it via CSS filter to make it visible. */
+    filter:brightness(.9) contrast(1.1);
+  }
+  body.theme-light .app-header .bismillah-img,
+  body.theme-sepia .app-header .bismillah-img{
+    /* In light backgrounds, dark green is fine — keep it readable */
+    filter:none;opacity:.85;
+  }
+  .app-header .app-title{
+    font-family:system-ui,-apple-system,sans-serif;
+    font-size:18px;font-weight:700;letter-spacing:.3px;
+    color:var(--primary);
+    margin-top:6px;
+  }
+  .app-header .app-title .arabic{
+    font-family:Amiri,serif;
+    font-size:22px;font-weight:600;
+    color:var(--primary);
+    margin-left:8px;direction:rtl;display:inline-block;
+  }
+  .app-header .app-sub{
+    font-size:12px;color:var(--text-dim);
+    margin-top:4px;
+  }
+
+  /* === SURAH PICKER SECTION === */
+  .surah-picker{
+    max-width:900px;margin:0 auto 16px;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:18px 18px 22px;
+  }
+  .picker-header{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-bottom:14px;flex-wrap:wrap;gap:10px;
+  }
+  .picker-title{
+    font-family:system-ui,-apple-system,sans-serif;
+    font-size:13px;font-weight:700;
+    color:var(--text-dim);
+    text-transform:uppercase;letter-spacing:1.5px;
+    margin:0;
+  }
+  /* Contact Support button — green */
+  .contact-support{
     display:inline-flex;align-items:center;gap:6px;
-    background:linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
-    color:#fff;text-decoration:none;
-    border-radius:8px;padding:7px 14px;
-    font-family:inherit;font-size:13px;font-weight:600;letter-spacing:.2px;
-    box-shadow:0 2px 12px rgba(46,204,113,.4);
-    transition:transform .15s ease,box-shadow .15s ease;
-    flex-shrink:0;
+    background:linear-gradient(135deg,var(--primary),var(--primary));
+    color:#fff;font-weight:700;font-size:14px;
+    padding:10px 20px;border-radius:30px;
+    text-decoration:none;
+    box-shadow:0 2px 8px var(--now-glow);
+    transition:all .15s ease;
   }
-  .contact-btn:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(46,204,113,.55)}
-  .contact-btn:active{transform:translateY(0)}
-  @media (max-width:540px){
-    .contact-btn span[aria-hidden]{display:none}
-    .contact-btn{padding:7px 10px}
+  .contact-support:hover{transform:translateY(-1px);box-shadow:0 4px 12px var(--now-glow)}
+  body.theme-light .contact-support{color:#fff}
+  body.theme-sepia .contact-support{color:#fff}
+  /* Search row */
+  .search-row{
+    display:flex;gap:10px;margin-bottom:16px;
   }
-  .section-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
-  .section-header h2{margin:0}
-  header{display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:18px;text-align:center}
-  header .bismillah{width:100%;max-width:480px;height:auto;filter:drop-shadow(0 4px 18px rgba(46,204,113,.25));margin:0 auto}
-  h1{margin:0;font-size:22px;font-weight:700;text-align:center}
-  h1 .arabic{font-family:'Amiri',serif;font-size:26px;margin-left:8px;color:#2ecc71}
-  .lede{margin:0 auto 24px;color:var(--text-dim);font-size:14px;line-height:1.5;max-width:780px;text-align:center}
-  .panel{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:18px}
-  .panel h2{margin:0 0 12px;font-size:14px;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:.8px}
-  /* The Recite Surah heading gets a bigger, bolder treatment with
-     a soft text-shadow so the user can clearly see which surah
-     they are reciting. */
-  #step2Title{
-    font-size:24px;
-    font-weight:800;
-    letter-spacing:.3px;
+  #searchInput{
+    flex:1;
+    background:var(--card);
     color:var(--text);
-    text-transform:none;
-    text-shadow:0 1px 0 rgba(255,255,255,.04), 0 2px 8px rgba(0,0,0,.45);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:11px 14px;
+    font-family:inherit;font-size:15px;
+    outline:none;
+    transition:border-color .15s ease;
   }
-  #step2Title .arabic-name{
-    font-family:'Amiri',serif;
-    font-size:28px;
-    color:#2ecc71;
-    margin:0 4px;
+  #searchInput::placeholder{color:var(--text-dim)}
+  #searchInput:focus{border-color:var(--primary)}
+  .reset-btn{
+    background:var(--card);
+    color:var(--text);
+    border:1px solid var(--border);
+    padding:10px 18px;
+    border-radius:10px;
+    font-family:inherit;font-size:14px;font-weight:600;
+    cursor:pointer;
+    transition:all .15s ease;
   }
-  .searchbar{display:flex;gap:10px;margin-bottom:14px}
-  .searchbar input{flex:1;background:var(--card);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;font-size:14px;outline:none}
-  .searchbar input:focus{border-color:var(--green)}
-  .surah-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px;max-height:250px;overflow-y:auto;padding:4px}
-  .surah-grid::-webkit-scrollbar{width:8px}
-  .surah-grid::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
-  .surah-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;cursor:pointer;transition:all .15s ease;text-align:left;font-family:inherit;color:var(--text)}
-  .surah-card:hover{background:var(--card-hover);border-color:rgba(46,204,113,.3);transform:translateY(-1px)}
-  .surah-card.active{border-color:var(--green);background:var(--green-soft)}
-  .sc-id{font-size:11px;color:var(--text-dim);font-weight:600;letter-spacing:.5px}
-  .sc-name-ar{font-family:'Amiri',serif;font-size:18px;margin-top:4px;color:var(--text)}
-  .sc-name-en{font-size:11px;color:var(--text-dim);margin-top:2px}
-  .sc-verses{font-size:10px;color:var(--text-dim);margin-top:2px}
-  #ayahContainer{font-family:'Amiri',serif;font-size:28px;line-height:2.2;direction:rtl;text-align:right;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;height:65vh;max-height:65vh;overflow-y:auto;transition:filter .2s ease,opacity .2s ease;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
-  #ayahContainer::-webkit-scrollbar{width:8px}
-  #ayahContainer::-webkit-scrollbar-track{background:transparent}
-  #ayahContainer::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
-  #ayahContainer::-webkit-scrollbar-thumb:hover{background:var(--primary)}
-  #ayahContainer .verse{margin-bottom:16px}
-  #ayahContainer .verse:last-child{margin-bottom:0}
-  #ayahContainer .verse-label{display:inline-block;background:var(--primary-soft);color:var(--primary);font-family:'Inter',sans-serif;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;margin-left:8px;vertical-align:middle}
-  .word{display:inline-block;padding:4px 6px;margin:2px 3px;border-radius:6px;cursor:pointer;transition:background-color .15s ease,color .15s ease,border-color .15s ease,opacity .15s ease;border:2px solid transparent;position:relative}
-  /* Note: NO transition on transform or box-shadow. When the .now class
-     moves to a new word on every Chrome interim tick (5-10x/sec), the
-     scale and box-shadow would animate rapidly, making the page shake
-     visibly on long surahs. The color/bg transitions stay smooth; the
-     transform/box-shadow change instantly. */
-  .word[data-status="correct"]{background:var(--green-soft);color:var(--green);border-color:rgba(46,204,113,.3)}
-  .word[data-status="correct"].now{box-shadow:0 0 0 3px rgba(46,204,113,.4);transform:scale(1.08)}
-  .word[data-status="mistake"]{background:var(--red-soft);color:var(--red);border-color:rgba(231,76,60,.3);text-decoration:line wavy var(--red)}
-  .word[data-status="unclear"]{background:var(--yellow-soft);color:var(--yellow);border-color:rgba(241,196,15,.3)}
-  /* Under Hide Script, the .past class dims every past word. Unclear
-     words need to stay unmistakably visible so the user can see which
-     words they skipped over. Override the dimming and make the yellow
-     tile pop. */
-  #ayahContainer.script-hidden .word[data-status="unclear"]{opacity:1;color:var(--yellow);background:var(--yellow-soft);border:2px solid rgba(241,196,15,.6);font-weight:600;filter:none}
-  .word.now{box-shadow:0 0 0 3px var(--primary);transform:scale(1.05)}
-  /* Position markers (set by highlightCurrent) — drives hide-script mode */
-  .word.past{color:var(--text-dim);opacity:.85}
-  .word.future{color:var(--text)}
-  /* === Hide Script mode ===
-     Hides only UNRECITED words (.future). Already-recited words (.past)
-     stay visible so the user sees their progress. The current word
-     (.now) stays highlighted so the user knows where they are. */
-  #ayahContainer.script-hidden .word.future{filter:blur(6px);opacity:.25}
-  #ayahContainer.script-hidden .verse-label{filter:blur(4px);opacity:.3}
-  /* The .now word must ALSO be hidden when script is hidden. The user
-     hid the script specifically to test their memory — if the current
-     word is fully visible, the test is broken. We blur it the same
-     way as .future, and add a solid border (not box-shadow) so the
-     user still has a subtle position indicator. The border is outside
-     the filter so it stays sharp. */
-  /* The .now word under Hide Script needs to be a CLEAR "you are here"
-     marker, not just a faint border. Without this the user loses track
-     of where they are supposed to be reciting. We give it a visible
-     blue background tint, a thick primary-color border, and remove the
-     blur on the border itself so the position is obvious. The TEXT
-     inside is still blurred so the user can't peek at the answer. */
-  /* .now tile under Hide Script: solid bright marker. The text
-     inside is hidden with color:transparent (not filter:blur) so the
-     box, border, and background stay perfectly sharp and the user
-     can clearly see WHERE they are reciting from, without being able
-     to read the word itself. */
-  #ayahContainer.script-hidden .word.now{
-    color:transparent;
+  .reset-btn:hover{border-color:var(--primary);color:var(--primary)}
+  /* Surah grid — fixed height with internal scroll, matches index.html */
+  .surah-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(170px,1fr));
+    gap:8px;
+    max-height:250px;
+    overflow-y:auto;
+    padding:4px;
+    scrollbar-width:thin;
+    scrollbar-color:var(--primary) transparent;
+  }
+  .surah-grid::-webkit-scrollbar{width:6px}
+  .surah-grid::-webkit-scrollbar-track{background:transparent}
+  .surah-grid::-webkit-scrollbar-thumb{background:var(--primary);border-radius:3px}
+  .surah-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:10px 12px;
+    cursor:pointer;
+    transition:all .15s ease;
+    text-align:left;
+    font-family:inherit;
+    color:var(--text);
+    user-select:none;
+  }
+  .surah-card:hover{
+    border-color:var(--primary);
+    background:var(--primary-soft);
+    transform:translateY(-1px);
+  }
+  .surah-card.active{
+    border-color:var(--primary);
+    background:var(--primary-soft);
+    box-shadow:0 0 0 1px var(--primary) inset;
+  }
+  .surah-card.hidden{display:none}
+  .surah-card .num{
+    font-size:11px;font-weight:600;
+    color:var(--text-dim);
+    letter-spacing:.5px;
+  }
+  .surah-card .ar-name{
+    font-family:Amiri,serif;
+    font-size:18px;
+    color:var(--text);
+    margin-top:2px;
+    line-height:1.2;
+    direction:rtl;
+  }
+  .surah-card.active .ar-name{color:var(--primary)}
+  .surah-card .translit{
+    font-size:11px;
+    color:var(--text-dim);
+    margin-top:1px;
+  }
+  .surah-card .ayahs{
+    font-size:10px;
+    color:var(--text-dim);
+    margin-top:1px;
+  }
+
+  /* === VERSION BADGE (top right) === */
+  .ver{
+    position:fixed;top:8px;right:8px;
+    background:var(--card);color:var(--primary);
+    border:1px solid var(--primary);
+    padding:2px 6px;border-radius:4px;
+    font-size:11px;font-family:monospace;z-index:10;
+  }
+
+  /* === SETTINGS ICON (top left) === */
+  .settings-btn{
+    position:fixed;top:8px;left:8px;
+    background:var(--card);color:var(--primary);
+    border:1px solid var(--primary);
+    padding:4px 8px;border-radius:6px;
+    font-size:16px;cursor:pointer;z-index:11;
+    line-height:1;
+  }
+  .settings-btn:hover{background:var(--primary);color:var(--bg)}
+  /* Settings dropdown */
+  .settings-menu{
+    position:fixed;top:44px;left:8px;
+    background:var(--bg);border:1px solid var(--primary);
+    border-radius:8px;padding:8px;z-index:11;
+    min-width:180px;
+    box-shadow:0 4px 12px var(--shadow);
+    display:none;
+  }
+  .settings-menu.open{display:block}
+  .settings-menu h3{
+    font-size:11px;color:var(--text-dim);
+    text-transform:uppercase;letter-spacing:1px;
+    margin:0 0 6px 4px;
+  }
+  .theme-option{
+    display:flex;align-items:center;gap:8px;
+    padding:6px 8px;border-radius:4px;cursor:pointer;
+    font-size:13px;color:var(--text);
+  }
+  .theme-option:hover{background:var(--primary-soft)}
+  .theme-option.active{background:var(--primary-soft);font-weight:600}
+  .theme-option .swatch{
+    display:inline-block;width:14px;height:14px;border-radius:50%;
+    border:1px solid var(--text-dim);
+  }
+
+  h1{font-size:16px;color:#2ecc71;margin-bottom:6px;text-align:center}
+  .sub{font-size:11px;color:var(--text-dim);text-align:center;margin-bottom:12px}
+
+  /* The PAGE — FIXED height showing ~11 lines, internal scroll.
+     Was: min-height:510px + overflow:hidden — but with 100 words the
+     content grew past 510px and the page expanded (no internal scroll).
+     Now: height:510px (FIXED) + overflow-y:auto (internal scroll). */
+  /* === STATS ROW (4 boxes) === */
+  .stats-row{
+    max-width:700px;margin:0 auto 10px;
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:8px;
+  }
+  .stat-box{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:10px 8px;
+    text-align:center;
+  }
+  .stat-box .stat-label{
+    font-family:system-ui,-apple-system,sans-serif;
+    font-size:10px;font-weight:700;
+    color:var(--text-dim);
+    text-transform:uppercase;letter-spacing:1px;
+    margin-bottom:4px;
+  }
+  .stat-box .stat-val{
+    font-family:system-ui,-apple-system,sans-serif;
+    font-size:20px;font-weight:700;
+    color:var(--text);
+    line-height:1;
+  }
+  .stat-box .stat-val.green{color:var(--primary)}
+  .stat-box .stat-val.red{color:#e74c3c}
+  .stat-box .stat-val.yellow{color:var(--yellow)}
+  /* === MIC + CONTROLS ROW === */
+  .mic-row{
+    max-width:700px;margin:0 auto 12px;
+    display:flex;gap:8px;align-items:center;
+    flex-wrap:wrap;
+  }
+  .mic-btn{
     background:var(--primary);
-    border:3px solid #fff;
-    box-shadow:0 0 0 2px var(--primary), 0 0 22px rgba(108,159,235,.7);
-    transform:none;
-    font-weight:700;
+    color:#0a1f12;
+    border:none;
+    padding:12px 22px;
+    border-radius:30px;
+    font-family:inherit;
+    font-size:15px;font-weight:600;
+    cursor:pointer;
+    transition:all .15s ease;
+    display:flex;align-items:center;gap:8px;
   }
-  /* The phoneme tooltip child must stay invisible too (it inherits
-     color:transparent which is fine since the tooltip only shows on
-     :hover and is also hidden under script-hidden by JS). */
-  .word.tajweed-tafkheem{border-bottom:3px solid var(--red)}
-  .word.tajweed-qalqala{border-bottom:3px solid var(--yellow)}
-  .word.tajweed-madd{border-bottom:3px solid var(--blue)}
-  .word.tajweed-idgham{border-bottom:3px solid var(--purple)}
-  .word.tajweed-ikhfaa{border-bottom:3px solid var(--purple)}
-  .word.tajweed-iqlab{border-bottom:3px solid var(--purple)}
-  .word.tajweed-ghunna{border-bottom:3px dotted var(--purple)}
-  .word .phoneme-tooltip{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--text);font-family:'Inter',sans-serif;line-height:1.5;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s;z-index:100;min-width:200px}
-  .word:hover .phoneme-tooltip{opacity:1}
-  .word .phoneme-tooltip .ipa{font-family:ui-monospace,monospace;color:var(--accent);font-size:13px}
-  .word .phoneme-tooltip .rules{margin-top:6px;color:var(--text-dim)}
-  .mic-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
-  .mic-btn{display:flex;align-items:center;gap:10px;background:var(--primary);color:#0a1f12;border:none;padding:12px 22px;border-radius:30px;font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;transition:all .15s ease}
-  .mic-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(46,204,113,.35)}
-  .mic-btn.listening{background:var(--red);color:#fff}
-  .mic-btn.listening:hover{box-shadow:0 6px 20px rgba(231,76,60,.35)}
-  .mic-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
-  .mic-dot{width:10px;height:10px;border-radius:50%;background:#0a1f12}
-  .mic-btn.listening .mic-dot{background:#fff;animation:pulse 1s ease-in-out infinite;box-shadow:0 0 12px rgba(255,255,255,.8)}
-  /* Larger visual ring on the listening button so the user can SEE it's active */
-  .mic-btn.listening{box-shadow:0 0 0 6px rgba(231,76,60,.25),0 6px 20px rgba(231,76,60,.4)}
-  /* "SPEAK NOW" indicator that lights up when the mic is actively capturing audio */
+  .mic-btn:hover{filter:brightness(1.1)}
+  .mic-btn.listening{animation:pulse 1.5s ease-in-out infinite}
   .mic-btn.listening.mic-armed{background:linear-gradient(135deg,#2ecc71,#27ae60)!important;box-shadow:0 0 0 8px rgba(46,204,113,.4),0 6px 20px rgba(46,204,113,.5)!important;position:relative}
-  .mic-btn.listening.mic-armed::after{content:'🎤 MIC LIVE — speak now';position:absolute;top:-38px;left:50%;transform:translateX(-50%);background:#2ecc71;color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:4px;white-space:nowrap;letter-spacing:.5px;box-shadow:0 2px 8px rgba(0,0,0,.2)}
-  @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.4);opacity:.5}}
-  .status{color:var(--text-dim);font-size:13px;margin-left:8px}
-  .status.warn{color:var(--yellow)}
-  .playback-row{display:none;align-items:center;gap:12px;margin-top:12px}
-  .playback-row:not(.hidden){display:flex}
-  /* Toggle button: pill-shaped, themed, with glow on hover (matches .mic-btn aesthetic) */
-  .toggle-script-btn{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(180deg,var(--card),var(--card-hover));color:var(--text);border:1px solid var(--border);font-size:13px;font-weight:600;padding:10px 18px;border-radius:30px;cursor:pointer;font-family:inherit;transition:all .15s ease}
-  .toggle-script-btn:hover{transform:translateY(-1px);border-color:var(--primary);color:var(--primary);box-shadow:0 4px 14px rgba(46,204,113,.28)}
-  .toggle-script-btn:active{transform:translateY(0);box-shadow:0 2px 8px rgba(46,204,113,.2)}
-  .toggle-script-btn.active{background:linear-gradient(180deg,var(--primary),var(--primary));color:#0a1f12;border-color:var(--primary);box-shadow:0 4px 14px rgba(46,204,113,.35)}
-  .play-btn{background:var(--card);border:1px solid var(--border);color:var(--text);padding:8px 14px;border-radius:8px;font-family:inherit;cursor:pointer;font-size:13px}
-  .play-btn:hover{border-color:var(--green)}
-  .progress-wrap{flex:1;height:8px;background:var(--card);border-radius:4px;overflow:hidden;border:1px solid var(--border)}
-  .progress-fill{height:100%;background:var(--green);width:0%;transition:width .1s linear}
-  .time-label{font-family:ui-monospace,monospace;font-size:12px;color:var(--text-dim);min-width:90px}
-  .stats{display:flex;gap:14px;margin-bottom:14px;flex-wrap:wrap}
-  .stat{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 16px}
-  .stat-label{font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px}
-  .stat-val{font-size:24px;font-weight:700;margin-top:2px}
-  .stat-val.green{color:var(--green)}
-  .stat-val.red{color:var(--red)}
-  .stat-val.yellow{color:var(--yellow)}
+  .mic-btn.listening.mic-armed::after{content:'\f130 MIC LIVE \2014 speak now';position:absolute;top:-38px;left:50%;transform:translateX(-50%);background:var(--primary);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:4px;white-space:nowrap;letter-spacing:.5px;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+  .mic-btn .mic-dot{width:10px;height:10px;border-radius:50%;background:#0a1f12}
+  .mic-btn.listening .mic-dot{animation:mic-pulse 1s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.85}}
+  @keyframes mic-pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.3);opacity:.7}}
+  .toggle-script-btn{
+    background:var(--card);
+    color:var(--text);
+    border:1px solid var(--border);
+    padding:10px 18px;
+    border-radius:30px;
+    font-family:inherit;
+    font-size:13px;font-weight:600;
+    cursor:pointer;
+    transition:all .15s ease;
+  }
+  .toggle-script-btn:hover{border-color:var(--primary);color:var(--primary)}
+  .skip-btn{background:rgba(241,196,15,.15);color:var(--yellow);border:1px solid var(--yellow);padding:8px 14px;border-radius:8px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s ease}
+  .skip-btn:hover{background:rgba(241,196,15,.3);transform:translateY(-1px)}
+  .status-text{
+    color:var(--text-dim);
+    font-size:12px;
+    font-family:system-ui,-apple-system,sans-serif;
+  }
+  /* Hide Script mode for the page — use visibility:hidden
+     (NOT display:none, NOT blur) so the .now word stays
+     in its ORIGINAL position when everything else is hidden.
+     Muslims don't blur the Quran — when Hide Script is
+     pressed, the text is hidden, but the layout is
+     preserved so the active .now word doesn't jump. */
+  #page.script-hidden .word.future{visibility:hidden}
+  #page.script-hidden .verse-marker{visibility:hidden}
+  #page.script-hidden .word.past{visibility:hidden}
+  #page.script-hidden .bismillah-block{visibility:hidden}
+  #page.script-hidden .surah-header{visibility:hidden}
+  /* The .now word stays visible (and in its position) so the
+     user can see the next word to recite */
+  #page.script-hidden .word.now{
+    color:#0a1f12!important;
+    background:var(--primary)!important;
+    border:3px solid #fff!important;
+    box-shadow:0 0 16px var(--now-glow),0 0 4px #fff inset!important;
+    text-shadow:none!important;
+    visibility:visible!important;
+  }
+  /* The .unclear and .wrong words also stay visible (user needs
+     to see what they've recited) */
+  #page.script-hidden .word[data-status="unclear"]{visibility:visible;opacity:1;color:var(--yellow);background:var(--yellow-soft);border:2px solid rgba(241,196,15,.6);font-weight:600}
+  #page.script-hidden .word.wrong{visibility:visible;opacity:1;color:#e74c3c;background:rgba(231,76,60,.3);font-weight:600}
+
+  #page{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:14px;
+    margin:0 auto 16px;
+    max-width:700px;
+    height:510px;            /* FIXED — page never grows past this */
+    overflow-y:auto;         /* internal scroll when content overflows */
+    position:relative;
+    scrollbar-width:thin;
+    scrollbar-color:var(--primary) transparent;
+  }
+  #page::-webkit-scrollbar{width:8px}
+  #page::-webkit-scrollbar-track{background:transparent}
+  #page::-webkit-scrollbar-thumb{background:var(--primary);border-radius:4px}
+  /* Words flow inline. LTR so DOM order = visual order */
+  /* Flexbox with row-reverse guarantees DOM order = visual reading order
+     for the user, regardless of the Arabic text's inherent RTL direction.
+     The first item in DOM appears at the RIGHT (read first in RTL),
+     subsequent items flow LEFT. The text within each word is still RTL
+     (the letters within the word go right-to-left), but the words
+     themselves are placed in DOM order. */
+  #page-inner{
+    display:flex;
+    flex-direction:row-reverse;
+    flex-wrap:wrap;
+    align-items:baseline;
+    font-family:Amiri,serif;
+    font-size:22px;
+    line-height:2.1;
+  }
+  .word{
+    display:inline-flex;
+    align-items:center;
+    padding:2px 5px;
+    border-radius:5px;
+    margin:1px 2px;
+    transition:all .15s;
+  }
+  .verse-marker{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    color:#2ecc71;
+    background:rgba(46,204,113,.15);
+    border:1px solid rgba(46,204,113,.3);
+    border-radius:50%;
+    width:26px;height:26px;
+    font-size:11px;
+    font-weight:700;
+    margin:0 4px;
+    font-family:system-ui,sans-serif;
+  }
+  /* Surah header takes a full row on its own */
+  .surah-header{
+    display:block;
+    flex-basis:100%;
+    color:#2ecc71;
+    font-family:system-ui,sans-serif;
+    font-size:11px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:1.5px;
+    margin:14px 0 4px;
+    padding-bottom:2px;
+    border-bottom:1px solid rgba(46,204,113,.2);
+    text-align:right;  /* Surah header is metadata, right-align it */
+  }
+  .surah-header.first{margin-top:0}
+  .word{display:inline-block;padding:2px 5px;border-radius:5px;margin:0 1px;transition:all .15s}
+  /* .past: has a background (light green tinted) so recited
+     words are clearly visible behind the active .now word */
+  .word.past{
+    color:var(--primary);
+    background:var(--primary-soft);
+    opacity:.95;
+    border-radius:6px;
+    padding:3px 7px;
+    font-weight:500;
+  }
+  /* .future: not yet recited, dimmed */
+  .word.future{color:var(--text-dim);opacity:.75}
+  /* .now: STRONG highlight — bright background, dark text, glow, border,
+     scale up. This is the active word the user is reciting. */
+  .word.now{
+    background:var(--primary);
+    color:#0a1f12;
+    font-weight:800;
+    font-size:1.15em;
+    padding:6px 10px;
+    margin:0 4px;
+    border-radius:8px;
+    transform:scale(1.15);
+    box-shadow:0 0 0 3px var(--primary),0 0 24px var(--now-glow),0 4px 12px rgba(0,0,0,.3);
+    position:relative;
+    z-index:10;
+    transition:all .15s ease;
+  }
+  /* .wrong: red BACKGROUND ONLY — NO strikethrough (don't cut the
+     Quran words). Just a red tinted background to mark mistakes. */
+  .word.wrong{
+    color:#e74c3c;
+    background:rgba(231,76,60,.25);
+    font-weight:600;
+    border-radius:6px;
+    padding:4px 8px;
+  }
+  /* .unclear: yellow background */
+  .word.unclear{
+    color:var(--yellow);
+    background:var(--yellow-soft);
+    font-weight:600;
+    border-radius:6px;
+    padding:4px 8px;
+  }
+
+  /* Bismillah word — highlighted as a soft yellow pre-chapter marker */
+  /* Bismillah words: darker green (matches the surah script's green
+     family but visually distinct from the standard past/future words). */
+  .word.bismillah{color:#1e8449;font-weight:600}
+  .word.bismillah.now{background:#1e8449;color:#0a1f12}
+
+  /* Inline verse marker */
+  .verse-marker{
+    display:inline-block;
+    color:#2ecc71;
+    background:rgba(46,204,113,.15);
+    border:1px solid rgba(46,204,113,.3);
+    border-radius:50%;
+    width:24px;height:24px;
+    line-height:22px;
+    text-align:center;
+    font-size:11px;
+    font-weight:700;
+    margin:0 6px 0 4px;
+    vertical-align:middle;
+    font-family:system-ui,sans-serif;
+  }
+  /* Surah header — big centered block with Arabic calligraphy on left,
+     English name + number on right, translation below. Matches the
+     standard mushaf layout the user showed. */
+  .surah-header{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-basis:100%;
+    gap:24px;
+    margin:20px 0 8px;
+    padding:12px 0;
+    border-top:1px solid rgba(46,204,113,.25);
+    border-bottom:1px solid rgba(46,204,113,.25);
+    text-align:center;
+  }
+  .surah-header.first{margin-top:0;border-top:none}
+  .surah-ar{
+    font-family:Amiri,serif;
+    font-size:38px;
+    color:var(--primary);
+    line-height:1;
+    direction:rtl;
+  }
+  .surah-info{
+    text-align:left;
+    font-family:system-ui,sans-serif;
+    line-height:1.3;
+  }
+  .surah-info .num-name{
+    font-size:20px;
+    font-weight:700;
+    color:var(--text);
+  }
+  .surah-info .num-name .num{color:var(--primary);margin-right:4px}
+  .surah-info .meaning{
+    font-size:13px;
+    color:var(--primary);
+    font-weight:500;
+    margin-top:2px;
+  }
+  /* Bismillah block — just the Arabic text, no English label. Uses a
+     different (more decorative) Arabic font. Color is a DARKER GREEN
+     so it matches the surah script's green family but stands out as
+     a header element. */
+  .bismillah-block{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-basis:100%;
+    margin:8px 0 16px;
+    padding:12px 14px;
+    background:var(--bismillah-bg);
+    border:1px solid var(--bismillah-border);
+    border-radius:8px;
+    direction:rtl;
+  }
+  .bismillah-block .words{
+    display:inline-flex;
+    gap:2px;
+  }
+  /* Different (more decorative) Arabic font for the Bismillah, in a
+     darker green to match the surah script's green family. */
+  .bismillah-block .word{
+    font-family:'Amiri Quran','Scheherazade New','Noto Naskh Arabic',Amiri,serif;
+    color:var(--bismillah-color);
+    font-weight:600;
+  }
+
+  /* Controls */
+  .controls{
+    display:flex;gap:8px;justify-content:center;flex-wrap:wrap;max-width:700px;margin:0 auto 12px;
+  }
+  button{
+    font-family:inherit;font-size:14px;padding:8px 14px;border-radius:8px;border:1px solid var(--primary);background:transparent;color:var(--primary);cursor:pointer;font-weight:600;
+  }
+  button:hover{background:var(--primary);color:var(--bg)}
+  button.primary{background:var(--primary);color:var(--bg)}
+  button:disabled{opacity:.4;cursor:not-allowed}
+
+  /* Stats */
+  .stats{
+    max-width:700px;margin:0 auto;font-family:monospace;font-size:11px;color:#2ecc71;text-align:center;
+    background:rgba(0,0,0,.3);padding:8px;border-radius:6px;
+  }
+  .stats span{color:#f1c40f}
+  .info{
+    max-width:700px;margin:0 auto 12px;background:rgba(0,0,0,.2);border:1px solid rgba(46,204,113,.15);border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.6
+  }
+  .info b{color:#2ecc71}
+  .info code{background:rgba(46,204,113,.15);padding:1px 5px;border-radius:3px;font-size:11px}
+
   .transcript-box{margin-top:14px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;font-size:13px;line-height:1.6;max-height:140px;overflow-y:auto}
   .transcript-box .label{color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;display:block}
-  .transcript-box .text{font-family:'Amiri',serif;font-size:18px;direction:rtl;text-align:right}
-  .transcript-box .conf{color:var(--text-dim);font-size:11px;margin-top:6px}
-  /* DEBUG PANEL — at the bottom, lists all marked-as-error words with context */
-  .debug-panel{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:18px;margin-top:18px}
-  .debug-panel h2{margin:0 0 6px;font-size:14px;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:.8px}
-  .debug-panel .hint{font-size:12px;color:var(--text-dim);margin-bottom:14px}
-  .debug-list{display:flex;flex-direction:column;gap:10px;max-height:520px;overflow-y:auto;padding-right:6px}
-  .debug-list::-webkit-scrollbar{width:8px}
-  .debug-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
-  .debug-empty{color:var(--text-dim);font-size:13px;font-style:italic;text-align:center;padding:30px 0}
-  .debug-row{background:var(--card);border:1px solid var(--border);border-left:4px solid var(--red);border-radius:8px;padding:12px 14px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;font-size:12px}
-  .debug-row.unclear{border-left-color:var(--yellow)}
-  .debug-row .col-label{color:var(--text-dim);font-size:10px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
-  .debug-row .arabic{font-family:'Amiri',serif;font-size:18px;direction:rtl}
-  .debug-row .norm{font-family:ui-monospace,monospace;font-size:11px;color:var(--text-dim);margin-top:2px;direction:ltr;text-align:left}
-  .debug-row .phoneme{font-family:ui-monospace,monospace;font-size:11px;color:var(--accent);margin-top:4px;direction:ltr;text-align:left}
-  .debug-row .reason{font-size:11px;color:var(--text-dim);margin-top:4px;line-height:1.4}
-  .debug-row .reason b{color:var(--red)}
-  .debug-row .meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;font-size:10px;color:var(--text-dim)}
-  .debug-row .meta .chip{background:var(--bg);padding:2px 6px;border-radius:3px;font-family:ui-monospace,monospace}
-  .clear-btn{margin-top:10px;background:var(--card);border:1px solid var(--border);color:var(--text-dim);padding:6px 12px;border-radius:6px;font-family:inherit;font-size:12px;cursor:pointer}
-  .clear-btn:hover{border-color:var(--red);color:var(--red)}
-</style>
+  .transcript-box .text{font-family:'Amiri',serif;font-size:18px;direction:rtl;text-align:right}</style>
 </head>
-<body>
+<body class="theme-dark">
 
-<!-- VERSION BADGE — increment on every push so user can confirm fresh load -->
+<div class="ver" id="ver">v8</div>
 
+<button class="settings-btn" id="settingsBtn" title="Settings">⚙</button>
+<div class="settings-menu" id="settingsMenu">
+  <h3>Theme</h3>
+  <div class="theme-option" data-theme="dark"><span class="swatch" style="background:#0a1f12"></span>Dark Green</div>
+  <div class="theme-option" data-theme="light"><span class="swatch" style="background:#fafaf5"></span>Light</div>
+  <div class="theme-option" data-theme="sepia"><span class="swatch" style="background:#f4ecd8"></span>Sepia (Mushaf)</div>
+  <div class="theme-option" data-theme="royal"><span class="swatch" style="background:#0d1b2a"></span>Royal Blue</div>
+</div>
 
-<div class="app">
-
-<header>
-  <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
-  <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
+<header class="app-header">
+  <img class="bismillah-img" src="assets/bismillah.png" alt="Bismillah">
+  <div class="app-title">Live Recitation Tracker <span class="arabic">مُتَتَبِّع التَّلَاوَة</span></div>
+  <div class="app-sub">Recite the Quran and watch each word light up as you speak</div>
 </header>
-<div class="version-badge" title="Increment on every change so you can verify your browser isn't loading a cached version">47.8</div>
 
-<p class="lede">
-  Pick a surah, hit Start, then recite naturally. The tracker follows along word-by-word and
-  marks each as <b style="color:var(--green)">correct</b> / <b style="color:var(--red)">wrong</b> /
-  <b style="color:var(--yellow)">unclear</b>. Tap any word to see its phoneme breakdown and
-  Tajweed rules.
-</p>
-
-<section class="panel">
-  <div class="section-header">
-    <h2>① Choose a Surah</h2>
-    <a class="contact-btn" href="support.html" title="Report a bug, suggest a feature, or send feedback">
-      <span aria-hidden="true">💬</span> Contact Support
-    </a>
+<section class="surah-picker">
+  <div class="picker-header">
+    <h2 class="picker-title">① Choose a surah</h2>
+    <a href="https://docs.google.com/forms/d/e/1FAIpQLScSSIYxlRbuN6gofwRA2J69Ucueqnl14LVZIv0vjnpIvtHXUA/viewform" target="_blank" rel="noopener" class="contact-support">💬 Contact Support</a>
   </div>
-  <div class="searchbar">
+  <div class="search-row">
     <input type="text" id="searchInput" placeholder="Search by number, transliteration, or Arabic name…" autocomplete="off">
-    <button class="mic-btn" id="resetBtn" style="background:var(--card);color:var(--text);border:1px solid var(--border);font-size:13px;padding:8px 14px">Reset</button>
+    <button class="reset-btn" id="resetBtn" type="button">Reset</button>
   </div>
   <div class="surah-grid" id="surahGrid"></div>
 </section>
 
-<section class="panel hidden" id="step2">
-  <h2 id="step2Title">② Recite</h2>
+<div class="stats-row">
+  <div class="stat-box"><div class="stat-label">Correct</div><div class="stat-val green" id="statCorrect">0</div></div>
+  <div class="stat-box"><div class="stat-label">Mistakes</div><div class="stat-val red" id="statMistake">0</div></div>
+  <div class="stat-box"><div class="stat-label">Unclear</div><div class="stat-val yellow" id="statUnclear">0</div></div>
+  <div class="stat-box"><div class="stat-label">Pointer</div><div class="stat-val" id="statPointer">0 / 0</div></div>
+</div>
+<div class="mic-row">
+  <button class="mic-btn" id="micBtn">
+    <span class="mic-dot"></span>
+    <span id="micLabel">Start reciting</span>
+  </button>
+  <button class="skip-btn" id="skipBtn" title="Skip current word (advance pointer)">Skip →</button>
+  <button class="toggle-script-btn" id="toggleScriptBtn">Hide Script</button>
+  <span class="status-text" id="status">Pick a surah from the above list and track your recitation</span>
+</div>
+<div id="matcherDebug" style="max-width:900px;margin:0 auto 12px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 16px;font-size:12px;line-height:1.5">
+  <div style="color:var(--text-dim);font-size:11px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">🔍 Comprehensive Matcher Debug</div>
+  <div id="mdPointer" style="font-family:monospace;color:var(--primary);font-size:13px;padding:4px;background:rgba(0,0,0,.2);border-radius:4px;margin-bottom:6px">pointer: —</div>
+  <div id="mdCurrent" style="font-family:monospace;color:var(--yellow);font-size:12px;margin-bottom:6px">refWords[pointer]: —</div>
+  <div id="mdTrace" style="font-family:monospace;color:var(--text);font-size:11px;margin-bottom:6px;max-height:200px;overflow-y:auto;background:rgba(0,0,0,.2);padding:6px;border-radius:4px">trace: (empty)</div>
+  <div id="mdStuck" style="background:#e74c3c;color:#fff;padding:6px 10px;border-radius:4px;margin:4px 0;font-size:12px;font-weight:700">🔴 stuck: (empty)</div>
+  <div id="mdLastAttempt" style="background:#3498db;color:#fff;padding:6px 10px;border-radius:4px;margin:4px 0;font-size:12px;font-weight:700">🔵 last attempt: (empty)</div>
+  <div id="mdLastWords" style="font-family:monospace;color:var(--text);font-size:11px;margin-bottom:6px">last 5: —</div>
+  <div id="mdTranscript" style="font-family:monospace;color:var(--text-dim);font-size:11px">transcript: —</div>
+</div>
+<div id="transcriptBox" class="transcript-box hidden">
+  <span class="label">Live transcript — what the app heard from you</span>
+  <div id="transcriptText" class="text"></div>
+</div>
+<div style="max-width:700px;margin:0 auto 12px;display:flex;justify-content:space-between;gap:8px">
+  <button id="prevPageBtn" style="flex:1;background:var(--card);color:var(--primary);border:1px solid var(--primary);padding:10px 16px;border-radius:8px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer">← Previous page</button>
+  <button id="nextPageBtn" style="flex:1;background:var(--card);color:var(--primary);border:1px solid var(--primary);padding:10px 16px;border-radius:8px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer">Next page →</button>
+</div>
+<div id="pageInfo" style="max-width:700px;margin:0 auto 12px;text-align:center;font-size:12px;color:var(--text-dim)">Page 1 of 1</div>
 
-  <div class="stats" id="stats">
-    <div class="stat"><div class="stat-label">Correct</div><div class="stat-val green" id="statCorrect">0</div></div>
-    <div class="stat"><div class="stat-label">Mistakes</div><div class="stat-val red" id="statMistake">0</div></div>
-    <div class="stat"><div class="stat-label">Unclear</div><div class="stat-val yellow" id="statUnclear">0</div></div>
-    <div class="stat"><div class="stat-label">Pointer</div><div class="stat-val" id="statPointer">0 / 0</div></div>
-  </div>
+<div id="page"><div id="page-inner"></div></div>
 
-  <div class="mic-row">
-    <button class="mic-btn" id="micBtn" tabindex="-1">
-      <span class="mic-dot"></span>
-      <span id="micLabel">Start reciting</span>
-    </button>
-    <button class="toggle-script-btn" id="toggleScriptBtn" title="Toggle the visible mushaf text">Hide Script</button>
-    <span class="status" id="status">Pick a surah from the above list and track your recitation</span>
-  </div>
 
-  <div class="playback-row" id="playbackRow">
-    <button class="play-btn" id="playBtn">▶</button>
-    <div class="progress-wrap"><div class="progress-fill" id="progressFill"></div></div>
-    <div class="time-label" id="timeLabel">0:00 / 0:00</div>
-    <audio id="playbackAudio" preload="auto"></audio>
-  </div>
-
-  <div id="ayahContainer"></div>
-
-  <div class="transcript-box hidden" id="transcriptBox">
-    <span class="label">Live transcript — what the app heard from you</span>
-    <div class="text" id="transcriptText"></div>
-    <div class="conf" id="transcriptConf"></div>
-  </div>
-</section>
-
-<section class="debug-panel" id="debugPanel">
-  <h2>③ Debug — words marked as errors</h2>
-  <p class="hint">Each row shows a word that was marked <b style="color:var(--red)">wrong</b> or
-    <b style="color:var(--yellow)">unclear</b>: what the script <i>expected</i> (the Quranic
-    text), what was <i>recited</i> (Chrome's transcription), and <b>why</b> it didn't match.</p>
-  <div class="debug-list" id="debugList">
-    <div class="debug-empty">No errors yet. Start reciting and any mismatches will appear here.</div>
-  </div>
-  <button class="clear-btn" id="clearDebugBtn">Clear debug log</button>
-</section>
-
-<!-- ============================================================
-     BROWSER & API DIAGNOSTICS — answers "why does this not work on
-     my phone?". Always visible so the user can see what the
-     browser is reporting, regardless of how the actual recognition
-     is going. Updated once on page load.
-     ============================================================ -->
-<section class="debug-panel" id="envPanel" style="margin-top:14px">
-  <h2>④ Browser &amp; API diagnostics</h2>
-  <p class="hint">What your browser reports about itself and about whether
-    it can do live speech recognition. If something here looks wrong, that
-    is why recitation isn't starting.</p>
-  <div id="envInfo" style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;line-height:1.6;background:#0a1220;border:1px solid var(--border);border-radius:8px;padding:12px;white-space:pre-wrap;word-break:break-word">Loading diagnostics…</div>
-  <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
-    <select id="envLangSel" style="background:#0a1220;color:var(--text);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-family:inherit;font-size:13px;cursor:pointer">
-      <option value="ar">ar — generic Arabic</option>
-      <option value="ar-SA">ar-SA — Saudi Arabic</option>
-      <option value="ar-EG">ar-EG — Egyptian Arabic</option>
-      <option value="ar-AE">ar-AE — Emirati Arabic</option>
-      <option value="en-US">en-US — US English (for comparison)</option>
-    </select>
-    <button class="clear-btn" id="envTestRecBtn" type="button" style="cursor:pointer">▶ Test this language (3s)</button>
-    <button class="clear-btn" id="envTest20Btn" type="button" style="cursor:pointer">⏱ Test this language (20s, same as main app)</button>
-    <button class="clear-btn" id="envReqMicBtn" type="button" style="cursor:pointer">🎤 Request microphone permission</button>
-    <button class="clear-btn" id="envClearLogBtn" type="button" style="cursor:pointer">🧹 Clear log</button>
-  </div>
-  <div id="envTestResult" style="margin-top:10px;font-family:ui-monospace,monospace;font-size:12px;color:var(--text-dim);white-space:pre-wrap;word-break:break-word;max-height:240px;overflow:auto;background:#0a1220;border:1px solid var(--border);border-radius:6px;padding:8px"></div>
-</section>
-
+<script src="phonemes-data.js"></script>
 <script>
 (function(){
-  function parseUA(ua){
-    var browser = 'unknown', os = 'unknown';
-    if(/Edg\//.test(ua)) browser = 'Microsoft Edge';
-    else if(/OPR\//.test(ua)) browser = 'Opera';
-    else if(/Chrome\//.test(ua)) browser = 'Google Chrome';
-    else if(/Safari\//.test(ua) && /Version\//.test(ua)) browser = 'Safari';
-    else if(/Firefox\//.test(ua)) browser = 'Firefox';
-    if(/Android/.test(ua)) os = 'Android';
-    else if(/iPhone|iPad|iPod/.test(ua)) os = 'iOS';
-    else if(/Windows/.test(ua)) os = 'Windows';
-    else if(/Mac OS X|macOS/.test(ua)) os = 'macOS';
-    else if(/Linux/.test(ua)) os = 'Linux';
-    return {browser:browser, os:os};
-  }
-  function boolStr(v){return v ? 'YES' : 'NO';}
-  function showEnv(){
-    var ua = navigator.userAgent;
-    var p = parseUA(ua);
-    var hasSR  = !!(window.SpeechRecognition);
-    var hasWSR = !!(window.webkitSpeechRecognition);
-    var proto = location.protocol;
-    var host  = location.host;
-    var isSecure = window.isSecureContext;
-    var online = navigator.onLine;
-    var langs = [];
-    if(hasSR || hasWSR){
-      try {
-        var tmpCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
-        // probe languages by trying to construct (no actual recognition yet)
-        langs.push('(SpeechRecognition constructor available — language is set at recognition time)');
-      } catch(e){ langs.push('error probing: ' + e.message); }
-    }
-    var rec = hasSR ? 'SpeechRecognition' : (hasWSR ? 'webkitSpeechRecognition' : 'NOT AVAILABLE');
-    var out = [];
-    out.push('Browser:        ' + p.browser);
-    out.push('OS / device:    ' + p.os);
-    out.push('User agent:     ' + ua);
-    out.push('');
-    out.push('Page URL:       ' + location.href);
-    out.push('Protocol:       ' + proto + (proto === 'https:' ? '  (secure ✓)' : '  (NOT SECURE — speech API will be BLOCKED)'));
-    out.push('isSecureContext:' + boolStr(isSecure));
-    out.push('Online:         ' + boolStr(online));
-    out.push('');
-    out.push('SpeechRecognition:         ' + boolStr(hasSR));
-    out.push('webkitSpeechRecognition:   ' + boolStr(hasWSR));
-    out.push('Effective class: ' + rec);
-    out.push('');
-    out.push('Notes: ' + (hasSR || hasWSR
-      ? 'Recognition API is exposed. If recitation still fails, the most likely cause is the protocol above (must be https or localhost), or the browser has not been granted microphone access at the OS level.'
-      : 'No SpeechRecognition class exists in this window. The page will not be able to do live recognition. The browser may be too old, the page may be served over an insecure origin, or the API may be disabled.'));
-    document.getElementById('envInfo').textContent = out.join('\n');
-  }
-  showEnv();
-  // Re-show if user comes back to the tab (some browsers change state)
-  document.addEventListener('visibilitychange', () => { if(!document.hidden) showEnv(); });
-  // Live event log that the main recognition flow calls into so the user can see
-  // what's happening. Renders into #envTestResult (full diagnostics) AND into
-  // #compactLog (right under the mic button, so it's visible on a phone
-  // without scrolling down to the full panel).
-  window.__envLog = function(kind, msg){
-    try {
-      var line = '[' + new Date().toLocaleTimeString() + '] ' + kind + ': ' + msg;
-      var out = document.getElementById('envTestResult');
-      if(out){
-        out.textContent = (out.textContent ? out.textContent + '\n' : '') + line;
-        out.scrollTop = out.scrollHeight;
-      }
-      var compact = document.getElementById('compactLog');
-      if(compact){
-        var existing = compact.textContent.split('\n');
-        existing.push(line);
-        if(existing.length > 8) existing = existing.slice(-8);
-        compact.textContent = existing.join('\n');
-      }
-      // Color both
-      var color = (kind === 'ERROR' || kind === 'END') ? '#e74c3c'
-                : (kind === 'START' || kind === 'AUDIO_START' || kind === 'SPEECH_START' || kind === 'RESULT') ? '#2ecc71'
-                : '#2ecc71';
-      if(out) out.style.color = color;
-      if(compact) compact.style.color = color;
-    } catch(_){}
-  };
-  // Test button: try to actually start recognition for 3s
-  var clearBtn = document.getElementById('envClearLogBtn');
-  if(clearBtn) clearBtn.addEventListener('click', function(){
-    var out = document.getElementById('envTestResult');
-    if(out) out.textContent = '';
-  });
-  var testBtn = document.getElementById('envTestRecBtn');
-  if(testBtn){
-    testBtn.addEventListener('click', function(){
-      var Ctor = window.SpeechRecognition || window.webkitSpeechRecognition;
-      var out = document.getElementById('envTestResult');
-      if(!Ctor){
-        out.textContent = 'FAIL: no SpeechRecognition constructor. The API is not available in this window.';
-        out.style.color = '#e74c3c';
-        return;
-      }
-      out.textContent = 'Starting test recognition for 3s...';
-      out.style.color = '';
-      try {
-        var r = new Ctor();
-        r.lang = 'ar';
-        r.continuous = false;
-        r.interimResults = false;
-        r.maxAlternatives = 1;
-        var got = false;
-        r.onresult = function(e){
-          got = true;
-          var txt = '';
-          for(var i=0;i<e.results.length;i++) txt += e.results[i][0].transcript;
-          out.textContent = 'SUCCESS: got transcript: ' + JSON.stringify(txt);
-          out.style.color = '#2ecc71';
-          try { r.stop(); } catch(_){}
-        };
-        r.onerror = function(e){
-          out.textContent = 'ERROR: ' + e.error + (e.message ? ' — ' + e.message : '');
-          out.style.color = '#e74c3c';
-        };
-        r.onend = function(){
-          if(!got){
-            out.textContent = 'ENDED: no transcript returned in 3s. Try the mic permission button first, then speak immediately after pressing test.';
-            out.style.color = '#e74c3c';
-          }
-        };
-        r.start();
-        setTimeout(function(){ try { r.stop(); } catch(_){} }, 3000);
-      } catch(e){
-        out.textContent = 'THREW: ' + e.message;
-        out.style.color = '#e74c3c';
-      }
-    });
-  }
-  // 20s test that mirrors the main app exactly. Uses the same config
-  // (continuous=false, interimResults=false, maxAlternatives=1, lang
-  // from selector). It does NOT restart on onend — it just runs one
-  // 20-second session so we can see if the browser can transcribe for
-  // more than 5 seconds, which is what the main app needs.
-  var test20Btn = document.getElementById('envTest20Btn');
-  if(test20Btn){
-    test20Btn.addEventListener('click', function(){
-      var Ctor = window.SpeechRecognition || window.webkitSpeechRecognition;
-      var out = document.getElementById('envTestResult');
-      if(!Ctor){
-        out.textContent = 'FAIL: no SpeechRecognition constructor.';
-        out.style.color = '#e74c3c';
-        return;
-      }
-      out.textContent = 'Starting 20s test (same config as main app)...';
-      out.style.color = '';
-      try {
-        var r = new Ctor();
-        var sel = document.getElementById('envLangSel');
-        r.lang = sel ? sel.value : 'ar';
-        r.continuous = false;
-        r.interimResults = false;
-        r.maxAlternatives = 1;
-        if(window.__envLog) window.__envLog('TEST20', 'Starting 20s test in ' + r.lang);
-        var allText = '';
-        r.onresult = function(e){
-          var txt = '';
-          for(var i=0;i<e.results.length;i++) txt += e.results[i][0].transcript;
-          allText += txt + ' ';
-          out.textContent = '20s TEST running (' + Math.round((Date.now()-window.__t20start)/1000) + 's) | so far: "' + allText + '"';
-          out.style.color = '#2ecc71';
-        };
-        r.onerror = function(e){
-          if(window.__envLog) window.__envLog('TEST20-ERR', e.error + (e.message ? ' — ' + e.message : ''));
-          out.textContent = '20s TEST ERROR at ' + Math.round((Date.now()-window.__t20start)/1000) + 's: ' + e.error + ' | collected: "' + allText + '"';
-          out.style.color = '#e74c3c';
-        };
-        r.onend = function(){
-          var dur = Math.round((Date.now()-window.__t20start)/1000);
-          if(window.__envLog) window.__envLog('TEST20-END', '20s test ended at ' + dur + 's');
-          out.textContent = '20s TEST ENDED at ' + dur + 's | collected: "' + allText + '"';
-        };
-        r.start();
-        window.__t20start = Date.now();
-        // Auto-stop after 20s
-        setTimeout(function(){
-          try { r.stop(); } catch(_){}
-        }, 20000);
-      } catch(e){
-        out.textContent = '20s TEST THREW: ' + e.message;
-        out.style.color = '#e74c3c';
-      }
-    });
-  }
-  // Mic permission button
-  var micBtn = document.getElementById('envReqMicBtn');
-  if(micBtn){
-    micBtn.addEventListener('click', async function(){
-      var out = document.getElementById('envTestResult');
-      if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
-        out.textContent = 'FAIL: navigator.mediaDevices.getUserMedia is not available. The browser is not exposing microphone access to this page.';
-        out.style.color = '#e74c3c';
-        return;
-      }
-      out.textContent = 'Requesting microphone permission...';
-      out.style.color = '';
-      try {
-        var stream = await navigator.mediaDevices.getUserMedia({audio:true});
-        out.textContent = 'SUCCESS: microphone permission granted. Stream has ' + stream.getAudioTracks().length + ' audio track(s).';
-        out.style.color = '#2ecc71';
-        stream.getTracks().forEach(t => t.stop());
-      } catch(e){
-        out.textContent = 'DENIED / FAILED: ' + (e.name || '') + ' — ' + (e.message || e);
-        out.style.color = '#e74c3c';
-      }
-    });
-  }
-})();
+  // ====== Surah metadata (Arabic name, English transliteration, meaning) ======
+  const SURAH_META = [
+    {num:1,name:"الفاتحة",translit:"Al-Fatihah",meaning:"The Opening",verses:7},
+    {num:2,name:"البقرة",translit:"Al-Baqarah",meaning:"The Cow",verses:286},
+    {num:3,name:"آل عمران",translit:"Aal-i-Imraan",meaning:"The Family of Imraan",verses:200},
+    {num:4,name:"النساء",translit:"An-Nisaa",meaning:"The Women",verses:176},
+    {num:5,name:"المائدة",translit:"Al-Maaida",meaning:"The Table",verses:120},
+    {num:6,name:"الأنعام",translit:"Al-An'aam",meaning:"The Cattle",verses:165},
+    {num:7,name:"الأعراف",translit:"Al-A'raaf",meaning:"The Heights",verses:206},
+    {num:8,name:"الأنفال",translit:"Al-Anfaal",meaning:"The Spoils of War",verses:75},
+    {num:9,name:"التوبة",translit:"At-Tawbah",meaning:"The Repentance",verses:129},
+    {num:10,name:"يونس",translit:"Yunus",meaning:"Jonas",verses:109},
+    {num:11,name:"هود",translit:"Hud",meaning:"Hud",verses:123},
+    {num:12,name:"يوسف",translit:"Yusuf",meaning:"Joseph",verses:111},
+    {num:13,name:"الرعد",translit:"Ar-Ra'd",meaning:"The Thunder",verses:43},
+    {num:14,name:"إبراهيم",translit:"Ibrahim",meaning:"Abraham",verses:52},
+    {num:15,name:"الحجر",translit:"Al-Hijr",meaning:"The Rocky Tract",verses:99},
+    {num:16,name:"النحل",translit:"An-Nahl",meaning:"The Bee",verses:128},
+    {num:17,name:"الإسراء",translit:"Al-Israa",meaning:"The Night Journey",verses:111},
+    {num:18,name:"الكهف",translit:"Al-Kahf",meaning:"The Cave",verses:110},
+    {num:19,name:"مريم",translit:"Maryam",meaning:"Mary",verses:98},
+    {num:20,name:"طه",translit:"Taa-Haa",meaning:"Taa-Haa",verses:135},
+    {num:21,name:"الأنبياء",translit:"Al-Anbiyaa",meaning:"The Prophets",verses:112},
+    {num:22,name:"الحج",translit:"Al-Hajj",meaning:"The Pilgrimage",verses:78},
+    {num:23,name:"المؤمنون",translit:"Al-Mu'minoon",meaning:"The Believers",verses:118},
+    {num:24,name:"النور",translit:"An-Noor",meaning:"The Light",verses:64},
+    {num:25,name:"الفرقان",translit:"Al-Furqaan",meaning:"The Criterion",verses:77},
+    {num:26,name:"الشعراء",translit:"Ash-Shu'araa",meaning:"The Poets",verses:227},
+    {num:27,name:"النمل",translit:"An-Naml",meaning:"The Ant",verses:93},
+    {num:28,name:"القصص",translit:"Al-Qasas",meaning:"The Stories",verses:88},
+    {num:29,name:"العنكبوت",translit:"Al-Ankaboot",meaning:"The Spider",verses:69},
+    {num:30,name:"الروم",translit:"Ar-Room",meaning:"The Romans",verses:60},
+    {num:31,name:"لقمان",translit:"Luqman",meaning:"Luqman",verses:34},
+    {num:32,name:"السجدة",translit:"As-Sajdah",meaning:"The Prostration",verses:30},
+    {num:33,name:"الأحزاب",translit:"Al-Ahzaab",meaning:"The Clans",verses:73},
+    {num:34,name:"سبإ",translit:"Saba",meaning:"Sheba",verses:54},
+    {num:35,name:"فاطر",translit:"Faatir",meaning:"The Originator",verses:45},
+    {num:36,name:"يس",translit:"Yaseen",meaning:"Yaseen",verses:83},
+    {num:37,name:"الصافات",translit:"As-Saaffaat",meaning:"Those Ranged in Ranks",verses:182},
+    {num:38,name:"ص",translit:"Saad",meaning:"The Letter Saad",verses:88},
+    {num:39,name:"الزمر",translit:"Az-Zumar",meaning:"The Groups",verses:75},
+    {num:40,name:"غافر",translit:"Ghafir",meaning:"The Forgiver",verses:85},
+    {num:41,name:"فصلت",translit:"Fussilat",meaning:"Explained in Detail",verses:54},
+    {num:42,name:"الشورى",translit:"Ash-Shura",meaning:"The Consultation",verses:53},
+    {num:43,name:"الزخرف",translit:"Az-Zukhruf",meaning:"The Gold Adornments",verses:89},
+    {num:44,name:"الدخان",translit:"Ad-Dukhaan",meaning:"The Smoke",verses:59},
+    {num:45,name:"الجاثية",translit:"Al-Jaathiyah",meaning:"The Kneeling",verses:37},
+    {num:46,name:"الأحقاف",translit:"Al-Ahqaf",meaning:"The Curved Sand Tracts",verses:35},
+    {num:47,name:"محمد",translit:"Muhammad",meaning:"Muhammad",verses:38},
+    {num:48,name:"الفتح",translit:"Al-Fath",meaning:"The Victory",verses:29},
+    {num:49,name:"الحجرات",translit:"Al-Hujuraat",meaning:"The Rooms",verses:18},
+    {num:50,name:"ق",translit:"Qaaf",meaning:"The Letter Qaaf",verses:45},
+    {num:51,name:"الذاريات",translit:"Adh-Dhaariyaat",meaning:"The Winnowing Winds",verses:60},
+    {num:52,name:"الطور",translit:"At-Tur",meaning:"The Mount",verses:49},
+    {num:53,name:"النجم",translit:"An-Najm",meaning:"The Star",verses:62},
+    {num:54,name:"القمر",translit:"Al-Qamar",meaning:"The Moon",verses:55},
+    {num:55,name:"الرحمن",translit:"Ar-Rahmaan",meaning:"The Most Gracious",verses:78},
+    {num:56,name:"الواقعة",translit:"Al-Waaqia",meaning:"The Inevitable",verses:96},
+    {num:57,name:"الحديد",translit:"Al-Hadeed",meaning:"The Iron",verses:29},
+    {num:58,name:"المجادلة",translit:"Al-Mujaadila",meaning:"The Woman Who Disputes",verses:22},
+    {num:59,name:"الحشر",translit:"Al-Hashr",meaning:"The Gathering",verses:24},
+    {num:60,name:"الممتحنة",translit:"Al-Mumtahana",meaning:"The Woman to be Examined",verses:13},
+    {num:61,name:"الصف",translit:"As-Saff",meaning:"The Ranks",verses:14},
+    {num:62,name:"الجمعة",translit:"Al-Jumu'ah",meaning:"The Friday",verses:11},
+    {num:63,name:"المنافقون",translit:"Al-Munaafiqoon",meaning:"The Hypocrites",verses:11},
+    {num:64,name:"التغابن",translit:"At-Taghaabun",meaning:"Mutual Disillusion",verses:18},
+    {num:65,name:"الطلاق",translit:"At-Talaaq",meaning:"Divorce",verses:12},
+    {num:66,name:"التحريم",translit:"At-Tahreem",meaning:"The Prohibition",verses:12},
+    {num:67,name:"الملك",translit:"Al-Mulk",meaning:"The Kingdom",verses:30},
+    {num:68,name:"القلم",translit:"Al-Qalam",meaning:"The Pen",verses:52},
+    {num:69,name:"الحاقة",translit:"Al-Haaqqa",meaning:"The Reality",verses:52},
+    {num:70,name:"المعارج",translit:"Al-Ma'aarij",meaning:"The Ways of Ascent",verses:44},
+    {num:71,name:"نوح",translit:"Nooh",meaning:"Noah",verses:28},
+    {num:72,name:"الجن",translit:"Al-Jinn",meaning:"The Jinn",verses:28},
+    {num:73,name:"المزمل",translit:"Al-Muzzammil",meaning:"The Enshrouded One",verses:20},
+    {num:74,name:"المدثر",translit:"Al-Muddaththir",meaning:"The Cloaked One",verses:56},
+    {num:75,name:"القيامة",translit:"Al-Qiyaamah",meaning:"The Resurrection",verses:40},
+    {num:76,name:"الإنسان",translit:"Al-Insaan",meaning:"Man",verses:31},
+    {num:77,name:"المرسلات",translit:"Al-Mursalaat",meaning:"The Emissaries",verses:50},
+    {num:78,name:"النبأ",translit:"An-Naba",meaning:"The Announcement",verses:40},
+    {num:79,name:"النازعات",translit:"An-Naazi'aat",meaning:"Those Who Pull Out",verses:46},
+    {num:80,name:"عبس",translit:"Abasa",meaning:"He Frowned",verses:42},
+    {num:81,name:"التكوير",translit:"At-Takweer",meaning:"The Folding Up",verses:29},
+    {num:82,name:"الإنفطار",translit:"Al-Infitaar",meaning:"The Cleaving",verses:19},
+    {num:83,name:"المطففين",translit:"Al-Mutaffifeen",meaning:"The Defrauders",verses:36},
+    {num:84,name:"الإنشقاق",translit:"Al-Inshiqaaq",meaning:"The Splitting Open",verses:25},
+    {num:85,name:"البروج",translit:"Al-Burooj",meaning:"The Constellations",verses:22},
+    {num:86,name:"الطارق",translit:"At-Taariq",meaning:"The Night-Comer",verses:17},
+    {num:87,name:"الأعلى",translit:"Al-A'laa",meaning:"The Most High",verses:19},
+    {num:88,name:"الغاشية",translit:"Al-Ghaashiya",meaning:"The Overwhelming",verses:26},
+    {num:89,name:"الفجر",translit:"Al-Fajr",meaning:"The Dawn",verses:30},
+    {num:90,name:"البلد",translit:"Al-Balad",meaning:"The City",verses:20},
+    {num:91,name:"الشمس",translit:"Ash-Shams",meaning:"The Sun",verses:15},
+    {num:92,name:"الليل",translit:"Al-Lail",meaning:"The Night",verses:21},
+    {num:93,name:"الضحى",translit:"Ad-Dhuhaa",meaning:"The Forenoon",verses:11},
+    {num:94,name:"الشرح",translit:"Ash-Sharh",meaning:"The Opening Forth",verses:8},
+    {num:95,name:"التين",translit:"At-Teen",meaning:"The Fig",verses:8},
+    {num:96,name:"العلق",translit:"Al-Alaq",meaning:"The Clot",verses:19},
+    {num:97,name:"القدر",translit:"Al-Qadr",meaning:"The Power",verses:5},
+    {num:98,name:"البينة",translit:"Al-Bayyinah",meaning:"The Clear Proof",verses:8},
+    {num:99,name:"الزلزلة",translit:"Az-Zalzalah",meaning:"The Earthquake",verses:8},
+    {num:100,name:"العاديات",translit:"Al-Aadiyaat",meaning:"The Coursers",verses:11},
+    {num:101,name:"القارعة",translit:"Al-Qaari'ah",meaning:"The Striking Hour",verses:11},
+    {num:102,name:"التكاثر",translit:"At-Takaathur",meaning:"The Piling Up",verses:8},
+    {num:103,name:"العصر",translit:"Al-Asr",meaning:"The Time",verses:3},
+    {num:104,name:"الهمزة",translit:"Al-Humazah",meaning:"The Slanderer",verses:9},
+    {num:105,name:"الفيل",translit:"Al-Feel",meaning:"The Elephant",verses:5},
+    {num:106,name:"قريش",translit:"Quraish",meaning:"Quraish",verses:4},
+    {num:107,name:"الماعون",translit:"Al-Maa'un",meaning:"The Small Kindness",verses:7},
+    {num:108,name:"الكوثر",translit:"Al-Kawthar",meaning:"The Abundance",verses:3},
+    {num:109,name:"الكافرون",translit:"Al-Kaafiroon",meaning:"The Disbelievers",verses:6},
+    {num:110,name:"النصر",translit:"An-Nasr",meaning:"The Help",verses:3},
+    {num:111,name:"المسد",translit:"Al-Masad",meaning:"The Palm Fibre",verses:5},
+    {num:112,name:"الإخلاص",translit:"Al-Ikhlaas",meaning:"The Sincerity",verses:4},
+    {num:113,name:"الفلق",translit:"Al-Falaq",meaning:"The Daybreak",verses:5},
+    {num:114,name:"الناس",translit:"An-Naas",meaning:"Mankind",verses:6},
+  ];
+  const SURAH_BY_NUM = {};
+  for(const s of SURAH_META) SURAH_BY_NUM[s.num] = s;
 
-// Fullscreen "speak now" overlay control. Called from startListening and
-// from onaudiostart/onaudioend events.
-function showSpeakOverlay(isFirstStart){
-  // Overlay removed. The small compact log under the mic button
-  // is the new "speak now" indicator. The surah text and the log
-  // are always visible.
-  return;
-  var ov = document.getElementById('speakOverlay');
-  var cd = document.getElementById('speakOverlayCountdown');
-  var ban = document.getElementById('speakOverlayBanner');
-  var sub = document.getElementById('speakOverlaySub');
-  var tmr = document.getElementById('speakOverlayTimer');
-  if(!ov) return;
-  if(isFirstStart){
-    ov.style.display = 'flex';
-    cd.style.display = 'block';
-    cd.textContent = '3';
-    ban.style.display = 'none';
-    sub.style.display = 'none';
-    tmr.style.display = 'none';
-    // Countdown 3, 2, 1, then "speak now" banner
-    setTimeout(function(){ cd.textContent = '2'; }, 1000);
-    setTimeout(function(){ cd.textContent = '1'; }, 2000);
-    setTimeout(function(){
-      cd.style.display = 'none';
-      ban.style.display = 'block';
-      sub.style.display = 'block';
-      sub.textContent = 'The mic is live for 5 seconds. Recite whatever you\'d like to test, then we\'ll restart automatically.';
-      tmr.style.display = 'block';
-      tmr.textContent = '5';
-      var n = 4;
-      var iv = setInterval(function(){
-        n--;
-        tmr.textContent = String(n);
-        if(n <= 0) clearInterval(iv);
-      }, 1000);
-    }, 3000);
-  } else {
-    // Quick flash on each restart so the user knows the mic is live again
-    ov.style.display = 'flex';
-    cd.style.display = 'none';
-    ban.style.display = 'block';
-    sub.style.display = 'block';
-    sub.textContent = '🔁 Mic restarted — keep reciting.';
-    tmr.style.display = 'block';
-    tmr.textContent = '5';
-    var n2 = 4;
-    var iv2 = setInterval(function(){
-      n2--;
-      tmr.textContent = String(n2);
-      if(n2 <= 0){ clearInterval(iv2); hideSpeakOverlay(); }
-    }, 1000);
+  // ====== Same data build as global-words.html ======
+  // PRODUCTION'S EXACT NORMALIZE (copied verbatim)
+  // Normalizes Arabic text for matching: strips diacritics/tatweel,
+  // unifies alef/ya/kaf/ha variants, removes non-Arabic chars.
+  // Critical for matching user recitation against the Quran text.
+  function normalize(word){
+    if(!word) return '';
+    return word
+      .normalize('NFKC')
+      .replace(/[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED\u0640]/g, '')
+      .replace(/[إأآاٱ]/g, 'ا')
+      .replace(/[يىی]/g, 'ي')
+      .replace(/[كک]/g, 'ك')
+      .replace(/[هھ]/g, 'ه')
+      .replace(/ة/g, 'ه')
+      .replace(/[^\u0600-\u06FF]/g, '')
+      .trim();
   }
-}
-function hideSpeakOverlay(){
-  var ov = document.getElementById('speakOverlay');
-  if(ov) ov.style.display = 'none';
-}
-function showContinueButton(){
-  var btn = document.getElementById('speakOverlayContinue');
-  if(btn) btn.style.display = 'inline-block';
-  var close = document.getElementById('speakOverlayClose');
-  if(close) close.textContent = 'Done';
-  var ban = document.getElementById('speakOverlayBanner');
-  if(ban){ ban.textContent = '✓ Session ended'; ban.style.background = 'linear-gradient(135deg,#3498db,#2980b9)'; ban.style.animation = 'none'; }
-  var sub = document.getElementById('speakOverlaySub');
-  if(sub) sub.textContent = 'Press Continue for the next verse, or Done to stop.';
-  var tmr = document.getElementById('speakOverlayTimer');
-  if(tmr) tmr.style.display = 'none';
-}
-// Wire the "Stop reciting" button on the overlay so the user can manually
-// stop the recognition loop without hunting for the mic button behind the overlay.
-document.addEventListener('DOMContentLoaded', function(){
-  var btn = document.getElementById('speakOverlayClose');
-  if(btn) btn.addEventListener('click', function(){
-    hideSpeakOverlay();
-    var mic = document.querySelector('.mic-btn');
-    if(mic) mic.click();
-  });
-  var cont = document.getElementById('speakOverlayContinue');
-  if(cont) cont.addEventListener('click', function(){
-    // Start a new recognition session directly
-    try {
-      if(window.__envLog) window.__envLog('CONTINUE', 'user pressed Continue — starting new session');
-      // Hide Continue button, show SPEAK NOW again
-      cont.style.display = 'none';
-      var ban = document.getElementById('speakOverlayBanner');
-      if(ban){ ban.textContent = '🎤 SPEAK NOW'; ban.style.background = 'linear-gradient(135deg,#2ecc71,#27ae60)'; ban.style.animation = 'pulse 1s ease-in-out infinite'; }
-      var sub = document.getElementById('speakOverlaySub');
-      if(sub) sub.textContent = '🔁 New session — keep reciting.';
-      var tmr = document.getElementById('speakOverlayTimer');
-      if(tmr){ tmr.style.display = 'block'; tmr.textContent = '∞'; }
-      // Start a new recognition
-      var Ctor = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if(!Ctor) return;
-      var r = new Ctor();
-      var sel = document.getElementById('envLangSel');
-      r.lang = sel ? sel.value : 'ar';
-      r.continuous = false;
-      r.interimResults = false;
-      r.maxAlternatives = 1;
-      r.onresult = recognition.onresult;
-      r.onerror = recognition.onerror;
-      r.onend = recognition.onend;
-      recognition = r;
-      recognition.start();
-    } catch(e){
-      if(window.__envLog) window.__envLog('CONTINUE', 'failed: ' + e.message);
-    }
-  });
-});
-</script>
-
-</div>
-
-<script>
-// =========================================================================
-// SURAH METADATA — name + transliteration + verse count for each of 114.
-// =========================================================================
-const SURAH_META = [
-  {num:1,name:"الفاتحة",translit:"Al-Fatihah",meaning:"The Opening",verses:7},
-  {num:2,name:"البقرة",translit:"Al-Baqarah",meaning:"The Cow",verses:286},
-  {num:3,name:"آل عمران",translit:"Aal-i-Imraan",meaning:"The Family of Imraan",verses:200},
-  {num:4,name:"النساء",translit:"An-Nisaa",meaning:"The Women",verses:176},
-  {num:5,name:"المائدة",translit:"Al-Maaida",meaning:"The Table",verses:120},
-  {num:6,name:"الأنعام",translit:"Al-An'aam",meaning:"The Cattle",verses:165},
-  {num:7,name:"الأعراف",translit:"Al-A'raaf",meaning:"The Heights",verses:206},
-  {num:8,name:"الأنفال",translit:"Al-Anfaal",meaning:"The Spoils of War",verses:75},
-  {num:9,name:"التوبة",translit:"At-Tawbah",meaning:"The Repentance",verses:129},
-  {num:10,name:"يونس",translit:"Yunus",meaning:"Jonas",verses:109},
-  {num:11,name:"هود",translit:"Hud",meaning:"Hud",verses:123},
-  {num:12,name:"يوسف",translit:"Yusuf",meaning:"Joseph",verses:111},
-  {num:13,name:"الرعد",translit:"Ar-Ra'd",meaning:"The Thunder",verses:43},
-  {num:14,name:"إبراهيم",translit:"Ibrahim",meaning:"Abraham",verses:52},
-  {num:15,name:"الحجر",translit:"Al-Hijr",meaning:"The Rocky Tract",verses:99},
-  {num:16,name:"النحل",translit:"An-Nahl",meaning:"The Bee",verses:128},
-  {num:17,name:"الإسراء",translit:"Al-Israa",meaning:"The Night Journey",verses:111},
-  {num:18,name:"الكهف",translit:"Al-Kahf",meaning:"The Cave",verses:110},
-  {num:19,name:"مريم",translit:"Maryam",meaning:"Mary",verses:98},
-  {num:20,name:"طه",translit:"Taa-Haa",meaning:"Taa-Haa",verses:135},
-  {num:21,name:"الأنبياء",translit:"Al-Anbiyaa",meaning:"The Prophets",verses:112},
-  {num:22,name:"الحج",translit:"Al-Hajj",meaning:"The Pilgrimage",verses:78},
-  {num:23,name:"المؤمنون",translit:"Al-Mu'minoon",meaning:"The Believers",verses:118},
-  {num:24,name:"النور",translit:"An-Noor",meaning:"The Light",verses:64},
-  {num:25,name:"الفرقان",translit:"Al-Furqaan",meaning:"The Criterion",verses:77},
-  {num:26,name:"الشعراء",translit:"Ash-Shu'araa",meaning:"The Poets",verses:227},
-  {num:27,name:"النمل",translit:"An-Naml",meaning:"The Ant",verses:93},
-  {num:28,name:"القصص",translit:"Al-Qasas",meaning:"The Stories",verses:88},
-  {num:29,name:"العنكبوت",translit:"Al-Ankaboot",meaning:"The Spider",verses:69},
-  {num:30,name:"الروم",translit:"Ar-Room",meaning:"The Romans",verses:60},
-  {num:31,name:"لقمان",translit:"Luqman",meaning:"Luqman",verses:34},
-  {num:32,name:"السجدة",translit:"As-Sajdah",meaning:"The Prostration",verses:30},
-  {num:33,name:"الأحزاب",translit:"Al-Ahzaab",meaning:"The Clans",verses:73},
-  {num:34,name:"سبإ",translit:"Saba",meaning:"Sheba",verses:54},
-  {num:35,name:"فاطر",translit:"Faatir",meaning:"The Originator",verses:45},
-  {num:36,name:"يس",translit:"Yaseen",meaning:"Yaseen",verses:83},
-  {num:37,name:"الصافات",translit:"As-Saaffaat",meaning:"Those Ranged in Ranks",verses:182},
-  {num:38,name:"ص",translit:"Saad",meaning:"The Letter Saad",verses:88},
-  {num:39,name:"الزمر",translit:"Az-Zumar",meaning:"The Groups",verses:75},
-  {num:40,name:"غافر",translit:"Ghafir",meaning:"The Forgiver",verses:85},
-  {num:41,name:"فصلت",translit:"Fussilat",meaning:"Explained in Detail",verses:54},
-  {num:42,name:"الشورى",translit:"Ash-Shura",meaning:"The Consultation",verses:53},
-  {num:43,name:"الزخرف",translit:"Az-Zukhruf",meaning:"The Gold Adornments",verses:89},
-  {num:44,name:"الدخان",translit:"Ad-Dukhaan",meaning:"The Smoke",verses:59},
-  {num:45,name:"الجاثية",translit:"Al-Jaathiyah",meaning:"The Kneeling",verses:37},
-  {num:46,name:"الأحقاف",translit:"Al-Ahqaf",meaning:"The Curved Sand Tracts",verses:35},
-  {num:47,name:"محمد",translit:"Muhammad",meaning:"Muhammad",verses:38},
-  {num:48,name:"الفتح",translit:"Al-Fath",meaning:"The Victory",verses:29},
-  {num:49,name:"الحجرات",translit:"Al-Hujuraat",meaning:"The Rooms",verses:18},
-  {num:50,name:"ق",translit:"Qaaf",meaning:"The Letter Qaaf",verses:45},
-  {num:51,name:"الذاريات",translit:"Adh-Dhaariyaat",meaning:"The Winnowing Winds",verses:60},
-  {num:52,name:"الطور",translit:"At-Tur",meaning:"The Mount",verses:49},
-  {num:53,name:"النجم",translit:"An-Najm",meaning:"The Star",verses:62},
-  {num:54,name:"القمر",translit:"Al-Qamar",meaning:"The Moon",verses:55},
-  {num:55,name:"الرحمن",translit:"Ar-Rahmaan",meaning:"The Most Gracious",verses:78},
-  {num:56,name:"الواقعة",translit:"Al-Waaqia",meaning:"The Inevitable",verses:96},
-  {num:57,name:"الحديد",translit:"Al-Hadeed",meaning:"The Iron",verses:29},
-  {num:58,name:"المجادلة",translit:"Al-Mujaadila",meaning:"The Woman Who Disputes",verses:22},
-  {num:59,name:"الحشر",translit:"Al-Hashr",meaning:"The Gathering",verses:24},
-  {num:60,name:"الممتحنة",translit:"Al-Mumtahana",meaning:"The Woman to be Examined",verses:13},
-  {num:61,name:"الصف",translit:"As-Saff",meaning:"The Ranks",verses:14},
-  {num:62,name:"الجمعة",translit:"Al-Jumu'ah",meaning:"The Friday",verses:11},
-  {num:63,name:"المنافقون",translit:"Al-Munaafiqoon",meaning:"The Hypocrites",verses:11},
-  {num:64,name:"التغابن",translit:"At-Taghaabun",meaning:"Mutual Disillusion",verses:18},
-  {num:65,name:"الطلاق",translit:"At-Talaaq",meaning:"Divorce",verses:12},
-  {num:66,name:"التحريم",translit:"At-Tahreem",meaning:"The Prohibition",verses:12},
-  {num:67,name:"الملك",translit:"Al-Mulk",meaning:"The Kingdom",verses:30},
-  {num:68,name:"القلم",translit:"Al-Qalam",meaning:"The Pen",verses:52},
-  {num:69,name:"الحاقة",translit:"Al-Haaqqa",meaning:"The Reality",verses:52},
-  {num:70,name:"المعارج",translit:"Al-Ma'aarij",meaning:"The Ways of Ascent",verses:44},
-  {num:71,name:"نوح",translit:"Nooh",meaning:"Noah",verses:28},
-  {num:72,name:"الجن",translit:"Al-Jinn",meaning:"The Jinn",verses:28},
-  {num:73,name:"المزمل",translit:"Al-Muzzammil",meaning:"The Enshrouded One",verses:20},
-  {num:74,name:"المدثر",translit:"Al-Muddaththir",meaning:"The Cloaked One",verses:56},
-  {num:75,name:"القيامة",translit:"Al-Qiyaamah",meaning:"The Resurrection",verses:40},
-  {num:76,name:"الإنسان",translit:"Al-Insaan",meaning:"Man",verses:31},
-  {num:77,name:"المرسلات",translit:"Al-Mursalaat",meaning:"The Emissaries",verses:50},
-  {num:78,name:"النبأ",translit:"An-Naba",meaning:"The Announcement",verses:40},
-  {num:79,name:"النازعات",translit:"An-Naazi'aat",meaning:"Those Who Pull Out",verses:46},
-  {num:80,name:"عبس",translit:"Abasa",meaning:"He Frowned",verses:42},
-  {num:81,name:"التكوير",translit:"At-Takweer",meaning:"The Folding Up",verses:29},
-  {num:82,name:"الإنفطار",translit:"Al-Infitaar",meaning:"The Cleaving",verses:19},
-  {num:83,name:"المطففين",translit:"Al-Mutaffifeen",meaning:"The Defrauders",verses:36},
-  {num:84,name:"الإنشقاق",translit:"Al-Inshiqaaq",meaning:"The Splitting Open",verses:25},
-  {num:85,name:"البروج",translit:"Al-Burooj",meaning:"The Constellations",verses:22},
-  {num:86,name:"الطارق",translit:"At-Taariq",meaning:"The Night-Comer",verses:17},
-  {num:87,name:"الأعلى",translit:"Al-A'laa",meaning:"The Most High",verses:19},
-  {num:88,name:"الغاشية",translit:"Al-Ghaashiya",meaning:"The Overwhelming",verses:26},
-  {num:89,name:"الفجر",translit:"Al-Fajr",meaning:"The Dawn",verses:30},
-  {num:90,name:"البلد",translit:"Al-Balad",meaning:"The City",verses:20},
-  {num:91,name:"الشمس",translit:"Ash-Shams",meaning:"The Sun",verses:15},
-  {num:92,name:"الليل",translit:"Al-Lail",meaning:"The Night",verses:21},
-  {num:93,name:"الضحى",translit:"Ad-Dhuhaa",meaning:"The Forenoon",verses:11},
-  {num:94,name:"الشرح",translit:"Ash-Sharh",meaning:"The Opening Forth",verses:8},
-  {num:95,name:"التين",translit:"At-Teen",meaning:"The Fig",verses:8},
-  {num:96,name:"العلق",translit:"Al-Alaq",meaning:"The Clot",verses:19},
-  {num:97,name:"القدر",translit:"Al-Qadr",meaning:"The Power",verses:5},
-  {num:98,name:"البينة",translit:"Al-Bayyinah",meaning:"The Clear Proof",verses:8},
-  {num:99,name:"الزلزلة",translit:"Az-Zalzalah",meaning:"The Earthquake",verses:8},
-  {num:100,name:"العاديات",translit:"Al-Aadiyaat",meaning:"The Coursers",verses:11},
-  {num:101,name:"القارعة",translit:"Al-Qaari'ah",meaning:"The Striking Hour",verses:11},
-  {num:102,name:"التكاثر",translit:"At-Takaathur",meaning:"The Piling Up",verses:8},
-  {num:103,name:"العصر",translit:"Al-Asr",meaning:"The Time",verses:3},
-  {num:104,name:"الهمزة",translit:"Al-Humazah",meaning:"The Slanderer",verses:9},
-  {num:105,name:"الفيل",translit:"Al-Feel",meaning:"The Elephant",verses:5},
-  {num:106,name:"قريش",translit:"Quraish",meaning:"Quraish",verses:4},
-  {num:107,name:"الماعون",translit:"Al-Maa'un",meaning:"The Small Kindness",verses:7},
-  {num:108,name:"الكوثر",translit:"Al-Kawthar",meaning:"The Abundance",verses:3},
-  {num:109,name:"الكافرون",translit:"Al-Kaafiroon",meaning:"The Disbelievers",verses:6},
-  {num:110,name:"النصر",translit:"An-Nasr",meaning:"The Help",verses:3},
-  {num:111,name:"المسد",translit:"Al-Masad",meaning:"The Palm Fibre",verses:5},
-  {num:112,name:"الإخلاص",translit:"Al-Ikhlaas",meaning:"The Sincerity",verses:4},
-  {num:113,name:"الفلق",translit:"Al-Falaq",meaning:"The Daybreak",verses:5},
-  {num:114,name:"الناس",translit:"An-Naas",meaning:"Mankind",verses:6},
-];
-
-// =========================================================================
-// CONSTANTS — matching thresholds, look-ahead windows.
-// =========================================================================
-const NEAR_WINDOW       = 8;     // normal lookahead
-const FAR_WINDOW        = 8;     // limited lookahead for resync (was 40 — too aggressive, jumped 4 lines on a single mispronunciation)
-const RESYNC_THRESHOLD  = 6;     // misses in a row before we trust a jump (was 4 — too eager)
-const LEVENSHTEIN_RATIO = 0.30;  // ≤30% edit distance is a match (was absolute 0.34)
-// Phoneme-similarity threshold (used as fallback when text is borderline)
-const PHONEME_LEVENSHTEIN_RATIO = 0.30;
-
-// =========================================================================
-// STATE
-// =========================================================================
-let refWords       = [];     // [{text, norm, phoneme, el, surah, ayah, position}]
-let ayahEndIndex   = [];     // [endIdx_in_refWords_of_ayah_1, endIdx_of_ayah_2, ...]
-let pointer        = 0;
-let consecutiveMisses = 0;
-let _lastHighlightedPointer = -1;
-let _prevPastEnd = 0;  // index of first non-.past word
-let _maxPointerReached = 0;  // furthest pointer reached this surah
-let _lastProcessedWordCount = 0;  // unused, kept for legacy
-let _pendingReProcess = false;  // rAF throttle for the heavy re-processing
-let _pendingFullText  = "";     // latest fullText waiting to be re-processed
-let _pendingWords     = [];     // latest words array waiting to be re-processed
-let stats          = {correct:0, mistake:0, unclear:0};
-let debugLog       = [];     // every mistake/unclear pushed here for the debug panel
-let recognition    = null;
-let listening      = false;
-let committedWordCount = 0;
-let finalizedText  = "";
-let confidences    = [];
-let mediaStream    = null;
-let mediaRecorder  = null;
-let audioChunks    = [];
-let currentAudioURL = null;
-let activeSurah    = null;
-let phonemeData    = null;   // will be loaded asynchronously on startup
-
-// =========================================================================
-// PHONEME DATA LOADER — pulls SURAH_PHONEMES from sibling phonemes-data.js
-// =========================================================================
-async function loadPhonemeData(){
-  return new Promise((resolve, reject) => {
-    const s = document.createElement('script');
-    s.src = 'phonemes-data.js';
-    s.onload = () => resolve(window.SURAH_PHONEMES || null);
-    s.onerror = () => reject(new Error('phonemes-data.js failed to load'));
-    document.head.appendChild(s);
-  });
-}
-
-// =========================================================================
-// NORMALIZATION — stricter than Claude's original.
-// Strips ALL Arabic combining marks (more thorough UCD coverage),
-// unifies alef/ya/taa-marbuta variants. NFKC normalization first.
-// =========================================================================
-function normalize(word){
-  if(!word) return '';
-  return word
-    .normalize('NFKC')
-    // strip every Arabic combining mark (Mn) plus all small high marks,
-    // tatweel, madda, superscript alef, etc.
-    .replace(/[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED\u0640]/g, '')
-    // unify alef variants (incl. alef wasla ٱ)
-    .replace(/[إأآاٱ]/g, 'ا')
-    // ya / alef maqsura / farsi ya → unified ya
-    .replace(/[يىی]/g, 'ي')
-    // farsi/persian variants → arabic
-    .replace(/[كک]/g, 'ك')
-    .replace(/[هھ]/g, 'ه')
-    // taa marbuta → ha (as in classical Arabic phonology)
-    .replace(/ة/g, 'ه')
-    // strip any non-Arabic (Latin digits, punctuation, etc.)
-    .replace(/[^\u0600-\u06FF]/g, '')
-    .trim();
-}
-
-// =========================================================================
-// SIMPLE MATCHER (port from mobile-simple.html, which works on Android)
-// Replaces the complex processNewWord matcher that's not working in the
-// main app. Strategy: exact → starts-with → Levenshtein fuzzy, in a
-// 12-word lookahead window. Always advances the pointer, so a wrong
-// word gets marked as 'wrong' and we move on (instead of stalling).
-// =========================================================================
-function levenshtein(a, b){
-  const m = a.length, n = b.length;
-  if(!m) return n; if(!n) return m;
-  const dp = Array.from({length:m+1}, () => new Array(n+1).fill(0));
-  for(let i=0;i<=m;i++) dp[i][0] = i;
-  for(let j=0;j<=n;j++) dp[0][j] = j;
-  for(let i=1;i<=m;i++){
-    for(let j=1;j<=n;j++){
-      dp[i][j] = a[i-1] === b[j-1]
-        ? dp[i-1][j-1]
-        : 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
-    }
-  }
-  return dp[m][n];
-}
-function _simpleFindMatch(w, p){
-  const NEAR = 12;
-  const end = Math.min(refWords.length, p + NEAR);
-  // 1) exact
-  for(let i = p; i < end; i++){
-    if(refWords[i].norm === w) return {idx:i, kind:'exact'};
-  }
-  // 2) prefix
-  for(let i = p; i < end; i++){
-    if(refWords[i].norm.startsWith(w) && w.length >= 2) return {idx:i, kind:'prefix'};
-    if(w.startsWith(refWords[i].norm) && refWords[i].norm.length >= 2) return {idx:i, kind:'prefix'};
-  }
-  // 3) fuzzy (Levenshtein)
-  for(let i = p; i < end; i++){
-    const d = levenshtein(refWords[i].norm, w);
-    const tol = Math.max(1, Math.floor(Math.max(refWords[i].norm.length, w.length) * 0.25));
-    if(d <= tol) return {idx:i, kind:'fuzzy', dist:d};
-  }
-  return {idx:-1, kind:'none'};
-}
-function _simpleMatch(text){
-  const heard = (text||'').split(/\s+/).map(normalize).filter(Boolean);
-  if(!heard.length) return;
-  if(window.__envLog) window.__envLog('MATCH', 'heard=' + JSON.stringify(heard) + ' from p=' + pointer);
-  let p = pointer;
-  for(const w of heard){
-    const m = _simpleFindMatch(w, p);
-    if(m.idx >= 0){
-      // mark skipped words as unclear
-      for(let i = p; i < m.idx; i++){
-        if(refWords[i].el.dataset.status !== 'correct'){
-          refWords[i].el.dataset.status = 'unclear';
-          refWords[i].el.classList.remove('now','future','past','wrong');
-          refWords[i].el.classList.add('past');
+  const BISMILLAH = [
+    {text:'بِسْمِ',  norm:'بسم',   phoneme:'bismi',  surah:0, ayah:'bismillah', position:1},
+    {text:'ٱللَّهِ', norm:'الله',   phoneme:'lla:hi', surah:0, ayah:'bismillah', position:2},
+    {text:'ٱلرَّحْمَـٰنِ', norm:'الرحن', surah:'',   surah:0, ayah:'bismillah', position:3},
+    {text:'ٱلرَّحِيمِ', norm:'الرحيم', phoneme:'',    surah:0, ayah:'bismillah', position:4}
+  ];
+  function buildGlobalRefWords(){
+    const all = [];
+    for(let s = 1; s <= 114; s++){
+      if(s !== 1 && s !== 9){
+        for(const w of BISMILLAH){
+          all.push({...w, globalIndex:all.length, surah:s});
         }
       }
-      refWords[m.idx].el.dataset.status = 'correct';
-      refWords[m.idx].el.classList.remove('now','future','unclear','wrong');
-      refWords[m.idx].el.classList.add('past');
-      if(window.__envLog) window.__envLog('MATCH', '"' + w + '" → refWords[' + m.idx + ']="' + refWords[m.idx].norm + '" (' + m.kind + (m.dist?', d='+m.dist:'') + ')');
-      p = m.idx + 1;
-    } else {
-      if(p < refWords.length){
-        refWords[p].el.dataset.status = 'wrong';
-        refWords[p].el.classList.remove('now','future','past','unclear');
-        refWords[p].el.classList.add('wrong');
-        if(window.__envLog) window.__envLog('MATCH', '"' + w + '" → WRONG at refWords[' + p + ']="' + refWords[p].norm + '"');
-        p++;
+      const surah = window.SURAH_PHONEMES[String(s)];
+      if(!surah) continue;
+      const ayahKeys = Object.keys(surah).map(Number).sort((a,b)=>a-b);
+      for(const a of ayahKeys){
+        const ayah = surah[String(a)];
+        const posKeys = Object.keys(ayah).map(Number).sort((a,b)=>a-b);
+        for(const p of posKeys){
+          const [text, phoneme, rules] = ayah[String(p)];
+          all.push({text, norm:normalize(text), phoneme, rules, surah:s, ayah:a, position:p, globalIndex:all.length});
+        }
       }
     }
+    return all;
   }
-  pointer = Math.min(p, refWords.length);
-  if(pointer < refWords.length){
-    refWords[pointer].el.classList.remove('future');
-    refWords[pointer].el.classList.add('now');
+  const refWords = buildGlobalRefWords();
+  let pointer = 0;
+
+  // ====== Pagination state ======
+  // The "page" shows words in [pageStart, pageEnd). When pointer is near
+  // pageEnd, we extend pageEnd. When pointer is more than PAGE_KEEP_BEHIND
+  // past pageStart, we move pageStart forward.
+  const PAGE_SIZE = 70;  // words per visible page (about 11 lines)
+  // We DO NOT render all 77,877 words in the DOM — only the current
+  // visible page slice (~70 words) is rendered, for performance.
+  // When the user scrolls or picks a different surah, the slice moves.
+  const PAGE_KEEP_BEHIND = 30;   // keep this many words behind the pointer
+  const PAGE_KEEP_AHEAD = 70;    // and this many ahead
+  let pageStart = 0;
+  let pageEnd = PAGE_SIZE;  // initial: render page 1 (PAGE_SIZE words) on startup
+
+  // ====== Render ======
+  function emitSurahHeader(surahNum, isFirst){
+    const meta = SURAH_BY_NUM[surahNum];
+    if(!meta) return;
+    const h = document.createElement('div');
+    h.className = 'surah-header' + (isFirst ? ' first' : '');
+    const ar = document.createElement('div');
+    ar.className = 'surah-ar';
+    ar.textContent = meta.name;
+    h.appendChild(ar);
+    const info = document.createElement('div');
+    info.className = 'surah-info';
+    info.innerHTML = '<div class="num-name"><span class="num">' + meta.num + '.</span>Surah ' + meta.translit + '</div><div class="meaning">' + meta.meaning + '</div>';
+    h.appendChild(info);
+    document.getElementById('page-inner').appendChild(h);
   }
-  if(pointer > 0 && refWords[pointer-1].el.classList.contains('now')){
-    refWords[pointer-1].el.classList.remove('now');
-    refWords[pointer-1].el.classList.add('past');
-  }
-  // Count stats from DOM state
-  const newStats = {correct:0, mistake:0, unclear:0};
-  for(let i = 0; i < refWords.length; i++){
-    const s = refWords[i].el.dataset.status;
-    if(s === 'correct') newStats.correct++;
-    else if(s === 'mistake') newStats.mistake++;
-    else if(s === 'unclear') newStats.unclear++;
-  }
-  stats = newStats;
-  if(typeof updateStats === 'function') updateStats();
-  if(typeof renderDebugPanel === 'function') renderDebugPanel();
-}
-
-// =========================================================================
-// PHONETIC NORMALIZER — quick JS approximation of the Qur'anic Phonemizer.
-// The full phonemizer is Python; this is a good-enough fallback so the
-// browser-only path can still do phonetic matching. Used as a secondary
-// check when text-Levenstein is borderline.
-// =========================================================================
-const AR_TO_IPA = {
-  'ا':'aː','إ':'ʔ','أ':'ʔ','آ':'aː','ٱ':'ʔ','ب':'b','ت':'t','ث':'θ',
-  'ج':'ʒ','ح':'ħ','خ':'x','د':'d','ذ':'ð','ر':'r','ز':'z','س':'s',
-  'ش':'ʃ','ص':'sˤ','ض':'dˤ','ط':'tˤ','ظ':'ðˤ','ع':'ʕ','غ':'ɣ','ف':'f',
-  'ق':'q','ك':'k','ل':'l','م':'m','ن':'n','ه':'h','و':'w','ي':'j',
-  'ى':'aː','ة':'h','ء':'ʔ','ؤ':'ʔ','ئ':'ʔ'
-};
-function phonemizeArabic(text){
-  if(!text) return '';
-  // strip combining marks + tatweel
-  const cleaned = text.normalize('NFKC')
-    .replace(/[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED\u0640]/g, '');
-  let out = '';
-  for(const ch of cleaned){
-    if(AR_TO_IPA[ch]) out += AR_TO_IPA[ch];
-    else if(/\s/.test(ch)) out += ' ';
-  }
-  // collapse doubled consonants (basic gemination → geminate)
-  out = out.replace(/(.)\1/g, '$1$1');
-  return out;
-}
-
-// =========================================================================
-// LEVENSHTEIN — classic DP, distance is what we care about.
-// =========================================================================
-function levenshtein(a, b){
-  const m = a.length, n = b.length;
-  if(!m) return n; if(!n) return m;
-  const dp = Array.from({length:m+1}, () => new Array(n+1).fill(0));
-  for(let i=0;i<=m;i++) dp[i][0] = i;
-  for(let j=0;j<=n;j++) dp[0][j] = j;
-  for(let i=1;i<=m;i++){
-    for(let j=1;j<=n;j++){
-      dp[i][j] = a[i-1] === b[j-1]
-        ? dp[i-1][j-1]
-        : 1 + Math.min(dp[i-1][j-1], dp[i-1][j], dp[i][j-1]);
-    }
-  }
-  return dp[m][n];
-}
-
-function levRatio(a, b){
-  if(!a || !b) return 0;
-  return 1 - (levenshtein(a, b) / Math.max(a.length, b.length));
-}
-
-// =========================================================================
-// MATCHING — text first (fast, exact-match shortcut), phoneme fallback.
-// isFuzzyMatch returns {matched: bool, kind: 'text'|'phoneme'|'substring'|'none',
-//                        distance, ratio, normalized, phonemes}
-// =========================================================================
-function isFuzzyMatch(heardNorm, expectedNorm, expectedPhonemes){
-  if(!heardNorm || !expectedNorm) return {matched:false, kind:'none'};
-
-  // 1) exact match
-  if(heardNorm === expectedNorm) return {matched:true, kind:'text', ratio:1};
-
-  // 2) substring — Chrome often merges "ال" + next word, or drops the prefix الـ
-  //    if heard contains expected, or vice versa, count it as a match.
-  const minLen = Math.min(heardNorm.length, expectedNorm.length);
-  const maxLen = Math.max(heardNorm.length, expectedNorm.length);
-  if(minLen >= 3){
-    if(heardNorm.includes(expectedNorm) || expectedNorm.includes(heardNorm)){
-      return {matched:true, kind:'substring', ratio: minLen/maxLen};
-    }
-  }
-
-  // 3) text Levenshtein ratio
-  const r = levRatio(heardNorm, expectedNorm);
-  if(r >= (1 - LEVENSHTEIN_RATIO)){
-    return {matched:true, kind:'text', ratio:r};
-  }
-
-  // 4) phonetic fallback — only if text was borderline (within 2x of threshold)
-  if(expectedPhonemes && r >= (1 - 2*LEVENSHTEIN_RATIO)){
-    const heardPh = phonemizeArabic(heardNorm);
-    if(heardPh && heardPh.length >= 3 && expectedPhonemes.length >= 3){
-      const phRatio = levRatio(heardPh, expectedPhonemes);
-      if(phRatio >= (1 - PHONEME_LEVENSHTEIN_RATIO)){
-        return {matched:true, kind:'phoneme', ratio:phRatio, heardPh, expectedPhonemes};
-      }
-      // Record what we tried so the debug panel can show the phoneme mismatch.
-      return {matched:false, kind:'phoneme', ratio:phRatio, heardPh, expectedPhonemes, textRatio:r};
-    }
-  }
-
-  return {matched:false, kind:'none', ratio:r};
-}
-
-// =========================================================================
-// MATCH SEARCH — find the first fuzzy match in [from, to).
-// =========================================================================
-function findMatch(heardNorm, from, to){
-  const end = Math.min(refWords.length, to);
-  for(let i = from; i < end; i++){
-    const m = isFuzzyMatch(heardNorm, refWords[i].norm, refWords[i].phoneme);
-    if(m.matched) return {idx:i, match:m};
-  }
-  return {idx:-1, match:{matched:false, kind:'none'}};
-}
-
-// =========================================================================
-// APPLY MATCH — mark all in-between as mistake/unclear, the matched one
-// as correct, advance pointer.
-// =========================================================================
-function applyMatch(matchAt, matchInfo, heardWord){
-  // Mark everything between pointer and matchAt as "skipped" (user may have
-  // skipped these intentionally OR the matcher just got confused). We don't
-  // know which — so UNCLEAR, not MISTAKE. The skip is logged with the
-  // heard word that triggered it so the user can see what caused the jump.
-  for(let i = pointer; i < matchAt; i++){
-    const w = refWords[i];
-    // Mark skipped words as 'unclear' (yellow). With FAR_WINDOW now
-    // capped at 8 (was 40), a resync paints at most ~1 line of yellow
-    // tiles instead of 4, so the visual is informative without
-    // becoming a wall. stats.unclear++ still counts the skip.
-    w.el.dataset.status = 'unclear';
-    stats.unclear++;
-    debugLog.push({
-      kind:'unclear',
-      heard:heardWord || '', heardNorm:heardWord ? normalize(heardWord) : '',
-      expected:w.text, expectedNorm:w.norm,
-      expectedPhoneme:w.phoneme,
-      surah:activeSurah, ayah:w.ayah, position:w.position,
-      reason:`Skipped "${w.norm}" (position ${i}). Pointer was at ${pointer}, jumped to ${matchAt} ` +
-             `because "${heardWord || '?'}" matched refWords[${matchAt}].norm="${refWords[matchAt].norm}" ` +
-             `(${matchInfo.kind}, ratio=${(matchInfo.ratio||0).toFixed(2)})`,
-      ts: Date.now(),
-    });
-  }
-  refWords[matchAt].el.dataset.status = 'correct';
-  stats.correct++;
-  pointer = matchAt + 1;
-  consecutiveMisses = 0;
-  updateStats();
-  highlightCurrent();
-  renderDebugPanel();
-  if(pointer >= refWords.length){
-    statusEl.textContent = 'Surah complete. Press reset to go again, or pick another surah.';
-    stopListening();
-  }
-}
-
-// =========================================================================
-// PROCESS NEW WORD — the core recognition loop.
-// On every Chrome result event, the latest fullText is split by whitespace
-// and any new words get processed here.
-// =========================================================================
-function processNewWord(rawWord){
-  const norm = normalize(rawWord);
-  if(!norm){
-    debugLog.push({
-      kind:'empty',
-      heard:rawWord, heardNorm:'',
-      expected:'', expectedNorm:'',
-      expectedPhoneme:'',
-      reason:'Empty after normalization (likely silence / noise artifact)',
-      ts: Date.now(),
-    });
-    return;
-  }
-  if(pointer >= refWords.length){
-    debugLog.push({
-      kind:'overflow',
-      heard:rawWord, heardNorm:norm,
-      expected:'(surah complete)', expectedNorm:'',
-      expectedPhoneme:'',
-      reason:'Surah already complete — extra words ignored',
-      ts: Date.now(),
-    });
-    return;
-  }
-
-  // FIRST-WORD BIAS: when pointer is at 0, the very first heard word almost
-  // certainly belongs to position 0 — Chrome might have split it weirdly
-  // (e.g. dropped the diacritics or misheard a single letter). Use a much
-  // more lenient match here (allow substring OR ratio >= 0.40).
-  if(pointer === 0 && consecutiveMisses === 0){
-    const head = isFuzzyMatch(norm, refWords[0].norm, refWords[0].phoneme, 0.40);
-    if(head.matched){
-      applyMatch(0, head, rawWord);
-      return;
-    }
-  }
-
-  // 1) near-window search (normal lookahead, prefer the EARLIEST match)
-  const near = findMatch(norm, pointer, pointer + NEAR_WINDOW);
-  if(near.idx !== -1 && (near.idx - pointer) <= 3){
-    applyMatch(near.idx, near.match, rawWord);
-    return;
-  }
-
-  // 2) far-window search (only after RESYNC_THRESHOLD misses in a row).
-  //    Cap the skip so we never mark a position as mistake/unclear if the
-  //    user is clearly still actively reciting (no consecutive misses yet).
-  consecutiveMisses++;
-  if(consecutiveMisses >= RESYNC_THRESHOLD){
-    const far = findMatch(norm, pointer + NEAR_WINDOW, pointer + FAR_WINDOW);
-    if(far.idx !== -1){
-      applyMatch(far.idx, far.match, rawWord);
-      return;
-    }
-  }
-
-  // 3) no match → log to debug panel so the user can see what happened.
-  //    IMPORTANT: do NOT advance pointer, do NOT mark anything as mistake.
-  //    Just record the miss and wait for more input.
-  const expected = refWords[pointer];
-  const expectedPhoneme = expected.phoneme;
-  const heardPh = phonemizeArabic(norm);
-  let phRatio = null;
-  if(expectedPhoneme && heardPh && heardPh.length >= 3 && expectedPhoneme.length >= 3){
-    phRatio = levRatio(heardPh, expectedPhoneme);
-  }
-  const textRatio = levRatio(norm, expected.norm);
-  debugLog.push({
-    kind:'miss',
-    heard:rawWord, heardNorm:norm, heardPhoneme:heardPh,
-    expected:expected.text, expectedNorm:expected.norm, expectedPhoneme,
-    textRatio, phRatio,
-    surah:activeSurah, ayah:expected.ayah, position:expected.position,
-    reason:phRatio != null
-      ? `Heard "${norm}" doesn't match expected "${expected.norm}" at pointer=${pointer}. ` +
-        `Text ratio=${textRatio.toFixed(2)}, phoneme ratio=${phRatio.toFixed(2)} ` +
-        `(need ≥${(1-PHONEME_LEVENSHTEIN_RATIO).toFixed(2)}). ` +
-        `Miss #${consecutiveMisses}/${RESYNC_THRESHOLD} before resync. Pointer stays put.`
-      : `Heard "${norm}" doesn't match expected "${expected.norm}" at pointer=${pointer}. ` +
-        `Text ratio=${textRatio.toFixed(2)} (need ≥${(1-LEVENSHTEIN_RATIO).toFixed(2)}). ` +
-        `Miss #${consecutiveMisses}/${RESYNC_THRESHOLD} before resync. Pointer stays put.`,
-    ts: Date.now(),
-  });
-  renderDebugPanel();
-}
-
-// =========================================================================
-// DEBUG PANEL — render every mistake/unclear with full context.
-// =========================================================================
-function renderDebugPanel(){
-  const list = document.getElementById('debugList');
-  if(!list) return;
-  if(!debugLog.length){
-    list.innerHTML = '<div class="debug-empty">No errors yet. Start reciting and any mismatches will appear here.</div>';
-    return;
-  }
-  // newest first
-  const rows = debugLog.slice().reverse().map(e => {
-    const cls = e.kind === 'unclear' ? 'debug-row unclear' : 'debug-row';
-    const meta = [
-      e.surah && e.ayah && `surah ${e.surah}:${e.ayah}:${e.position||'?'}`,
-      e.textRatio != null && `text=${e.textRatio.toFixed(2)}`,
-      e.phRatio != null && `phon=${e.phRatio.toFixed(2)}`,
-    ].filter(Boolean).map(s => `<span class="chip">${s}</span>`).join('');
-    return `
-      <div class="${cls}">
-        <div>
-          <div class="col-label">Expected (canonical)</div>
-          <div class="arabic">${e.expected||'—'}</div>
-          <div class="norm">${e.expectedNorm||'—'}</div>
-          <div class="phoneme">IPA: ${e.expectedPhoneme||'—'}</div>
-        </div>
-        <div>
-          <div class="col-label">Recited (Chrome heard)</div>
-          <div class="arabic">${e.heard||'—'}</div>
-          <div class="norm">${e.heardNorm||'—'}</div>
-          <div class="phoneme">IPA: ${e.heardPhoneme||'—'}</div>
-        </div>
-        <div>
-          <div class="col-label">Why it failed</div>
-          <div class="reason">${e.reason||'—'}</div>
-          <div class="meta">${meta}</div>
-        </div>
-      </div>
-    `;
-  }).join('');
-  list.innerHTML = rows;
-}
-
-// =========================================================================
-// UI — surah picker, ayah rendering, stats, status.
-// =========================================================================
-const surahGrid   = document.getElementById('surahGrid');
-const searchInput = document.getElementById('searchInput');
-const step2       = document.getElementById('step2');
-const step2Title  = document.getElementById('step2Title');
-const ayahContainer = document.getElementById('ayahContainer');
-const micBtn      = document.getElementById('micBtn');
-const micLabel    = document.getElementById('micLabel');
-const statusEl    = document.getElementById('status');
-const playbackRow = document.getElementById('playbackRow');
-const playBtn     = document.getElementById('playBtn');
-const progressFill= document.getElementById('progressFill');
-const timeLabel   = document.getElementById('timeLabel');
-const playbackAudio=document.getElementById('playbackAudio');
-const transcriptBox= document.getElementById('transcriptBox');
-const transcriptText=document.getElementById('transcriptText');
-const transcriptConf=document.getElementById('transcriptConf');
-
-function renderSurahGrid(filter){
-  const q = (filter || '').trim().toLowerCase();
-  surahGrid.innerHTML = '';
-  SURAH_META.forEach(s => {
-    if(q){
-      const hay = `${s.num} ${s.translit} ${s.meaning} ${s.name}`.toLowerCase();
-      if(!hay.includes(q)) return;
-    }
-    const card = document.createElement('button');
-    card.className = 'surah-card';
-    card.dataset.num = String(s.num);
-    card.innerHTML = `
-      <div class="sc-id">Surah ${s.num}</div>
-      <div class="sc-name-ar">${s.name}</div>
-      <div class="sc-name-en">${s.translit} · ${s.meaning}</div>
-      <div class="sc-verses">${s.verses} ayahs</div>
-    `;
-    card.addEventListener('click', () => selectSurah(s.num, card));
-    surahGrid.appendChild(card);
-  });
-
-  // Load Surah Al-Fatiha (1) by default so the user lands on a working
-  // recitation screen instead of an empty "Pick a surah" placeholder.
-  // Wait one tick so phonemeData finishes its initial load.
-  setTimeout(() => {
-    const fatihaCard = surahGrid.querySelector('.surah-card[data-num="1"]');
-    if(fatihaCard) selectSurah(1, fatihaCard);
-  }, 100);
-}
-
-async function selectSurah(num, cardEl){
-  if(!phonemeData){
-    statusEl.textContent = 'Phoneme data still loading — try again in a moment.';
-    return;
-  }
-  activeSurah = num;
-  document.querySelectorAll('.surah-card').forEach(c => c.classList.toggle('active', c === cardEl));
-  resetState();
-  step2.classList.remove('hidden');
-  // Title: ② Recite Surah <num> — <English> <Arabic>
-  const _meta = SURAH_META.find(s => s.num === num);
-  if(_meta){
-    step2Title.innerHTML = `② Recite Surah ${num} — <span class="arabic-name">${_meta.name}</span> <span style="color:var(--text-dim);font-weight:600">${_meta.translit}</span>`;
-  } else {
-    step2Title.textContent = `② Recite Surah ${num}`;
-  }
-  buildSurah(num);
-  // Mark every word as 'future' so the Hide Script button has something
-  // to blur. Without this, words render without future/past/now classes
-  // and the script-hidden CSS selector matches nothing.
-  highlightCurrent();
-  // Scroll the recite section into view so the user sees the words,
-  // not the surah picker they just clicked.
-  // Removed: was scrolling step2 (the recite section) into view after
-  // selecting a surah. The user wanted the page to stay anchored at
-  // the top (Bismillah + title + surah grid) on open and not jump
-  // down. The auto-load of Al-Fatiha fires this same code, so the
-  // page was jumping on every page open. User scrolls down manually
-  // when they want the recite screen.
-}
-
-function resetState(){
-  refWords = [];
-  ayahEndIndex = [];
-  pointer = 0;
-  consecutiveMisses = 0;
-  stats = {correct:0, mistake:0, unclear:0};
-  debugLog = [];
-  committedWordCount = 0;
-  finalizedText = '';
-  confidences = [];
-  renderDebugPanel();
-  updateStats();
-  transcriptBox.classList.add('hidden');
-  playbackRow.classList.add('hidden');
-}
-
-function buildSurah(num){
-  const meta = SURAH_META.find(s => s.num === num);
-  if(!meta) return;
-  const surah = phonemeData?.[String(num)];
-  if(!surah){
-    ayahContainer.innerHTML = '<p style="color:var(--text-dim);text-align:center;padding:40px 0">Phoneme data for this surah is missing.</p>';
-    return;
-  }
-  ayahContainer.innerHTML = '';
-  const wordList = refWords = [];
-  ayahEndIndex = [];
-  let wordCounter = 0;
-
-  // iterate over every ayah in canonical order
-  const ayahKeys = Object.keys(surah).map(Number).sort((a,b)=>a-b);
-  ayahKeys.forEach(v => {
-    const verse = document.createElement('div');
-    verse.className = 'verse';
-    // Create the label but don't append yet — we append it AFTER the
-    // words so that in RTL it renders on the LEFT (visually) of the verse.
-    const label = document.createElement('span');
-    label.className = 'verse-label';
-    label.textContent = toArabicDigits(v);
-    const posKeys = Object.keys(surah[v]).map(Number).sort((a,b)=>a-b);
-    posKeys.forEach(p => {
-      const [text, phoneme, tajweedStr] = surah[v][p];
+  function emitBismillahBlock(startIdx, endIdx){
+    // The user wants Bismillah shown ABOVE the surah content as a
+    // separate recitable block. It is still part of the global
+    // refWords (so the matcher highlights it as the user recites),
+    // but visually it's in its own yellow-tinted block — just the
+    // Arabic text, no English label. Uses a more decorative Arabic
+    // font (Amiri Quran / Scheherazade / Noto Naskh) but keeps
+    // the same yellow color.
+    const block = document.createElement('div');
+    block.className = 'bismillah-block';
+    const words = document.createElement('span');
+    words.className = 'words';
+    for(let i = startIdx; i < endIdx; i++){
+      const w = refWords[i];
       const span = document.createElement('span');
-      span.className = 'word future';
-      span.textContent = text;
-      // tooltip with phoneme + tajweed rules
-      const tooltip = document.createElement('div');
-      tooltip.className = 'phoneme-tooltip';
-      const rulesArr = (tajweedStr||'').split(',').filter(Boolean);
-      const ruleNames = rulesArr.map(r => {
-        const [ch, rule] = r.split(':');
-        return `<span style="color:var(--accent)">${ch}</span> → ${rule}`;
-      }).join('<br>');
-      tooltip.innerHTML = `
-        <div class="ipa">/${phoneme}/</div>
-        <div class="rules">${ruleNames || '<span style="color:var(--text-dim)">no Tajweed annotations</span>'}</div>
-      `;
-      span.appendChild(tooltip);
-      // mark up by Tajweed rule for border colors
-      const ruleSet = new Set(rulesArr.map(r => r.split(':')[1]));
-      if(ruleSet.has('TAFKHEEM'))                  span.classList.add('tajweed-tafkheem');
-      if(ruleSet.has('QALQALA_KUBRA')||ruleSet.has('QALQALA_SUGHRA')) span.classList.add('tajweed-qalqala');
-      if(/MADD/.test([...ruleSet].join(' ')))      span.classList.add('tajweed-madd');
-      if(ruleSet.has('IDGHAM')||ruleSet.has('IDGHAM_SHAMSIYAH')||ruleSet.has('IDGHAM_QAMARIYAH')||ruleSet.has('IDGHAM_WAW')||ruleSet.has('IDGHAM_YAA')||ruleSet.has('IDGHAM_MEEM')||ruleSet.has('IDGHAM_LAM')||ruleSet.has('IDGHAM_NOON')) span.classList.add('tajweed-idgham');
-      if(ruleSet.has('IKHFAA')||ruleSet.has('IKHFAA_SHAFAWI')) span.classList.add('tajweed-ikhfaa');
-      if(ruleSet.has('IQLAB'))                     span.classList.add('tajweed-iqlab');
-      if(ruleSet.has('GHUNNA'))                    span.classList.add('tajweed-ghunna');
-      verse.appendChild(span);
-      wordCounter++;
-      wordList.push({
-        text,
-        norm: normalize(text),
-        phoneme,
-        el: span,
-        surah:num, ayah:v, position:p,
+      span.className = 'word bismillah';
+      if(i < pointer) span.classList.add('past');
+      else if(i === pointer) span.classList.add('now');
+      else span.classList.add('future');
+      span.textContent = w.text;
+      words.appendChild(span);
+    }
+    block.appendChild(words);
+    document.getElementById('page-inner').appendChild(block);
+  }
+  function renderPage(){
+    const inner = document.getElementById('page-inner');
+    inner.innerHTML = '';
+    // Walk words in [pageStart, pageEnd). Group:
+    //   - surah headers: when surah changes
+    //   - bismillah blocks: when the first 4 words of a surah (except 1 and 9) are Bismillah
+    //   - verse markers: AFTER the last word of each ayah (not before the first)
+    let lastSurah = null;
+    let ayahEndIdx = -1;  // index of the last word of the current ayah
+    let ayahNum = null;
+    let isFirstSurah = true;
+    // Pre-compute which words are Bismillah runs at the start of each surah
+    function isBismillahRun(s, e){
+      if(e - s !== 4) return false;
+      for(let i = s; i < e; i++){
+        if(refWords[i].ayah !== 'bismillah') return false;
+      }
+      return true;
+    }
+    for(let i = pageStart; i < pageEnd; i++){
+      const w = refWords[i];
+      // === Surah transition ===
+      // Only emit the surah header / bismillah block when this is the
+      // ACTUAL first word of the surah in the global refWords flow
+      // (i.e., the previous word in the global flow is from a different
+      // surah, or we're at the very start of refWords). Without this
+      // check, every page that contains a new surah's first word would
+      // re-emit the header — so a 10-page surah would show the title
+      // 10 times. We want it ONCE, at the start of the surah.
+      const isActualSurahStart = (i === 0) || (refWords[i-1].surah !== w.surah);
+      if(isActualSurahStart){
+        // Close out the previous ayah's marker (if any)
+        if(ayahNum !== null && lastSurah !== null){
+          // (handled at ayah-end below)
+        }
+        ayahNum = null;
+        // Check if the next 4 words are Bismillah (for surahs 2-114)
+        // If yes, emit surah header first, THEN bismillah block
+        if(isBismillahRun(i, Math.min(i+4, refWords.length))){
+          emitSurahHeader(w.surah, isFirstSurah);
+          isFirstSurah = false;
+          emitBismillahBlock(i, i+4);
+          lastSurah = w.surah;
+          // Skip the 4 Bismillah words in the regular word loop — they're
+          // already rendered inside the bismillah block.
+          // We need to advance the verse-marker for the Bismillah "ayah"
+          // AFTER the bismillah block, so the next word in DOM is the
+          // marker for the Bismillah.
+          // The bismillah ayah is "ayah 1" of the surah, so marker is "1".
+          // Per the user's request, the Bismillah's marker should appear
+          // AFTER the Bismillah words (i.e. just before ayah 2).
+          // We'll emit it after the bismillah block, before the next word.
+          const m = document.createElement('span');
+          m.className = 'verse-marker';
+          m.textContent = '1';
+          document.getElementById('page-inner').appendChild(m);
+          // Now skip past the 4 Bismillah words
+          i += 3;  // (i++ in the loop will move to i+4)
+          continue;
+        }
+        // For surah 1 (Al-Fatihah): the first 4 words ARE its ayah 1
+        // (Bismillah). Don't emit a bismillah block. Just emit the surah
+        // header and let the word loop render the Bismillah as the first
+        // 4 words of ayah 1.
+        emitSurahHeader(w.surah, isFirstSurah);
+        isFirstSurah = false;
+        lastSurah = w.surah;
+      }
+      // === Detect end of current ayah (for verse marker) ===
+      // We emit the verse marker AFTER the last word of an ayah, not
+      // before. So we need to peek ahead: if the next word is in a
+      // different ayah (or there is no next word), this word is the
+      // last word of the current ayah.
+      const isLastWordOfAyah = (i === pageEnd - 1) ||
+        (refWords[i+1].ayah !== w.ayah) ||
+        (refWords[i+1].surah !== w.surah);
+      // === Emit the word ===
+      const span = document.createElement('span');
+      span.className = 'word';
+      // Bismillah words: rendered inside the bismillah block, so they
+      // shouldn't reach here for surahs 2-114. But Al-Fatihah's
+      // ayah 1 IS Bismillah and is NOT in a bismillah block — it
+      // gets the regular bismillah color.
+      if(w.ayah === 'bismillah' && w.surah === 1) span.classList.add('bismillah');
+      if(i < pointer) span.classList.add('past');
+      else if(i === pointer) span.classList.add('now');
+      else span.classList.add('future');
+      span.textContent = w.text;
+      // CRITICAL: link this DOM element back to the refWord so the
+      // matcher can highlight it. Without this, applyMatch and
+      // highlightCurrent silently fail because refWords[i].el is
+      // undefined. Also ensure .norm is set (matcher needs it).
+      w.el = span;
+      w.norm = w.norm || normalize(w.text);
+      inner.appendChild(span);
+      // === If this is the last word of the ayah, emit the verse marker ===
+      if(isLastWordOfAyah && w.ayah !== 'bismillah'){
+        const m = document.createElement('span');
+        m.className = 'verse-marker';
+        m.textContent = w.ayah;
+        inner.appendChild(m);
+      }
+    }
+    // Update the page info display
+    updateStats();
+  }
+
+  function updateStats(){
+    // Show the current mushaf page (page X of Y) + the surah at the
+    // top of the visible page slice
+    const pageNum = Math.floor(pageStart / PAGE_SIZE) + 1;
+    const totalPages = Math.ceil(refWords.length / PAGE_SIZE);
+    const firstWord = refWords[pageStart] || refWords[0];
+    if(!firstWord) return;
+    const meta = SURAH_META.find(s => s.num === firstWord.surah);
+    const surahLabel = meta ? meta.translit + ' (' + firstWord.surah + '/114)' : 'Surah ?';
+    const el = document.getElementById('pageInfo');
+    if(el) el.textContent = 'Page ' + pageNum + ' of ' + totalPages + '  ·  ' + surahLabel;
+  }
+
+  function maybePaginate(){
+    // If pointer is within PAGE_KEEP_AHEAD of pageEnd, extend the page
+    if(pointer >= pageEnd - PAGE_KEEP_AHEAD){
+      pageEnd = Math.min(pointer + PAGE_KEEP_AHEAD, refWords.length);
+    }
+    // If pointer is more than PAGE_KEEP_BEHIND past pageStart, advance pageStart
+    if(pointer > pageStart + PAGE_KEEP_BEHIND){
+      pageStart = pointer - PAGE_KEEP_BEHIND;
+    }
+  }
+
+  // ====== Controls ======
+  function advance(n){
+    pointer = Math.min(pointer + n, refWords.length - 1);
+    maybePaginate();
+    renderPage();
+  }
+  function goTo(idx){
+    // Center the page slice on the word at idx
+    pointer = Math.max(0, Math.min(idx, refWords.length - 1));
+    pageStart = Math.max(0, pointer - 10);
+    pageEnd   = Math.min(refWords.length, pageStart + PAGE_SIZE);
+    renderPage();
+  }
+  function prevPage(){
+    // Flip to the previous page (move slice BACKWARD by PAGE_SIZE)
+    const pageNum = Math.floor(pageStart / PAGE_SIZE);
+    if(pageNum === 0) return;  // already at first page
+    pageStart = (pageNum - 1) * PAGE_SIZE;
+    pageEnd   = Math.min(refWords.length, pageStart + PAGE_SIZE);
+    renderPage();
+  }
+  function nextPage(){
+    // Flip to the next page (move slice FORWARD by PAGE_SIZE)
+    const pageNum = Math.floor(pageStart / PAGE_SIZE);
+    const totalPages = Math.ceil(refWords.length / PAGE_SIZE);
+    if(pageNum >= totalPages - 1) return;  // already at last page
+    pageStart = (pageNum + 1) * PAGE_SIZE;
+    pageEnd   = Math.min(refWords.length, pageStart + PAGE_SIZE);
+    renderPage();
+  }
+  function reset(){
+    // Reset to the very first page (Al-Fatihah start)
+    pointer = 0;
+    pageStart = 0;
+    pageEnd   = Math.min(refWords.length, PAGE_SIZE);
+    renderPage();
+  }
+
+  document.getElementById('prevPageBtn').addEventListener('click', prevPage);
+  document.getElementById('nextPageBtn').addEventListener('click', nextPage);
+
+  // === THEME SWITCHER ===
+  const settingsBtn = document.getElementById('settingsBtn');
+  const settingsMenu = document.getElementById('settingsMenu');
+  settingsBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    settingsMenu.classList.toggle('open');
+  });
+  document.addEventListener('click', (e) => {
+    if(!settingsMenu.contains(e.target) && e.target !== settingsBtn){
+      settingsMenu.classList.remove('open');
+    }
+  });
+  function setTheme(themeName){
+    document.body.classList.remove('theme-dark','theme-light','theme-sepia','theme-royal');
+    document.body.classList.add('theme-' + themeName);
+    try{ localStorage.setItem('hifzapp-theme', themeName); }catch(e){}
+    document.querySelectorAll('.theme-option').forEach(o => {
+      o.classList.toggle('active', o.dataset.theme === themeName);
+    });
+  }
+  document.querySelectorAll('.theme-option').forEach(o => {
+    o.addEventListener('click', () => {
+      setTheme(o.dataset.theme);
+      settingsMenu.classList.remove('open');
+    });
+  });
+  // Load saved theme
+  let _savedTheme = null;
+  try{ _savedTheme = localStorage.getItem('hifzapp-theme'); }catch(e){}
+  if(_savedTheme && ['dark','light','sepia','royal'].includes(_savedTheme)){
+    setTheme(_savedTheme);
+  } else {
+    // First visit — check system preference
+    const _prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+    setTheme(_prefersLight ? 'light' : 'dark');
+  }
+
+  // ==== SURAH PICKER ====
+  function renderSurahGrid(){
+    const grid = document.getElementById('surahGrid');
+    if(!grid) return;
+    grid.innerHTML = '';
+    for(const s of SURAH_META){
+      const card = document.createElement('div');
+      card.className = 'surah-card';
+      card.dataset.num = s.num;
+      card.innerHTML = '<div class="num">Surah ' + s.num + '</div>' +
+                       '<div class="ar-name">' + s.name + '</div>' +
+                       '<div class="translit">' + s.translit + ' &middot; ' + s.meaning + '</div>' +
+                       '<div class="ayahs">' + s.verses + ' ayah' + (s.verses === 1 ? '' : 's') + '</div>';
+      card.addEventListener('click', () => selectSurah(s.num, card));
+      grid.appendChild(card);
+    }
+  }
+  function selectSurah(num, cardEl){
+    if(!window.SURAH_PHONEMES){ return; }
+    // Mark active card
+    document.querySelectorAll('.surah-card').forEach(c => c.classList.toggle('active', c === cardEl));
+    // Find the surah's first word in refWords
+    const startIdx = refWords.findIndex(w => w.surah === num);
+    if(startIdx < 0) return;
+    // MUSHAF-STYLE NAVIGATION: find the PAGE that contains the
+    // surah's start word. The surah title will be rendered at
+    // its natural position in that page (which may be middle
+    // of the page, NOT at the top). The user flips pages to
+    // read the rest of the surah.
+    const pageNum = Math.floor(startIdx / PAGE_SIZE);
+    pageStart = pageNum * PAGE_SIZE;
+    pageEnd   = Math.min(refWords.length, pageStart + PAGE_SIZE);
+    // Reset the pointer to the TOP of the visible page so the
+    // user can recite from the start of what's visible. This way
+    // they see the .now word highlighted immediately.
+    pointer = pageStart;
+    // Reset stats for the new surah
+    stats = {correct:0, mistake:0, unclear:0};
+    if(typeof updateStatsUI === 'function') updateStatsUI();
+    renderPage();
+  }
+  // Search filter
+  const searchInput = document.getElementById('searchInput');
+  if(searchInput){
+    searchInput.addEventListener('input', (e) => {
+      const q = e.target.value.toLowerCase().trim();
+      document.querySelectorAll('.surah-card').forEach(card => {
+        const num = parseInt(card.dataset.num, 10);
+        const meta = SURAH_META.find(s => s.num === num);
+        if(!meta) return;
+        const hay = (num + ' ' + meta.translit + ' ' + meta.name + ' ' + meta.meaning).toLowerCase();
+        card.classList.toggle('hidden', q && !hay.includes(q));
       });
     });
-    // Append the verse label AFTER all words so it renders on the LEFT
-    // (visually) in this RTL layout.
-    verse.appendChild(label);
-    ayahContainer.appendChild(verse);
-    ayahEndIndex.push(wordCounter);
-  });
-}
+  }
+  // Reset button — clear search + clear active card + scroll to top
+  const resetBtn = document.getElementById('resetBtn');
+  if(resetBtn){
+    resetBtn.addEventListener('click', () => {
+      if(searchInput) searchInput.value = '';
+      document.querySelectorAll('.surah-card').forEach(c => {
+        c.classList.remove('hidden');
+        c.classList.remove('active');
+      });
+      window.scrollTo({top:0, behavior:'smooth'});
+    });
+  }
 
-function updateStats(){
-  document.getElementById('statCorrect').textContent = stats.correct;
-  document.getElementById('statMistake').textContent = stats.mistake;
-  document.getElementById('statUnclear').textContent = stats.unclear;
-  document.getElementById('statPointer').textContent = `${pointer} / ${refWords.length}`;
-}
+  // Render the surah grid
+  renderSurahGrid();
 
-function highlightCurrent(){
-  // PERFORMANCE: bail if pointer has not changed. The onresult handler
-  // calls this on every interim tick but most ticks the pointer is
-  // the same. The old code did an O(all words) re-class even when
-  // nothing changed, which is what made long surahs visibly lag the
-  // user by a line or two.
-  if(pointer === _lastHighlightedPointer) {
-    // Still do the scroll check in case the user scrolled manually.
-    if(pointer < refWords.length){
-      const el = refWords[pointer].el;
-      const _container = document.getElementById('ayahContainer');
-      if(_container){
-        const _cRect = _container.getBoundingClientRect();
-        const _eRect = el.getBoundingClientRect();
-        const _padding = 40;
-        if(_eRect.top < _cRect.top + _padding || _eRect.bottom > _cRect.bottom - _padding){
-          // See main path for the strategy + page-scroll guard.
-          const _blockMode = _container.classList.contains('script-hidden') ? 'end' : 'nearest';
-          const _pageY = window.scrollY;
-          el.scrollIntoView({behavior:'auto', block: _blockMode});
-          if(window.scrollY !== _pageY) window.scrollTo(0, _pageY);
+  // ==== RECITATION: stats + matcher + speech recognition ====
+  let stats = {correct:0, mistake:0, unclear:0};
+  function updateStatsUI(){
+    const statCorrect = document.getElementById('statCorrect');
+    const statMistake = document.getElementById('statMistake');
+    const statUnclear = document.getElementById('statUnclear');
+    const statPointer = document.getElementById('statPointer');
+    if(statCorrect) statCorrect.textContent = stats.correct;
+    if(statMistake) statMistake.textContent = stats.mistake;
+    if(statUnclear) statUnclear.textContent = stats.unclear;
+    if(statPointer) statPointer.textContent = (pointer + 1) + ' / ' + refWords.length;
+  }
+
+  // ==== MATCHER: ported from index.html v47.5 (with past-region fix) ====
+  function levenshtein(a, b){
+    const m = a.length, n = b.length;
+    if(!m) return n; if(!n) return m;
+    const dp = Array.from({length:m+1}, () => new Array(n+1).fill(0));
+    for(let i=0;i<=m;i++) dp[i][0] = i;
+    for(let j=0;j<=n;j++) dp[0][j] = j;
+    for(let i=1;i<=m;i++){
+      for(let j=1;j<=n;j++){
+        dp[i][j] = a[i-1] === b[j-1]
+          ? dp[i-1][j-1]
+          : 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
+      }
+    }
+    return dp[m][n];
+  }
+  // === PRODUCTION'S MATCHER (copied verbatim from production index.html v38.0) ===
+  // This is the exact matcher logic that works perfectly on the live
+  // production website. It uses:
+  //   - first-word bias (lenient match for the first word)
+  //   - near-window search (pointer to pointer + NEAR_WINDOW)
+  //   - far-window search (only after RESYNC_THRESHOLD misses)
+  //   - no match → log + don't advance pointer
+  // Plus the applyMatch function that marks words as correct/unclear.
+  const NEAR_WINDOW = 8;        // production's value
+  const FAR_WINDOW = 8;         // production's value
+  const RESYNC_THRESHOLD = 6;   // production's value
+  const LEVENSHTEIN_RATIO = 0.30;
+  const PHONEME_LEVENSHTEIN_RATIO = 0.40;
+  let _maxPointerReached = 0;
+  let _lastHighlightedPointer = -1;
+  let _prevPastEnd = 0;
+  let consecutiveMisses = 0;
+  let committedWordCount = 0;
+  let _pendingFullText = '';
+  let _pendingWords = [];
+  let _pendingReProcess = false;
+  let _pendingFinalized = '';  // (legacy, unused since v3.24)
+  // CRITICAL: levRatio was missing! This caused the matcher to crash
+  // when trying to fuzzy-match "العالمين" (and any word that didn't
+  // exact-match or substring-match). Production has this function —
+  // we forgot to copy it over.
+  function levRatio(a, b){
+    if(!a || !b) return 0;
+    if(a === b) return 1;
+    const la = a.length, lb = b.length;
+    if(!la || !lb) return 0;
+    // Levenshtein distance
+    const dp = Array.from({length: la+1}, () => new Array(lb+1).fill(0));
+    for(let i = 0; i <= la; i++) dp[i][0] = i;
+    for(let j = 0; j <= lb; j++) dp[0][j] = j;
+    for(let i = 1; i <= la; i++){
+      for(let j = 1; j <= lb; j++){
+        const cost = a[i-1] === b[j-1] ? 0 : 1;
+        dp[i][j] = Math.min(
+          dp[i-1][j] + 1,      // deletion
+          dp[i][j-1] + 1,      // insertion
+          dp[i-1][j-1] + cost  // substitution
+        );
+      }
+    }
+    const dist = dp[la][lb];
+    return 1 - (dist / Math.max(la, lb));
+  }
+  function isFuzzyMatch(heardNorm, expectedNorm, expectedPhoneme, lenientRatio){
+    if(!heardNorm || !expectedNorm) return {matched:false, kind:'none'};
+    lenientRatio = lenientRatio || LEVENSHTEIN_RATIO;
+    // 1) exact match
+    if(heardNorm === expectedNorm) return {matched:true, kind:'text', ratio:1};
+    // 2) substring — Chrome often merges "ال" + next word
+    const minLen = Math.min(heardNorm.length, expectedNorm.length);
+    const maxLen = Math.max(heardNorm.length, expectedNorm.length);
+    if(minLen >= 3){
+      if(heardNorm.includes(expectedNorm) || expectedNorm.includes(heardNorm)){
+        return {matched:true, kind:'substring', ratio: minLen/maxLen};
+      }
+    }
+    // 3) text Levenshtein ratio
+    const textRatio = levRatio(heardNorm, expectedNorm);
+    if(textRatio >= 1 - lenientRatio){
+      return {matched:true, kind:'text', ratio:textRatio};
+    }
+    // 4) phoneme fallback
+    if(expectedPhoneme){
+      const heardPh = phonemizeArabic(heardNorm);
+      if(heardPh && heardPh.length >= 3 && expectedPhoneme.length >= 3){
+        const phRatio = levRatio(heardPh, expectedPhoneme);
+        if(phRatio >= 1 - PHONEME_LEVENSHTEIN_RATIO){
+          return {matched:true, kind:'phoneme', ratio:phRatio};
         }
       }
     }
-    return;
+    return {matched:false, kind:'none'};
   }
-
-  // INCREMENTAL re-class: only touch the DOM elements that actually
-  // changed. Old approach: querySelectorAll all 3500 .word elements,
-  // remove all .now/.past/.future, then re-add them. That is 7000
-  // DOM operations per pointer change and it was the bottleneck
-  // causing the visible lag.
-  //
-  // With _maxPointerReached the .past class only ever grows
-  // monotonically. With _lastHighlightedPointer we know which word
-  // used to have .now. So:
-  //   1. Remove .now from the old .now word
-  //   2. Add .past to the newly-reached words
-  //   3. Add .now to the new current word
-  // Total: O(changed) DOM ops, typically 1-3 elements.
-  if(_lastHighlightedPointer >= 0 && _lastHighlightedPointer < refWords.length){
-    refWords[_lastHighlightedPointer].el.classList.remove("now");
+  function findMatch(heardNorm, from, to){
+    const end = Math.min(refWords.length, to);
+    for(let i = from; i < end; i++){
+      const m = isFuzzyMatch(heardNorm, refWords[i].norm, refWords[i].phoneme);
+      if(m.matched) return {idx:i, match:m};
+    }
+    return {idx:-1, match:{matched:false, kind:'none'}};
   }
-  for(let i = _prevPastEnd; i < _maxPointerReached; i++){
-    const w = refWords[i].el;
-    w.classList.add("past");
-    w.classList.remove("future");  // no longer a candidate for hide-script blur
-  }
-  if(pointer < refWords.length){
-    const w = refWords[pointer].el;
-    w.classList.add("now");
-    w.classList.remove("future");  // .now has its own (hidden) style under script-hidden
-  }
-
-  if(pointer > _maxPointerReached) _maxPointerReached = pointer;
-  _prevPastEnd = _maxPointerReached;
-  _lastHighlightedPointer = pointer;
-  if(pointer < refWords.length){
-    const el = refWords[pointer].el;
-    // Only scroll if the current word is OUTSIDE the visible area of
-    // the ayah container. Use instant ('auto') scroll rather than
-    // 'smooth' — smooth scrolling re-triggers on every Chrome interim
-    // tick and visibly shakes the page on long surahs.
-    const _container = document.getElementById('ayahContainer');
-    if(_container){
-      const _cRect = _container.getBoundingClientRect();
-      const _eRect = el.getBoundingClientRect();
-      const _padding = 40;  // keep some breathing room around the word
-      if(_eRect.top < _cRect.top + _padding || _eRect.bottom > _cRect.bottom - _padding){
-        // SCROLL STRATEGY:
-        //   - Hide Script ON  -> block: 'end'. Current word sits at
-        //     the bottom of the container, all past (recited) words
-        //     stay visible above it, and the first word is never
-        //     scrolled out of view as soon as the pointer advances.
-        //   - Hide Script OFF -> block: 'nearest'. Minimum scroll
-        //     disruption; current word stays in view with context.
-        // The old block:'center' centered the current word and pushed
-        // the first word above the visible area as soon as the pointer
-        // left the first line.
-        const _blockMode = _container.classList.contains('script-hidden') ? 'end' : 'nearest';
-        // PAGE-SCROLL GUARD: scrollIntoView walks every scrollable
-        // ancestor including the document, so on the first interim
-        // tick it can yank the whole page to the top. Snapshot and
-        // restore window.scrollY so only the container scrolls.
-        const _pageY = window.scrollY;
-        el.scrollIntoView({behavior:'auto', block: _blockMode});
-        if(window.scrollY !== _pageY) window.scrollTo(0, _pageY);
+  // PRODUCTION'S applyMatch (always marks skipped words as unclear,
+  // no guard). This is critical for the re-derivation to work
+  // correctly — production's _runReProcess only clears status from
+  // _maxPointerReached onwards, so words below _maxPointerReached
+  // keep their status. The re-derivation can safely re-mark
+  // skipped words as unclear because they're between the current
+  // pointer and the match (which is always <= pointer + 3).
+  function applyMatch(matchAt, matchInfo, heardWord){
+    for(let i = pointer; i < matchAt; i++){
+      const w = refWords[i];
+      if(w.el){
+        w.el.dataset.status = 'unclear';
+        stats.unclear++;
       }
     }
+    if(refWords[matchAt] && refWords[matchAt].el){
+      refWords[matchAt].el.dataset.status = 'correct';
+      stats.correct++;
+    }
+    pointer = matchAt + 1;
+    consecutiveMisses = 0;
   }
-}
+  // PRODUCTION'S processNewWord (copied verbatim + adapted for pageStart)
+  function processNewWord(rawWord){
+    const norm = normalize(rawWord);
+    if(!norm) return;
+    if(pointer >= refWords.length) return;
+    // DEBUG: show what we're about to try
+    console.log(`[matcher] try: pointer=${pointer} word="${rawWord}" norm="${norm}" target="${refWords[pointer] ? refWords[pointer].norm : 'OOB'}" target.text="${refWords[pointer] ? refWords[pointer].text : 'OOB'}"`);
+    // STUCK-WORD DEBUG: if pointer is at العالمين (idx 7), show detailed info
+    if(pointer === 7 && refWords[pointer] && refWords[pointer].norm === 'العلمين'){
+      const stuckEl = document.getElementById('mdStuck');
+      if(stuckEl) stuckEl.textContent = `STUCK: trying "${rawWord}" (norm:"${norm}") at idx 7 — el=${refWords[pointer].el ? 'YES' : 'NO'} class="${refWords[pointer].el ? refWords[pointer].el.className : 'N/A'}"`;
+    }
+    const lastAtt = document.getElementById('mdLastAttempt');
+    if(lastAtt) lastAtt.textContent = `last: p=${pointer} word="${rawWord}" (norm:"${norm}") target="${refWords[pointer] ? refWords[pointer].norm : 'OOB'}"`;
 
-function toArabicDigits(n){
-  const map = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
-  return String(n).split('').map(d => map[+d] ?? d).join('');
-}
-
-// =========================================================================
-// SPEECH RECOGNITION
-// =========================================================================
-function getRecognitionCtor(){
-  return window.SpeechRecognition || window.webkitSpeechRecognition || null;
-}
-
-async function startListening(){
-  const Ctor = getRecognitionCtor();
-  if(!Ctor){
-    statusEl.textContent = "This browser doesn't support live speech recognition (need Chrome/Edge desktop or Android).";
-    statusEl.classList.add('warn');
-    return;
-  }
-  if(!refWords.length){
-    statusEl.textContent = "Pick a surah first (or wait for it to finish loading).";
-    statusEl.classList.add('warn');
-    return;
-  }
-
-  recognition = new Ctor();
-  // Try multiple Arabic variants in order. The first that actually
-  // produces a non-empty result wins. Different Android builds ship
-  // different Arabic packs (ar, ar-SA, ar-EG), so this beats guessing.
-  var _envLangSel = document.getElementById('envLangSel');
-  recognition.lang = _envLangSel ? _envLangSel.value : 'ar';
-  if(window.__envLog) window.__envLog('START', 'language=' + recognition.lang);
-  // Use SINGLE-SHOT mode and chain sessions manually via onend. Android
-  // Chrome's continuous=true is broken (sits ~5s, fires NOMATCH, ends).
-  // The test button (which uses continuous=false) works perfectly on
-  // the same phone, so we run the main app the same way and rely on
-  // the onend → restart loop to keep listening.
-  // CRITICAL: interimResults must be FALSE on Android Chrome. With
-  // interimResults=true, the browser suppresses the final result
-  // delivery and we never get the transcript. mobile.html confirmed
-  // this — same recognition config except interimResults=false works.
-  recognition.continuous = false;
-  recognition.interimResults = false;
-  recognition.maxAlternatives = 1;
-
-  // Diagnostic: wire every recognition event into __envLog so we can see
-  // exactly what the browser is doing on Android. Each line shows the time
-  // and the event name. RESULT lines also include the transcript so we
-  // can confirm the matcher is getting data.
-  // ALSO: turn the mic button bright green with "SPEAK NOW!" label
-  // when the mic is actively capturing audio, so the user knows
-  // exactly when to speak. Without this indicator, the user
-  // doesn't know when the 5-second audio capture window is open
-  // and ends up silent, getting NOMATCH on every session.
-  ['onstart','onaudiostart','onaudioend','onspeechstart','onspeechend','onnomatch','onsoundstart','onsoundend'].forEach(ev => {
-    recognition[ev] = (e) => {
-      var tag = ev.slice(2).toUpperCase();
-      if(window.__envLog) window.__envLog(tag, 'fired');
-      var _mic = document.getElementById('micBtn');
-      if(_mic){
-        if(ev === 'onaudiostart' || ev === 'onspeechstart' || ev === 'onsoundstart'){
-          _mic.classList.add('mic-armed');
-          if(micLabel) micLabel.textContent = '🎤 SPEAK NOW!';
-        } else if(ev === 'onaudioend' || ev === 'onspeechend' || ev === 'onend'){
-          _mic.classList.remove('mic-armed');
-          if(micLabel) micLabel.textContent = 'Listening… tap to stop';
+    // FIRST-WORD BIAS: when pointer is at pageStart (the very
+    // first word of the current page) AND no recent misses,
+    // be lenient. This handles Chrome splitting the first
+    // word weirdly. After the first word, this doesn't trigger.
+    if(pointer === pageStart && consecutiveMisses === 0){
+      const head = isFuzzyMatch(norm, refWords[pointer].norm, refWords[pointer].phoneme, 0.40);
+      if(head.matched){
+        applyMatch(pointer, head, rawWord);
+        if(typeof updateMatcherDebug === 'function'){
+          updateMatcherDebug(_pendingFullText, rawWord, 'match(bias)', `at idx ${pointer}`);
+          traceMatch(rawWord, 'match(bias)', `at idx ${pointer}`);
         }
-      }
-    };
-  });
-
-  recognition.onresult = (event) => {
-    // SIMPLIFIED: same approach as mobile.html which works on Android.
-    // Just take the LATEST result's transcript and process it directly.
-    // No rAF, no accumulated text, no re-derivation. One pass, one result.
-    let txt = '';
-    for(let i = event.resultIndex; i < event.results.length; i++){
-      const res = event.results[i];
-      txt += res[0].transcript + ' ';
-    }
-    txt = txt.trim();
-    if(window.__envLog){
-      window.__envLog('RESULT', event.results.length + ' items | "' + (txt.length > 80 ? txt.slice(0,80) + '…' : txt) + '"');
-    }
-    if(txt){
-      // Show transcript
-      if(transcriptBox){ transcriptBox.classList.remove('hidden'); transcriptText.textContent = txt; }
-      if(typeof confidences !== 'undefined' && event.results[event.results.length-1][0].confidence > 0){
-        if(!confidences) confidences = [];
-        confidences.push(event.results[event.results.length-1][0].confidence);
-      }
-      // Split into words and process each one
-      const words = txt.split(/\s+/);
-      // Reset state for clean re-derivation
-      pointer = 0;
-      _lastHighlightedPointer = -1;
-      _maxPointerReached = 0;
-      _prevPastEnd = 0;
-      consecutiveMisses = 0;
-      // Use the SIMPLE matcher from mobile-simple.html (works on Android).
-      // The complex processNewWord matcher was stalling on Android.
-      if(typeof _simpleMatch === 'function'){
-        _simpleMatch(txt);
+        return;
       } else {
-        // Fallback to old matcher if _simpleMatch isn't loaded
-        for(let i = 0; i < words.length; i++){
-          processNewWord(words[i]);
-        }
+        if(typeof traceMatch === 'function') traceMatch(rawWord, 'bias-fail', `trying "${refWords[pointer].norm}"`);
       }
-      committedWordCount = words.length;
-      highlightCurrent();
-      if(typeof renderDebugPanel === 'function') renderDebugPanel();
     }
-  };
 
-  // rAF helpers removed — we process synchronously on each result, same
-  // as mobile.html which works on Android. The old throttled version
-  // was over-engineered and likely contributed to the Android failures.
-  function _scheduleReProcess(){ /* no-op: direct processing now */ }
-  function _runReProcess(){ /* no-op: direct processing now */ }
+    // 1) near-window search (production's tight lookahead: <= 3)
+    const near = findMatch(norm, pointer, pointer + NEAR_WINDOW);
+    if(near.idx !== -1 && (near.idx - pointer) <= 3){
+      applyMatch(near.idx, near.match, rawWord);
+      if(typeof updateMatcherDebug === 'function'){
+        updateMatcherDebug(_pendingFullText, rawWord, 'match', `at idx ${near.idx} (delta=${near.idx-pointer})`);
+        traceMatch(rawWord, 'match', `at idx ${near.idx} (delta=${near.idx-pointer})`);
+      }
+      return;
+    } else if(near.idx !== -1){
+      // Found a match but it's too far (delta > 3)
+      if(typeof traceMatch === 'function') traceMatch(rawWord, 'too-far', `near match at ${near.idx} but delta=${near.idx-pointer} > 3`);
+    } else {
+      if(typeof traceMatch === 'function') traceMatch(rawWord, 'no-near', `nothing in [${pointer}, ${pointer+NEAR_WINDOW})`);
+    }
 
+    // 2) far-window search (only after RESYNC_THRESHOLD misses)
+    consecutiveMisses++;
+    if(consecutiveMisses >= RESYNC_THRESHOLD){
+      const far = findMatch(norm, pointer + NEAR_WINDOW, pointer + FAR_WINDOW);
+      if(far.idx !== -1){
+        applyMatch(far.idx, far.match, rawWord);
+        if(typeof updateMatcherDebug === 'function'){
+          updateMatcherDebug(_pendingFullText, rawWord, 'match(far)', `at idx ${far.idx} (delta=${far.idx-pointer})`);
+          traceMatch(rawWord, 'match(far)', `at idx ${far.idx} (delta=${far.idx-pointer})`);
+        }
+        return;
+      }
+    }
+
+    // 3) no match — don't advance, don't mark
+    if(typeof updateMatcherDebug === 'function'){
+      updateMatcherDebug(_pendingFullText, rawWord, 'miss', `consecutiveMisses=${consecutiveMisses}`);
+      traceMatch(rawWord, 'miss', `consecutiveMisses=${consecutiveMisses}`);
+    }
+  }
+  // === rAF-throttled re-processing (production's pattern) ===
+  function _scheduleReProcess(){
+    if(_pendingReProcess) return;
+    _pendingReProcess = true;
+    requestAnimationFrame(_runReProcess);
+  }
   function _runReProcess(){
     _pendingReProcess = false;
-    if(!refWords.length) return;  // surah not loaded yet
+    if(!refWords.length) return;
     const words = _pendingWords;
-
-    // Reset dataset.status ONLY for words we haven't reached yet
-    // (_maxPointerReached and beyond). For words below _maxPointerReached,
-    // the status is already finalized from previous ticks and we must NOT
-    // touch it. Resetting and re-setting 'correct' on every tick would
-    // toggle the CSS class off and on, and the background-color/color
-    // transition would animate that toggle, making the highlighted
-    // recited words visibly blink while the user is actively speaking.
-    // (When the user pauses, no new ticks fire, no toggle, no blink.)
+    // Reset status ONLY for words at _maxPointerReached and beyond
     for(let i = _maxPointerReached; i < refWords.length; i++){
-      refWords[i].el.dataset.status = '';
+      if(refWords[i] && refWords[i].el){
+        refWords[i].el.dataset.status = '';
+      }
     }
-    pointer = 0;
+    pointer = pageStart;
     _lastHighlightedPointer = -1;
-    _maxPointerReached = 0;
-    _prevPastEnd = 0;
+    _maxPointerReached = pageStart;
+    _prevPastEnd = pageStart;
     consecutiveMisses = 0;
-    debugLog = [];
-
+    stats = {correct:0, mistake:0, unclear:0};
     // Re-process every word
     for(let i = 0; i < words.length; i++){
       processNewWord(words[i]);
     }
     committedWordCount = words.length;
     highlightCurrent();
-    // Count stats from the ACTUAL DOM state of refWords (not from
-    // processNewWord's per-call counter, which would double-count
-    // across rAF ticks). Each refWord has el.dataset.status = 'correct',
-    // 'mistake', 'unclear', or '' (unreached).
-    var newStats = {correct:0, mistake:0, unclear:0};
-    for(let i = 0; i < refWords.length; i++){
-      const s = refWords[i].el.dataset.status;
-      if(s === 'correct') newStats.correct++;
-      else if(s === 'mistake') newStats.mistake++;
-      else if(s === 'unclear') newStats.unclear++;
+    updateStatsUI();
+    // Page-flip if pointer moved out of current page
+    if(pointer >= pageEnd){
+      const newPageNum = Math.floor(pointer / PAGE_SIZE);
+      pageStart = newPageNum * PAGE_SIZE;
+      pageEnd   = Math.min(refWords.length, pageStart + PAGE_SIZE);
+      renderPage();
     }
-    stats = newStats;
-    renderDebugPanel();
-    updateStats();
+  }
+  // === COMPREHENSIVE debug logging ===
+  let _lastWordsLog = [];
+  let _traceLog = [];  // detailed trace of every matcher decision
+  function updateMatcherDebug(transcript, heardWord, matchResult, extra){
+    if(heardWord){
+      _lastWordsLog.push({word:heardWord, result:matchResult, time:Date.now(), extra:extra||''});
+      if(_lastWordsLog.length > 5) _lastWordsLog.shift();
+    }
+    const mdP = document.getElementById('mdPointer');
+    const mdC = document.getElementById('mdCurrent');
+    const mdTr = document.getElementById('mdTrace');
+    const mdL = document.getElementById('mdLastWords');
+    const mdT = document.getElementById('mdTranscript');
+    if(mdP){
+      const w = refWords[pointer];
+      const wTxt = w ? `text="${w.text}" norm="${w.norm || '?'}"` : '(end)';
+      mdP.textContent = `pointer: ${pointer} → ${wTxt}`;
+    }
+    if(mdC && refWords[pointer]){
+      const w = refWords[pointer];
+      const el = w.el;
+      const status = el ? (el.dataset.status || 'none') : 'no-el';
+      mdC.textContent = `refWords[${pointer}]: text="${w.text}" | norm="${w.norm||'?'}" | phoneme="${w.phoneme||'?'}" | status="${status}" | el=${el?'yes':'NO'}`;
+    }
+    if(mdTr){
+      mdTr.innerHTML = _traceLog.slice(-15).map(t => {
+        let color = 'var(--text-dim)';
+        if(t.result === 'match') color = 'var(--primary)';
+        else if(t.result === 'match(bias)') color = 'var(--primary)';
+        else if(t.result === 'match(far)') color = '#5dade2';
+        else if(t.result === 'miss') color = '#e74c3c';
+        return `<div style="color:${color}">p=${t.pointer} "${t.word}" (norm:"${t.norm}") → ${t.result} ${t.extra||''}</div>`;
+      }).join('');
+    }
+    if(mdL){
+      mdL.innerHTML = _lastWordsLog.map(e => {
+        const color = e.result === 'match' ? 'var(--primary)' :
+                      e.result === 'skip'  ? 'var(--yellow)'  :
+                      e.result === 'miss'  ? '#e74c3c' : 'var(--text-dim)';
+        return `<span style="color:${color}">"${e.word}" [${e.result}]</span>`;
+      }).join(' · ');
+    }
+    if(mdT && transcript){
+      const words = transcript.split(/\s+/);
+      const display = words.map((w,i) => `<span style="color:${i===words.length-1?'var(--primary)':'var(--text-dim)'}">${i}:${w}</span>`).join(' ');
+      mdT.innerHTML = `transcript (${words.length} words): ${display}`;
+    }
+    if(typeof _pendingWords !== 'undefined'){
+      const mdP2 = document.getElementById('mdPending');
+      if(mdP2){
+        mdP2.textContent = `_pendingWords.length=${_pendingWords.length} | fullText.length=${transcript ? transcript.length : 0} | _pendingFinalized.length=${(_pendingFinalized||'').length}`;
+      }
+    }
+  }
+  function traceMatch(heardWord, result, extra){
+    _traceLog.push({
+      pointer: pointer,
+      word: heardWord,
+      norm: normalize(heardWord),
+      result: result,
+      extra: extra || '',
+      time: Date.now()
+    });
+    if(_traceLog.length > 30) _traceLog.shift();
   }
 
-  recognition.onerror = (e) => {
-    if(window.__envLog) window.__envLog('ERROR', e.error + (e.message ? ' — ' + e.message : ''));
-    // Show a clear status for every error so the user knows what's wrong.
-    if(e.error === 'no-speech'){
-      // Don't disable — Chrome's continuous mode just had a quiet moment.
-      // But on mobile, repeated no-speech often means Arabic pack missing
-      // or mic is not picking anything up. After 3 in a row, surface a hint.
-      noSpeechStreak = (noSpeechStreak || 0) + 1;
-      if(noSpeechStreak >= 3){
-        statusEl.textContent = 'No speech detected — speak louder, or check your phone\'s Arabic voice input is enabled (Settings → Languages → Arabic → Speech).';
-        statusEl.classList.add('warn');
+  // === highlightCurrent: incremental DOM updates (production's pattern) ===
+  function highlightCurrent(){
+    // DEBUG: show pointer and DOM state
+    const curEl = (pointer < refWords.length && refWords[pointer]) ? refWords[pointer].el : null;
+    console.log(`[highlight] pointer=${pointer} word="${curEl ? curEl.textContent : 'OOB'}" el=${curEl ? 'YES' : 'NO'} class="${curEl ? curEl.className : 'N/A'}" status="${curEl ? (curEl.dataset.status || 'none') : 'N/A'}"`);
+    if(pointer === _lastHighlightedPointer) return;
+    if(_lastHighlightedPointer >= 0 && _lastHighlightedPointer < refWords.length){
+      const oldEl = refWords[_lastHighlightedPointer] && refWords[_lastHighlightedPointer].el;
+      if(oldEl) oldEl.classList.remove('now');
+    }
+    for(let i = _prevPastEnd; i < _maxPointerReached; i++){
+      const w = refWords[i] && refWords[i].el;
+      if(w){
+        w.classList.add('past');
+        w.classList.remove('future');
       }
+    }
+    if(pointer < refWords.length){
+      const w = refWords[pointer] && refWords[pointer].el;
+      if(w){
+        w.classList.add('now');
+        w.classList.remove('future');
+      }
+    }
+    if(pointer > _maxPointerReached) _maxPointerReached = pointer;
+    _prevPastEnd = _maxPointerReached;
+    _lastHighlightedPointer = pointer;
+  }
+
+  // ==== SPEECH RECOGNITION ====
+  let recognition = null;
+  window.__hifzappSessionId = 0;
+  let listening = false;
+  const micBtn = document.getElementById('micBtn');
+  const micLabel = document.getElementById('micLabel');
+  const statusEl = document.getElementById('status');
+  function getRecognitionCtor(){
+    return window.SpeechRecognition || window.webkitSpeechRecognition || null;
+  }
+  function startRecognition(){
+    const Ctor = getRecognitionCtor();
+    if(!Ctor){
+      if(statusEl) statusEl.textContent = 'Speech recognition not supported in this browser.';
       return;
     }
-    noSpeechStreak = 0;
-    if(e.error === 'not-allowed' || e.error === 'audio-capture'){
-      statusEl.textContent = 'Mic error: ' + e.error + '. Check microphone permissions in your browser settings.';
-      statusEl.classList.add('warn');
-      listening = false;
-      micBtn.classList.remove('listening');
-      micLabel.textContent = 'Start reciting';
-    } else if(e.error === 'service-not-allowed'){
-      statusEl.textContent = 'Speech recognition service blocked. On Android Chrome: Settings → Site settings → Microphone, allow this site.';
-      statusEl.classList.add('warn');
-      listening = false;
-      micBtn.classList.remove('listening');
-      micLabel.textContent = 'Start reciting';
-    } else if(e.error === 'network'){
-      statusEl.textContent = 'Speech recognition needs internet — Chrome sends audio to Google\'s servers. Check your connection.';
-      statusEl.classList.add('warn');
-    } else {
-      statusEl.textContent = 'Recognition error: ' + e.error + '. Tap Start to retry.';
-      statusEl.classList.add('warn');
-    }
-  };
-
-  recognition.onend = () => {
-    if(window.__envLog) window.__envLog('END', 'recognition session ended');
-    // SIMPLIFIED: same approach as mobile.html which works on Android.
-    // Always auto-restart if still listening, with no fancy limits.
-    if(!listening) return;
-    setTimeout(() => {
-      if(!listening) return;
-      try {
-        var _sel2 = document.getElementById('envLangSel');
-        if(_sel2) recognition.lang = _sel2.value;
-        if(window.__envLog) window.__envLog('START', 'auto-restart after silence');
-        recognition.start();
+    recognition = new Ctor();
+    recognition.continuous = true;       // production's working setting
+    recognition.interimResults = true;   // production's working setting (rAF throttles)
+    recognition.maxAlternatives = 1;
+    recognition.lang = 'ar-SA';
+    // session id — used to ignore the auto-restart setTimeout if the user
+    // has already stopped the mic
+    const sessionId = ++window.__hifzappSessionId;
+    // PRODUCTION'S onresult: accumulate finalized + interim text,
+    // stash in module-scope, and schedule rAF-throttled re-processing.
+    // This is the exact pattern from the working production website.
+    // FIX v3.24: Use ONLY the latest full text from this event,
+    // not the accumulated _pendingFinalized. The accumulation was
+    // causing the matcher to see the SAME words repeatedly because
+    // _pendingFinalized persisted across session restarts, but the
+    // new session's interim results didn't include them. Now the
+    // matcher always sees the full text that was just recognized.
+    recognition.onresult = (event) => {
+      // Use ONLY event.results for this event — the browser gives us
+      // ALL results (final + interim) for the current recognition.
+      // This is the same approach production uses.
+      let fullText = '';
+      for(let i = 0; i < event.results.length; i++){
+        const res = event.results[i];
+        fullText += res[0].transcript + ' ';
       }
-      catch(e){
-        if(window.__envLog) window.__envLog('START', 'restart failed: ' + e.message);
-      }
-    }, 200);
-  };
-
-  // Diagnostic: surface context info so the user knows if mobile is blocking us.
-  const isInsecureContext = !window.isSecureContext;
-  if(isInsecureContext && location.protocol !== 'file:'){
-    statusEl.textContent = 'Note: this page is not on HTTPS — speech recognition may be limited. Mobile Chrome requires HTTPS.';
-    statusEl.classList.add('warn');
-  }
-
-  if(window.__envLog) window.__envLog('START', 'recognition.start() called (continuous=' + recognition.continuous + ', lang=' + recognition.lang + ')');
-  try{
-    recognition.start();
-    listening = true;
-    // Show the big "speak now" overlay on first start only
-    if(!window.__speakOverlayShown){
-      window.__speakOverlayShown = true;
-      showSpeakOverlay(true);
-    } else {
-      showSpeakOverlay(false);
-    }
-    window.__statsInitialized = false;  // reset cumulative stats for new session
-    micBtn.classList.add('listening');
-    micLabel.textContent = 'Listening… tap to stop';
-    statusEl.classList.remove('warn');
-    statusEl.textContent = 'Listening (Arabic) — recite naturally. The tracker follows along.';
-    noSpeechStreak = 0;
-    // Show a clear visual hint that the app is live even if Android's beep
-    // is hard to hear. The pulsing red dot in the mic button does this.
-  }catch(e){
-    statusEl.textContent = "Couldn't start microphone: " + (e.message || e.name) +
-      '. On Android Chrome, ensure microphone is allowed and Arabic voice input is enabled.';
-    statusEl.classList.add('warn');
-    return;
-  }
-
-  // Parallel MediaRecorder for playback (independent of recognition).
-  audioChunks = [];
-  navigator.mediaDevices.getUserMedia({audio:true}).then(stream => {
-    mediaStream = stream;
-    const mime = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : '';
-    mediaRecorder = mime ? new MediaRecorder(mediaStream, {mimeType:mime}) : new MediaRecorder(mediaStream);
-    mediaRecorder.ondataavailable = (e) => { if(e.data.size > 0) audioChunks.push(e.data); };
-    mediaRecorder.onstop = () => {
-      if(audioChunks.length){
-        const blob = new Blob(audioChunks, {type: mediaRecorder.mimeType || 'audio/webm'});
-        if(currentAudioURL) URL.revokeObjectURL(currentAudioURL);
-        currentAudioURL = URL.createObjectURL(blob);
-        playbackAudio.src = currentAudioURL;
-        playbackRow.classList.remove('hidden');
-        progressFill.style.width = '0%';
-        timeLabel.textContent = '0:00 / 0:00';
-        playBtn.textContent = '▶';
-      }
-      if(mediaStream) mediaStream.getTracks().forEach(t => t.stop());
+      fullText = fullText.trim();
+      if(!fullText) return;
+      // Update the transcript display
+      const transcriptBox = document.getElementById('transcriptBox');
+      const transcriptText = document.getElementById('transcriptText');
+      if(transcriptBox) transcriptBox.classList.remove('hidden');
+      if(transcriptText) transcriptText.textContent = fullText;
+      // Stash and schedule rAF re-process
+      _pendingFullText = fullText;
+      _pendingWords = fullText.split(/\s+/);
+      _scheduleReProcess();
     };
-    if(listening) mediaRecorder.start();
-  }).catch(() => { mediaRecorder = null; });
-}
-
-function stopListening(){
-  listening = false;
-  if(recognition){ try{ recognition.stop(); }catch(_){} }
-  if(mediaRecorder && mediaRecorder.state !== 'inactive'){ try{ mediaRecorder.stop(); }catch(_){} }
-  micBtn.classList.remove('listening');
-  micLabel.textContent = 'Start reciting';
-}
-
-function formatTime(t){
-  if(!isFinite(t) || t < 0) t = 0;
-  const m = Math.floor(t / 60);
-  const s = Math.floor(t % 60);
-  return `${m}:${String(s).padStart(2,'0')}`;
-}
-
-playbackAudio.addEventListener('timeupdate', () => {
-  const cur = playbackAudio.currentTime;
-  const dur = playbackAudio.duration || 0;
-  timeLabel.textContent = `${formatTime(cur)} / ${formatTime(dur)}`;
-  progressFill.style.width = dur ? `${(cur/dur)*100}%` : '0%';
-});
-playbackAudio.addEventListener('ended', () => { playBtn.textContent = '▶'; });
-playBtn.addEventListener('click', () => {
-  if(playbackAudio.paused){ playbackAudio.play(); playBtn.textContent = '❚❚'; }
-  else                    { playbackAudio.pause(); playBtn.textContent = '▶'; }
-});
-
-// =========================================================================
-// WIRE UP
-// =========================================================================
-micBtn.addEventListener('click', () => {
-  if(listening) stopListening();
-  else startListening();
-});
-document.getElementById('resetBtn').addEventListener('click', () => {
-  // Stop recognition first if it's still running (state may be inconsistent)
-  if(listening) stopListening();
-  // Reset recite-section state
-  resetState();
-  noSpeechStreak = 0;
-  // Clear the live transcript text (resetState only hides the box)
-  transcriptText.textContent = '';
-  transcriptConf.textContent = '';
-  transcriptBox.classList.add('hidden');
-  // Clear the search bar so the surah picker shows all 114 surahs again
-  searchInput.value = '';
-  // Deselect any active surah card + reset active surah
-  activeSurah = null;
-  document.querySelectorAll('.surah-card.active').forEach(c => c.classList.remove('active'));
-  // Hide the recite section so the user is back at the picker
-  step2.classList.add('hidden');
-  statusEl.textContent = 'Reset. Pick a surah above to start.';
-  // Re-render the full surah grid
-  renderSurahGrid('');
-  // Scroll back to the top so the user sees the cleared state
-  window.scrollTo({top: 0, behavior: 'smooth'});
-  // Force re-render of any stale UI
-  highlightCurrent();
-  renderDebugPanel();
-  updateStats();
-});
-// === Hide Script / Show Script toggle ===
-// Lets the user hide the visible mushaf text to test their memory.
-// When hidden: all words except the current pointer (.now) are blurred
-// and dimmed so the user sees roughly where they are but can't peek.
-const toggleScriptBtn = document.getElementById('toggleScriptBtn');
-let scriptHidden = false;
-toggleScriptBtn.addEventListener('click', () => {
-  scriptHidden = !scriptHidden;
-  ayahContainer.classList.toggle('script-hidden', scriptHidden);
-  toggleScriptBtn.classList.toggle('active', scriptHidden);
-  toggleScriptBtn.textContent = scriptHidden ? 'Show Script' : 'Hide Script';
-  toggleScriptBtn.title = scriptHidden
-    ? 'Show the full mushaf text (currently hidden for memory test)'
-    : 'Hide the mushaf text to test your memory';
-});
-document.getElementById('clearDebugBtn').addEventListener('click', () => {
-  debugLog = [];
-  renderDebugPanel();
-});
-searchInput.addEventListener('input', () => renderSurahGrid(searchInput.value));
-
-// =========================================================================
-// TEST MODE — exposes matcher logic to window for in-browser verification
-// without affecting production. The user can open the page and run in console:
-//   __matcher__.isFuzzyMatch("صراط", "صراط", "sˤiraˤ:tˤaˤ")
-// =========================================================================
-window.__matcher__ = {
-  normalize, phonemizeArabic, levRatio, isFuzzyMatch, levenshtein,
-};
-
-// =========================================================================
-// BOOT — load phoneme data, then render the picker.
-// =========================================================================
-(async function boot(){
-  try{
-    phonemeData = await loadPhonemeData();
-    if(!phonemeData){
-      statusEl.textContent = 'Phoneme data failed to load. Make sure phonemes-data.js is in the same directory as this HTML.';
-      return;
-    }
-    renderSurahGrid('');
-  }catch(e){
-    console.error('boot failed:', e);
-    statusEl.textContent = 'Failed to load phoneme data: ' + e.message;
-  }
-})();
-
-// Fullscreen "speak now" overlay control. Called from startListening and
-// from onaudiostart/onaudioend events.
-function showSpeakOverlay(isFirstStart){
-  // Overlay removed. The small compact log under the mic button
-  // is the new "speak now" indicator. The surah text and the log
-  // are always visible.
-  return;
-  var ov = document.getElementById('speakOverlay');
-  var cd = document.getElementById('speakOverlayCountdown');
-  var ban = document.getElementById('speakOverlayBanner');
-  var sub = document.getElementById('speakOverlaySub');
-  var tmr = document.getElementById('speakOverlayTimer');
-  if(!ov) return;
-  if(isFirstStart){
-    ov.style.display = 'flex';
-    cd.style.display = 'block';
-    cd.textContent = '3';
-    ban.style.display = 'none';
-    sub.style.display = 'none';
-    tmr.style.display = 'none';
-    // Countdown 3, 2, 1, then "speak now" banner
-    setTimeout(function(){ cd.textContent = '2'; }, 1000);
-    setTimeout(function(){ cd.textContent = '1'; }, 2000);
-    setTimeout(function(){
-      cd.style.display = 'none';
-      ban.style.display = 'block';
-      sub.style.display = 'block';
-      sub.textContent = 'The mic is live for 5 seconds. Recite whatever you\'d like to test, then we\'ll restart automatically.';
-      tmr.style.display = 'block';
-      tmr.textContent = '5';
-      var n = 4;
-      var iv = setInterval(function(){
-        n--;
-        tmr.textContent = String(n);
-        if(n <= 0) clearInterval(iv);
-      }, 1000);
-    }, 3000);
-  } else {
-    // Quick flash on each restart so the user knows the mic is live again
-    ov.style.display = 'flex';
-    cd.style.display = 'none';
-    ban.style.display = 'block';
-    sub.style.display = 'block';
-    sub.textContent = '🔁 Mic restarted — keep reciting.';
-    tmr.style.display = 'block';
-    tmr.textContent = '5';
-    var n2 = 4;
-    var iv2 = setInterval(function(){
-      n2--;
-      tmr.textContent = String(n2);
-      if(n2 <= 0){ clearInterval(iv2); hideSpeakOverlay(); }
-    }, 1000);
-  }
-}
-function hideSpeakOverlay(){
-  var ov = document.getElementById('speakOverlay');
-  if(ov) ov.style.display = 'none';
-}
-function showContinueButton(){
-  var btn = document.getElementById('speakOverlayContinue');
-  if(btn) btn.style.display = 'inline-block';
-  var close = document.getElementById('speakOverlayClose');
-  if(close) close.textContent = 'Done';
-  var ban = document.getElementById('speakOverlayBanner');
-  if(ban){ ban.textContent = '✓ Session ended'; ban.style.background = 'linear-gradient(135deg,#3498db,#2980b9)'; ban.style.animation = 'none'; }
-  var sub = document.getElementById('speakOverlaySub');
-  if(sub) sub.textContent = 'Press Continue for the next verse, or Done to stop.';
-  var tmr = document.getElementById('speakOverlayTimer');
-  if(tmr) tmr.style.display = 'none';
-}
-// Wire the "Stop reciting" button on the overlay so the user can manually
-// stop the recognition loop without hunting for the mic button behind the overlay.
-document.addEventListener('DOMContentLoaded', function(){
-  var btn = document.getElementById('speakOverlayClose');
-  if(btn) btn.addEventListener('click', function(){
-    hideSpeakOverlay();
-    var mic = document.querySelector('.mic-btn');
-    if(mic) mic.click();
-  });
-  var cont = document.getElementById('speakOverlayContinue');
-  if(cont) cont.addEventListener('click', function(){
-    // Start a new recognition session directly
-    try {
-      if(window.__envLog) window.__envLog('CONTINUE', 'user pressed Continue — starting new session');
-      // Hide Continue button, show SPEAK NOW again
-      cont.style.display = 'none';
-      var ban = document.getElementById('speakOverlayBanner');
-      if(ban){ ban.textContent = '🎤 SPEAK NOW'; ban.style.background = 'linear-gradient(135deg,#2ecc71,#27ae60)'; ban.style.animation = 'pulse 1s ease-in-out infinite'; }
-      var sub = document.getElementById('speakOverlaySub');
-      if(sub) sub.textContent = '🔁 New session — keep reciting.';
-      var tmr = document.getElementById('speakOverlayTimer');
-      if(tmr){ tmr.style.display = 'block'; tmr.textContent = '∞'; }
-      // Start a new recognition
-      var Ctor = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if(!Ctor) return;
-      var r = new Ctor();
-      var sel = document.getElementById('envLangSel');
-      r.lang = sel ? sel.value : 'ar';
-      r.continuous = false;
-      r.interimResults = false;
-      r.maxAlternatives = 1;
-      r.onresult = recognition.onresult;
-      r.onerror = recognition.onerror;
-      r.onend = recognition.onend;
-      recognition = r;
+    // PRODUCTION'S onend: use `listening` flag with 250ms delay.
+    recognition.onend = () => {
+      if(!listening) return;
+      setTimeout(() => {
+        if(!listening) return;
+        try {
+          recognition.start();
+        } catch(e) {
+          setTimeout(() => {
+            if(listening){
+              try{ recognition.start(); }catch(_){}
+            }
+          }, 400);
+        }
+      }, 250);
+    };
+    recognition.onerror = (e) => {
+      if(statusEl) statusEl.textContent = 'Mic error: ' + (e.error || 'unknown');
+    };
+    // onaudiostart/onspeechstart for the 'mic-armed' indicator
+    ['onaudiostart','onspeechstart','onsoundstart'].forEach(ev => {
+      recognition[ev] = () => {
+        if(micBtn) micBtn.classList.add('mic-armed');
+      };
+    });
+    ['onaudioend','onspeechend'].forEach(ev => {
+      recognition[ev] = () => {
+        if(micBtn) micBtn.classList.remove('mic-armed');
+      };
+    });
+    try{
       recognition.start();
-    } catch(e){
-      if(window.__envLog) window.__envLog('CONTINUE', 'failed: ' + e.message);
+      listening = true;
+      if(micBtn) micBtn.classList.add('listening');
+      if(micLabel) micLabel.textContent = 'Listening... tap to stop';
+      if(statusEl) statusEl.textContent = 'Listening (Arabic) — recite naturally.';
+      window.__isReciting = true;
+    }catch(e){
+      if(statusEl) statusEl.textContent = "Couldn't start microphone: " + e.message;
     }
-  });
-});
-</script>
+  }
+  function stopRecognition(){
+    // Bump the session id FIRST so any pending auto-restart setTimeouts
+    // from the previous session are invalidated
+    window.__hifzappSessionId = (window.__hifzappSessionId || 0) + 1;
+    // Mark the user as NOT reciting — this is the source of truth
+    window.__isReciting = false;
+    if(recognition){
+      try{ recognition.abort(); }catch(e){}
+      try{ recognition.stop(); }catch(e){}
+    }
+    listening = false;
+    if(micBtn) micBtn.classList.remove('listening','mic-armed');
+    if(micLabel) micLabel.textContent = 'Start reciting';
+    if(statusEl) statusEl.textContent = 'Tap the mic to start reciting';
+  }
+  if(micBtn){
+    micBtn.addEventListener('click', () => {
+      // Use __isReciting as the source of truth (not 'listening',
+      // which can be in a transitional state during onend)
+      if(window.__isReciting) stopRecognition();
+      else startRecognition();
+    });
+  }
 
+  // ==== HIDE SCRIPT TOGGLE ====
+  const toggleScriptBtn = document.getElementById('toggleScriptBtn');
+  const page = document.getElementById('page');
+  if(toggleScriptBtn && page){
+    toggleScriptBtn.addEventListener('click', () => {
+      page.classList.toggle('script-hidden');
+      toggleScriptBtn.textContent = page.classList.contains('script-hidden') ? 'Show Script' : 'Hide Script';
+    });
+  }
+
+  // ==== SKIP BUTTON — manually advance the pointer ====
+  const skipBtn = document.getElementById('skipBtn');
+  if(skipBtn){
+    skipBtn.addEventListener('click', () => {
+      if(pointer < refWords.length){
+        // Mark current word as 'skipped' (yellow) and advance
+        if(refWords[pointer].el){
+          refWords[pointer].el.dataset.status = 'unclear';
+          refWords[pointer].status = 'unclear';
+        }
+        pointer++;
+        // Update _maxPointerReached so we don't re-process this
+        if(pointer > _maxPointerReached) _maxPointerReached = pointer;
+        _lastHighlightedPointer = -1;  // force highlightCurrent to re-run
+        highlightCurrent();
+        updateStatsUI();
+        // Page-flip if needed
+        if(pointer >= pageEnd){
+          const newPageNum = Math.floor(pointer / PAGE_SIZE);
+          pageStart = newPageNum * PAGE_SIZE;
+          pageEnd   = Math.min(refWords.length, pageStart + PAGE_SIZE);
+          renderPage();
+        }
+      }
+    });
+  }
+
+  // ==== NORMALIZE (used by matcher) ====
+  // Already defined earlier in the IIFE; if not, define a minimal version
+  if(typeof normalize !== 'function'){
+    window.__normalize = function(word){
+      if(!word) return '';
+      return (word||'')
+        .normalize('NFKC')
+        .replace(/[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED\u0640]/g, '')
+        .replace(/[إأآاٱ]/g, 'ا')
+        .replace(/[يىی]/g, 'ي')
+        .replace(/ة/g, 'ه')
+        .replace(/[^\u0600-\u06FF]/g, '')
+        .trim();
+    };
+  }
+
+  // Initial stats
+  updateStatsUI();
+
+  // Initial render (page starts empty — user picks a surah to begin)
+  renderPage();
+
+  // Expose for debugging
+  window.__refWords = refWords;
+  window.__getPointer = () => pointer;
+})();
+</script>
 </body>
 </html>
