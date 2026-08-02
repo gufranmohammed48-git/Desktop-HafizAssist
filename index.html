@@ -170,7 +170,7 @@
   .word.tajweed-ikhfaa{border-bottom:3px solid var(--purple)}
   .word.tajweed-iqlab{border-bottom:3px solid var(--purple)}
   .word.tajweed-ghunna{border-bottom:3px dotted var(--purple)}
-  .word .phoneme-tooltip{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--text);font-family:'Inter',sans-serif;line-height:1.5;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s;z-index:100;min-width:200px}
+  .word .phoneme-tooltip{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--text);font-family:'Inter',sans-serif;line-height:1.5;white-space:normal;max-width:90vw;opacity:0;pointer-events:none;transition:opacity .15s;z-index:100;min-width:200px;box-shadow:0 4px 12px var(--shadow)}
   .word:hover .phoneme-tooltip{opacity:1}
   .word .phoneme-tooltip .ipa{font-family:ui-monospace,monospace;color:var(--accent);font-size:13px}
   .word .phoneme-tooltip .rules{margin-top:6px;color:var(--text-dim)}
@@ -245,7 +245,7 @@
 .page-controls button{background:var(--card);color:var(--primary);border:1px solid var(--primary);padding:8px 16px;border-radius:8px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer}
 .page-controls button:hover{background:var(--primary-soft)}
 .page-controls #pageInfo{color:var(--text-dim);font-size:12px;padding:0 8px}
-#page{font-family:var(--quran-font, 'Amiri'),serif;font-size:20px;line-height:1.9;direction:rtl;text-align:right;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:8px;flex:1;min-height:300px;overflow-y:auto;transition:filter .2s ease,opacity .2s ease;display:flex;flex-direction:column}
+#page{font-family:var(--quran-font, 'Amiri'),serif;font-size:20px;line-height:1.9;direction:rtl;text-align:right;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:8px;flex:1;min-height:300px;overflow-x:hidden;overflow-y:auto;transition:filter .2s ease,opacity .2s ease;display:flex;flex-direction:column}
 #page::-webkit-scrollbar{width:8px}
 #page::-webkit-scrollbar-track{background:transparent}
 #page::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
@@ -288,7 +288,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 #page,#ayahContainer,.stat,.mic-row,#statsRow{background:var(--card);border-color:var(--border);color:var(--text);transition:background .3s ease,color .3s ease,border-color .3s ease}
 .surah-header{border-bottom-color:var(--bismillah-border)}
 .surah-header .ar-name{color:var(--bismillah-color)}
-.word{color:var(--text)}
+.word{color:var(--text);max-width:100%;overflow-wrap:break-word;word-break:break-word}
 .word.future{color:var(--text-dim);opacity:.75}
 .word.past{color:var(--primary);background:var(--primary-soft)}
 .word[data-status="unclear"]{color:var(--yellow);background:var(--yellow-soft)}
@@ -330,7 +330,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
     </div>
   </div>
 </div>
-<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v48</div>
+<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v49</div>
 
 <!-- VERSION BADGE — increment on every push so user can confirm fresh load -->
 
