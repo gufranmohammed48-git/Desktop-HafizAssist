@@ -331,7 +331,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
     </div>
   </div>
 </div>
-<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v52</div>
+<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v53</div>
 
 <!-- VERSION BADGE — increment on every push so user can confirm fresh load -->
 
@@ -1022,9 +1022,11 @@ async function selectSurah(num, cardEl){
     return;
   }
   activeSurah = num;
-  // Scroll to top of the page so the user sees the surah header
-  // and the sticky prev/next buttons
-  setTimeout(() => window.scrollTo({top: 0, behavior: 'smooth'}), 100);
+  // Scroll DOWN to the recite button so the user can start immediately
+  setTimeout(() => {
+    const micBtn = document.getElementById('micBtn');
+    if(micBtn) micBtn.scrollIntoView({block: 'center', behavior: 'smooth'});
+  }, 100);
   document.querySelectorAll('.surah-card').forEach(c => c.classList.toggle('active', c === cardEl));
   resetState();
   step2.classList.remove('hidden');
