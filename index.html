@@ -35,7 +35,7 @@
   }
   *{box-sizing:border-box}
   body{margin:0;font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-  .app{max-width:1200px;margin:0 auto;padding:8px 20px;display:flex;flex-direction:column;min-height:100vh}
+  .app{max-width:1200px;margin:0 auto;padding:8px 20px}
   /* VERSION BADGE — top right, easy to spot for cache-busting checks */
   .version-badge{
     position:fixed;top:14px;right:14px;z-index:1000;
@@ -241,11 +241,11 @@
   .clear-btn:hover{border-color:var(--red);color:var(--red)}
 
 /* ==== MUSHAF-STYLE PAGINATION ==== */
-.page-controls{display:flex;gap:10px;justify-content:center;align-items:center;margin:8px 0;flex-wrap:wrap}
+.page-controls{display:flex;gap:10px;justify-content:center;align-items:center;margin:0;padding:10px 0;flex-wrap:wrap;position:sticky;bottom:0;background:var(--bg);z-index:50;border-top:1px solid var(--border);box-shadow:0 -2px 8px var(--shadow)}
 .page-controls button{background:var(--card);color:var(--primary);border:1px solid var(--primary);padding:8px 16px;border-radius:8px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer}
 .page-controls button:hover{background:var(--primary-soft)}
 .page-controls #pageInfo{color:var(--text-dim);font-size:12px;padding:0 8px}
-#page{font-family:var(--quran-font, 'Amiri'),serif;font-size:20px;line-height:1.9;direction:rtl;text-align:right;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:8px;flex:1;min-height:300px;overflow-x:hidden;overflow-y:auto;transition:filter .2s ease,opacity .2s ease;display:flex;flex-direction:column}
+#page{font-family:var(--quran-font, 'Amiri'),serif;font-size:20px;line-height:1.9;direction:rtl;text-align:right;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;height:auto;overflow:visible;transition:filter .2s ease,opacity .2s ease}
 #page::-webkit-scrollbar{width:8px}
 #page::-webkit-scrollbar-track{background:transparent}
 #page::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
@@ -331,7 +331,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
     </div>
   </div>
 </div>
-<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v51</div>
+<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v52</div>
 
 <!-- VERSION BADGE — increment on every push so user can confirm fresh load -->
 
@@ -1022,8 +1022,9 @@ async function selectSurah(num, cardEl){
     return;
   }
   activeSurah = num;
-  // No auto-scroll - user stays at the top of the page
-  // (so they see the surah picker and can read the status)
+  // Scroll to top of the page so the user sees the surah header
+  // and the sticky prev/next buttons
+  setTimeout(() => window.scrollTo({top: 0, behavior: 'smooth'}), 100);
   document.querySelectorAll('.surah-card').forEach(c => c.classList.toggle('active', c === cardEl));
   resetState();
   step2.classList.remove('hidden');
@@ -1063,7 +1064,7 @@ function resetState(){
 // Each page = 70 words. Only one page in DOM. Surah titles appear in flow.
 // Bismillah prepended for surahs 2-114 (except 9) as a separate block.
 // =========================================================================
-const PAGE_SIZE = 70;  // words per mushaf page
+const PAGE_SIZE = 100;  // words per mushaf page
 let pageStart = 0;
 let pageEnd = PAGE_SIZE;
 let allRefWords = [];  // global array of ALL 77,877 words
@@ -1239,20 +1240,6 @@ function renderPage(){
     }
   }
   inner.appendChild(frag);
-  // === Smart scroll: enable overflow-y if 3+ surahs on this page ===
-  // Count unique surahs in the page by scanning allRefWords[pageStart..pageEnd]
-  const surahsOnPage = new Set();
-  for(let i = pageStart; i < pageEnd; i++){
-    if(allRefWords[i]) surahsOnPage.add(allRefWords[i].surah);
-  }
-  // If 3+ surahs, allow scroll. Otherwise, keep hidden.
-  if(surahsOnPage.size >= 3){
-    inner.style.overflowY = 'auto';
-    document.getElementById('page')?.style.setProperty('overflow-y', 'auto');
-  } else {
-    inner.style.overflowY = 'hidden';
-    document.getElementById('page')?.style.setProperty('overflow-y', 'hidden');
-  }
   // Update page info
   const pageInfo = document.getElementById('pageInfo');
   if(pageInfo){
