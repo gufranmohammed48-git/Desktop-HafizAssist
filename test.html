@@ -1526,12 +1526,14 @@ window.__matcher__ = {
 (async function boot(){
   try{
     phonemeData = await loadPhonemeData();
-  buildGlobalRefWords();  // build global refWords array
+    buildGlobalRefWords();  // build global refWords array
     if(!phonemeData){
       statusEl.textContent = 'Phoneme data failed to load. Make sure phonemes-data.js is in the same directory as this HTML.';
       return;
     }
     renderSurahGrid('');
+    // Auto-select Al-Fatihah so user can start immediately
+    setSurahPage(1);
   }catch(e){
     console.error('boot failed:', e);
     statusEl.textContent = 'Failed to load phoneme data: ' + e.message;
