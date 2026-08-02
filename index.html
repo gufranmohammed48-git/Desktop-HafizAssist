@@ -579,7 +579,7 @@
 </head>
 <body class="theme-light">
 
-<div class="ver" id="ver">v9.4</div>
+<div class="ver" id="ver">v9.5</div>
 
 <button class="settings-btn" id="settingsBtn" title="Settings">⚙</button>
 <div class="settings-menu" id="settingsMenu">
@@ -1555,8 +1555,13 @@
     recognition.onerror = (e) => {
       if(statusEl) statusEl.textContent = 'Mic error: ' + (e.error || 'unknown');
     };
-    // onaudiostart/onspeechstart for the 'mic-armed' indicator
-    ['onaudiostart','onspeechstart','onsoundstart'].forEach(ev => {
+    // Only mark 'mic-armed' (green gradient) when the USER actually starts
+    // speaking — NOT when the browser just starts capturing audio.
+    // onaudiostart fires immediately on session start, which would flip
+    // the button to green before the user says anything. We want the
+    // button to stay RED while listening-but-silent, then turn green
+    // only when speech is detected.
+    ['onspeechstart','onsoundstart'].forEach(ev => {
       recognition[ev] = () => {
         if(micBtn) micBtn.classList.add('mic-armed');
       };
