@@ -579,7 +579,7 @@
 </head>
 <body class="theme-light">
 
-<div class="ver" id="ver">v10.2</div>
+<div class="ver" id="ver">v10.3</div>
 
 <button class="settings-btn" id="settingsBtn" title="Settings">⚙</button>
 <div class="settings-menu" id="settingsMenu">
@@ -1203,8 +1203,8 @@
   const NEAR_WINDOW = 8;        // production's value
   const FAR_WINDOW = 8;         // production's value
   const RESYNC_THRESHOLD = 6;   // production's value
-  const LEVENSHTEIN_RATIO = 0.30;
-  const PHONEME_LEVENSHTEIN_RATIO = 0.40;
+  const LEVENSHTEIN_RATIO = 0.15;  // tightened from 0.30 (user feedback: too many false matches)
+  const PHONEME_LEVENSHTEIN_RATIO = 0.25;  // tightened from 0.40
   let _maxPointerReached = 0;
   let _lastHighlightedPointer = -1;
   let _prevPastEnd = 0;
@@ -1259,13 +1259,16 @@
     if(textRatio >= 1 - lenientRatio){
       return {matched:true, kind:'text', ratio:textRatio};
     }
-    // 4) phoneme fallback
-    if(expectedPhoneme){
+    // 4) phoneme fallback — ONLY if text is borderline (production's check)
+    //    This prevents false matches from words that sound similar but
+    //    are completely different words.
+    const r = textRatio;
+    if(expectedPhoneme && r >= (1 - 2*LEVENSHTEIN_RATIO)){
       const heardPh = phonemizeArabic(heardNorm);
       if(heardPh && heardPh.length >= 3 && expectedPhoneme.length >= 3){
         const phRatio = levRatio(heardPh, expectedPhoneme);
         if(phRatio >= 1 - PHONEME_LEVENSHTEIN_RATIO){
-          return {matched:true, kind:'phoneme', ratio:phRatio};
+          return {matched:true, kind:'phoneme', ratio:phRatio, heardPh, expectedPhoneme};
         }
       }
     }
