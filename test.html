@@ -258,7 +258,7 @@
 </style>
 </head>
 <body>
-<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v1</div>
+<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v2</div>
 
 <!-- VERSION BADGE — increment on every push so user can confirm fresh load -->
 
@@ -1151,8 +1151,14 @@ function setSurahPage(num){
   if(meta && statusEl){
     statusEl.textContent = `Ready to recite ${meta.translit} (${meta.meaning}). Click Start to begin.`;
   }
-  // DEBUG
-  console.log(`[setSurahPage] surah=${num} refWords.length=${refWords.length} pointer=${pointer} firstWord=${refWords[0] ? refWords[0].text : 'none'} firstWord.el=${refWords[0] && refWords[0].el ? 'YES' : 'NO'}`);
+  // DEBUG: show the first 5 words of the new surah
+  const first5 = [];
+  for(let i = 0; i < Math.min(5, refWords.length); i++){
+    first5.push(`${i}:${refWords[i].text}(norm:${refWords[i].norm || '?'})`);
+  }
+  console.log(`[setSurahPage] surah=${num} refWords.length=${refWords.length} pointer=${pointer}`);
+  console.log(`[setSurahPage] first 5 words: ${first5.join(' ')}`);
+  console.log(`[setSurahPage] firstWord.el=${refWords[0] && refWords[0].el ? 'YES' : 'NO'}`);
 }
 
 function nextPage(){
