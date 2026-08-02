@@ -34,7 +34,7 @@
   }
   *{box-sizing:border-box}
   body{margin:0;font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-  .app{max-width:1200px;margin:0 auto;padding:12px 20px;display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;width:100%}
+  .app{max-width:1200px;margin:0 auto;padding:8px 20px;height:100vh;display:flex;flex-direction:column;overflow:hidden}
   /* VERSION BADGE — top right, easy to spot for cache-busting checks */
   .version-badge{
     position:fixed;top:14px;right:14px;z-index:1000;
@@ -244,7 +244,7 @@
 .page-controls button{background:var(--card);color:var(--primary);border:1px solid var(--primary);padding:8px 16px;border-radius:8px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer}
 .page-controls button:hover{background:var(--primary-soft)}
 .page-controls #pageInfo{color:var(--text-dim);font-size:12px;padding:0 8px}
-#page{font-family:var(--quran-font, 'Amiri'),serif;font-size:26px;line-height:2.4;direction:rtl;text-align:right;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;flex:1;min-height:0;overflow:hidden;transition:filter .2s ease,opacity .2s ease}
+#page{font-family:var(--quran-font, 'Amiri'),serif;font-size:22px;line-height:2.2;direction:rtl;text-align:right;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;flex:1;min-height:200px;overflow:hidden;transition:filter .2s ease,opacity .2s ease}
 #page::-webkit-scrollbar{width:8px}
 #page::-webkit-scrollbar-track{background:transparent}
 #page::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
@@ -284,7 +284,7 @@ body.theme-dark{--bg:#0a1f12;--card:rgba(255,255,255,.04);--border:rgba(46,204,1
 body.theme-sepia{--bg:#f4ecd8;--card:#faf3e0;--border:rgba(139,90,43,.25);--text:#3e2c1c;--text-dim:#7a6045;--primary:#8b5a2b;--primary-soft:rgba(139,90,43,.14);--yellow:#a67c00;--yellow-soft:rgba(166,124,0,.14);--accent:#5d4e8e;--now-glow:rgba(139,90,43,.5);--shadow:rgba(0,0,0,.18);--bismillah-bg:rgba(139,90,43,.10);--bismillah-border:rgba(139,90,43,.35);--bismillah-color:#8b5a2b}
 body.theme-royal{--bg:#0d1b2a;--card:rgba(255,255,255,.05);--border:rgba(212,175,55,.30);--text:#f5f0e0;--text-dim:#a89e7e;--primary:#d4af37;--primary-soft:rgba(212,175,55,.15);--yellow:#e8c547;--yellow-soft:rgba(232,197,71,.15);--accent:#c0a96e;--now-glow:rgba(212,175,55,.55);--shadow:rgba(0,0,0,.5);--bismillah-bg:rgba(212,175,55,.10);--bismillah-border:rgba(212,175,55,.40);--bismillah-color:#d4af37}
 html,body{height:100%;overflow:hidden;margin:0;padding:0}
-body{background:var(--bg);color:var(--text);transition:background .3s ease,color .3s ease;display:flex;flex-direction:column;height:100vh}
+body{background:var(--bg);color:var(--text);transition:background .3s ease,color .3s ease}
 #page,#ayahContainer,.stat,.mic-row,#statsRow{background:var(--card);border-color:var(--border);color:var(--text);transition:background .3s ease,color .3s ease,border-color .3s ease}
 .surah-header{border-bottom-color:var(--bismillah-border)}
 .surah-header .ar-name{color:var(--bismillah-color)}
@@ -330,7 +330,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
     </div>
   </div>
 </div>
-<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v20</div>
+<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v21</div>
 
 <!-- VERSION BADGE — increment on every push so user can confirm fresh load -->
 
