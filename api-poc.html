@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Quran.com API Proof of Concept</title>
+<style>
+body { background: #fafaf5; color: #1a3a1a; font-family: 'Amiri', serif; padding: 20px; max-width: 900px; margin: 0 auto; }
+h1 { color: #2e7d32; }
+.page { background: #fff; border: 1px solid #ccc; border-radius: 12px; padding: 20px; margin: 20px 0; }
+.verse { margin: 12px 0; direction: rtl; text-align: right; font-size: 22px; line-height: 2; }
+.verse-num { background: #2e7d32; color: #fff; border-radius: 50%; padding: 2px 8px; font-size: 14px; margin-left: 8px; }
+.word { padding: 2px 4px; }
+.phoneme { font-size: 11px; color: #999; }
+.controls { display: flex; gap: 10px; align-items: center; margin: 20px 0; }
+button { background: #2e7d32; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; }
+input { padding: 8px; border: 1px solid #ccc; border-radius: 6px; }
+pre { background: #f0f0f0; padding: 10px; border-radius: 6px; overflow: auto; font-size: 12px; }
+</style>
+</head>
+<body>
+<h1>Quran.com API Proof of Concept</h1>
+
+<div class="controls">
+  <label>Page: <input type="number" id="pageNum" value="1" min="1" max="604"></label>
+  <button id="loadBtn">Load Page</button>
+  <span id="status">Ready</span>
+</div>
+
+<div id="output" class="page">
+  <p>Click "Load Page" to fetch from Quran.com API.</p>
+</div>
+
+<div id="raw" style="margin-top: 30px;">
+  <h2>Raw API Response (first 500 chars):</h2>
+  <pre id="rawOutput">-</pre>
+</div>
+
+<script>
+// Simplified inline copy of the API wrapper
+const API_BASE = 'https://api.quran.com/api/v4';
+const AUDIO_BASE = 'https://audio.qurancdn.com/';
+
+async function fetchPage(pageNum){
+  const url = `${API_BASE}/verses/by_page/${pageNum}?language=en&fields=text_uthmani&words=true&word_fields=text_uthmani,text_imlaei,transliteration`;
+  const res = await fetch(url);
+  if(!res.ok) throw new Error(`HTTP ${res.status}`);
+  return await res.json();
+}
+
+function renderPage(data){
+  const html = [];
+  html.push(`<h2>Page ${data.page_number || '?'} of 604</h2>`);
+  for(const v of data.verses){
+    let verseHtml = `<div class="verse">`;
+    if(v.words){
+      for(const w of v.words){
+        if(w.char_type_name === 'end' || w.char_type_name === 'pause') continue;
+        const word = w.text_uthmani || w.text;
+        verseHtml += `<span class="word" title="IPA: see phoneme below\nTranslation: ${w.translation?.text || 'N/A'}">${word}</span> `;
+      }
+    } else {
+      verseHtml += v.text_uthmani;
+    }
+    verseHtml += `<span class="verse-num">${v.verse_number}</span></div>`;
+    html.push(verseHtml);
+  }
+  return html.join('');
+}
+
+document.getElementById('loadBtn').addEventListener('click', async () => {
+  const pageNum = parseInt(document.getElementById('pageNum').value);
+  const status = document.getElementById('status');
+  const output = document.getElementById('output');
+  const raw = document.getElementById('rawOutput');
+  status.textContent = 'Loading...';
+  try {
+    const data = await fetchPage(pageNum);
+    status.textContent = `Loaded ${data.verses.length} verses from page ${data.page_number}`;
+    output.innerHTML = renderPage(data);
+    raw.textContent = JSON.stringify(data, null, 2).substring(0, 1500);
+  } catch(e) {
+    status.textContent = 'Error: ' + e.message;
+    output.innerHTML = '<p>Failed to load.</p>';
+  }
+});
+
+// Auto-load page 1
+window.addEventListener('load', () => {
+  document.getElementById('loadBtn').click();
+});
+</script>
+</body>
+</html>
