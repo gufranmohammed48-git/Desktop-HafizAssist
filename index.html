@@ -579,7 +579,7 @@
 </head>
 <body class="theme-light">
 
-<div class="ver" id="ver">v9.5</div>
+<div class="ver" id="ver">v9.6</div>
 
 <button class="settings-btn" id="settingsBtn" title="Settings">⚙</button>
 <div class="settings-menu" id="settingsMenu">
@@ -1344,7 +1344,39 @@
       }
     }
 
-    // 3) no match — don't advance, don't mark
+    // 3) no match — AUTO-SKIP after enough misses (production v2.0 behavior).
+    // User scenario: reciting correctly, says something wrong, gets stuck.
+    // Production would auto-advance the pointer past the stuck word so when
+    // the user corrects themselves, the matcher can pick up at the new
+    // position. Without this, the pointer stays stuck forever.
+    if(consecutiveMisses >= RESYNC_THRESHOLD){
+      // Mark current word as unclear and advance pointer by 1
+      if(refWords[pointer] && refWords[pointer].el){
+        refWords[pointer].el.dataset.status = 'unclear';
+        stats.unclear++;
+      }
+      pointer++;
+      if(pointer > _maxPointerReached) _maxPointerReached = pointer;
+      consecutiveMisses = 0;  // reset so next word gets a fresh window
+      // Visual + page-flip (so .now moves with the new pointer position)
+      _lastHighlightedPointer = -1;
+      highlightCurrent();
+      updateStatsUI();
+      if(typeof updateMatcherDebug === 'function'){
+        updateMatcherDebug(_pendingFullText, rawWord, 'auto-skip', `pointer advanced to ${pointer} after ${RESYNC_THRESHOLD} misses`);
+        traceMatch(rawWord, 'auto-skip', `advanced to ${pointer}`);
+      }
+      // Page-flip if we walked off the current page
+      if(pointer >= pageEnd){
+        const newPageNum = Math.floor(pointer / PAGE_SIZE);
+        pageStart = newPageNum * PAGE_SIZE;
+        pageEnd   = Math.min(refWords.length, pageStart + PAGE_SIZE);
+        renderPage();
+      }
+      return;
+    }
+
+    // 4) no match within threshold — don't advance, don't mark
     if(typeof updateMatcherDebug === 'function'){
       updateMatcherDebug(_pendingFullText, rawWord, 'miss', `consecutiveMisses=${consecutiveMisses}`);
       traceMatch(rawWord, 'miss', `consecutiveMisses=${consecutiveMisses}`);
