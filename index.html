@@ -329,7 +329,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
     </div>
   </div>
 </div>
-<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v33</div>
+<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v34</div>
 
 <!-- VERSION BADGE — increment on every push so user can confirm fresh load -->
 
@@ -564,7 +564,8 @@ let pointer        = 0;
 let consecutiveMisses = 0;
 let _lastHighlightedPointer = -1;
 let _prevPastEnd = 0;  // index of first non-.past word
-let _maxPointerReached = 0;  // furthest pointer reached this surah
+let _maxPointerReached = 0;
+let _isAutoFlipping = false;  // guard to prevent multiple auto-flips per Chrome result  // furthest pointer reached this surah
 let _lastProcessedWordCount = 0;  // unused, kept for legacy
 let _pendingReProcess = false;  // rAF throttle for the heavy re-processing
 let _pendingFullText  = "";     // latest fullText waiting to be re-processed
@@ -775,22 +776,28 @@ function applyMatch(matchAt, matchInfo, heardWord){
   const localPageEnd = Math.min(refWords.length, pageEnd - surahGlobalStart);
   // ONLY flip page if there are MORE words in this surah after this page
   // If localPageEnd == refWords.length, the surah is done — advance to next surah instead
-  if(pointer >= localPageEnd && localPageEnd < refWords.length && pageEnd < allRefWords.length){
+  // ALSO: guard with _isAutoFlipping to prevent multiple setTimeout(nextPage)
+  // calls from a single Chrome result event (which processes many words at once)
+  if(pointer >= localPageEnd && localPageEnd < refWords.length && pageEnd < allRefWords.length && !_isAutoFlipping){
+    _isAutoFlipping = true;
     statusEl.textContent = 'Page complete. Flipping to next page...';
     setTimeout(() => {
       nextPage();
+      _isAutoFlipping = false;  // reset guard AFTER flip completes
       statusEl.textContent = 'Listening — keep reciting!';
-    }, 600);
+    }, 700);
     return;
   }
-  if(pointer >= refWords.length){
+  if(pointer >= refWords.length && !_isAutoFlipping){
     // Surah complete — try to auto-advance to the next surah
     if(activeSurah && activeSurah < 114){
       const nextSurah = activeSurah + 1;
       // Slight delay so the user sees "Surah complete" briefly
+      _isAutoFlipping = true;
       statusEl.textContent = `Surah ${activeSurah} complete. Continuing to Surah ${nextSurah}...`;
       setTimeout(() => {
         setSurahPage(nextSurah);
+        _isAutoFlipping = false;  // reset guard AFTER surah advance completes
         statusEl.textContent = `Now reciting Surah ${nextSurah}. Keep going!`;
       }, 800);
       // Keep listening — do NOT stop
