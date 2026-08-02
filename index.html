@@ -330,7 +330,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
     </div>
   </div>
 </div>
-<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v43</div>
+<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v44</div>
 
 <!-- VERSION BADGE — increment on every push so user can confirm fresh load -->
 
@@ -364,8 +364,6 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 </section>
 
 <section class="panel hidden" id="step2">
-  <h2 id="step2Title">② Recite</h2>
-
   <div class="stats" id="stats">
     <div class="stat"><div class="stat-label">Correct</div><div class="stat-val green" id="statCorrect">0</div></div>
     <div class="stat"><div class="stat-label">Mistakes</div><div class="stat-val red" id="statMistake">0</div></div>
@@ -974,7 +972,6 @@ function _doRenderDebugPanel(){
 const surahGrid   = document.getElementById('surahGrid');
 const searchInput = document.getElementById('searchInput');
 const step2       = document.getElementById('step2');
-const step2Title  = document.getElementById('step2Title');
 const ayahContainer = document.getElementById('ayahContainer');
 const micBtn      = document.getElementById('micBtn');
 const micLabel    = document.getElementById('micLabel');
@@ -1029,13 +1026,6 @@ async function selectSurah(num, cardEl){
   document.querySelectorAll('.surah-card').forEach(c => c.classList.toggle('active', c === cardEl));
   resetState();
   step2.classList.remove('hidden');
-  // Title: ② Recite Surah <num> — <English> <Arabic>
-  const _meta = SURAH_META.find(s => s.num === num);
-  if(_meta){
-    step2Title.innerHTML = `② Recite Surah ${num} — <span class="arabic-name">${_meta.name}</span> <span style="color:var(--text-dim);font-weight:600">${_meta.translit}</span>`;
-  } else {
-    step2Title.textContent = `② Recite Surah ${num}`;
-  }
   setSurahPage(num);
   // Mark every word as 'future' so the Hide Script button has something
   // to blur. Without this, words render without future/past/now classes
