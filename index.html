@@ -579,7 +579,7 @@
 </head>
 <body class="theme-light">
 
-<div class="ver" id="ver">v10.4</div>
+<div class="ver" id="ver">v10.5</div>
 
 <button class="settings-btn" id="settingsBtn" title="Settings">⚙</button>
 <div class="settings-menu" id="settingsMenu">
@@ -1351,7 +1351,9 @@
     }
 
     // 1) near-window search (production's tight lookahead: <= 3)
-    const near = findMatch(norm, pointer, pointer + NEAR_WINDOW);
+    //    BOUNDED to current surah so wrong words don't match other surahs.
+    const surahEnd = findSurahEnd(pointer);
+    const near = findMatch(norm, pointer, Math.min(pointer + NEAR_WINDOW, surahEnd));
     if(near.idx !== -1 && (near.idx - pointer) <= 3){
       applyMatch(near.idx, near.match, rawWord);
       if(typeof updateMatcherDebug === 'function'){
