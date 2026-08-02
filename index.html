@@ -329,7 +329,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
     </div>
   </div>
 </div>
-<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v36</div>
+<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v37</div>
 
 <!-- VERSION BADGE — increment on every push so user can confirm fresh load -->
 
@@ -748,11 +748,12 @@ function applyMatch(matchAt, matchInfo, heardWord){
   // heard word that triggered it so the user can see what caused the jump.
   for(let i = pointer; i < matchAt; i++){
     const w = refWords[i];
+    if(!w) continue;  // skip undefined entries
     // Mark skipped words as 'unclear' (yellow). With FAR_WINDOW now
     // capped at 8 (was 40), a resync paints at most ~1 line of yellow
     // tiles instead of 4, so the visual is informative without
     // becoming a wall. stats.unclear++ still counts the skip.
-    w.el.dataset.status = 'unclear';
+    if(w.el) w.el.dataset.status = 'unclear';
     stats.unclear++;
     _pushDebug({
       kind:'unclear',
