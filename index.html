@@ -244,7 +244,7 @@
 .page-controls button{background:var(--card);color:var(--primary);border:1px solid var(--primary);padding:8px 16px;border-radius:8px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer}
 .page-controls button:hover{background:var(--primary-soft)}
 .page-controls #pageInfo{color:var(--text-dim);font-size:12px;padding:0 8px}
-#page{font-family:var(--quran-font, 'Amiri'),serif;font-size:20px;line-height:2;direction:rtl;text-align:right;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;height:calc(100vh - 32px);min-height:400px;overflow:hidden;transition:filter .2s ease,opacity .2s ease;display:flex;flex-direction:column}
+#page{font-family:var(--quran-font, 'Amiri'),serif;font-size:18px;line-height:1.7;direction:rtl;text-align:right;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px;height:calc(100vh - 32px);min-height:400px;overflow:hidden;transition:filter .2s ease,opacity .2s ease;display:flex;flex-direction:column}
 #page::-webkit-scrollbar{width:8px}
 #page::-webkit-scrollbar-track{background:transparent}
 #page::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
@@ -329,7 +329,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
     </div>
   </div>
 </div>
-<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v29</div>
+<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v30</div>
 
 <!-- VERSION BADGE — increment on every push so user can confirm fresh load -->
 
@@ -767,6 +767,15 @@ function applyMatch(matchAt, matchInfo, heardWord){
   updateStats();
   highlightCurrent();
   renderDebugPanel();
+  // Auto-flip to next page when user reaches the end of current page
+  if(pointer >= pageEnd && pageEnd < allRefWords.length){
+    statusEl.textContent = 'Page complete. Flipping to next page...';
+    setTimeout(() => {
+      nextPage();
+      statusEl.textContent = 'Listening — keep reciting!';
+    }, 600);
+    return;
+  }
   if(pointer >= refWords.length){
     // Surah complete — try to auto-advance to the next surah
     if(activeSurah && activeSurah < 114){
