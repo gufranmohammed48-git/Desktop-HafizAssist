@@ -258,7 +258,7 @@
 </style>
 </head>
 <body>
-<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v5</div>
+<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v6</div>
 
 <!-- VERSION BADGE — increment on every push so user can confirm fresh load -->
 
@@ -1427,6 +1427,11 @@ async function startListening(){
   }
 
   recognition.onerror = (e) => {
+    // 'aborted' is expected during auto-restart (Chrome) — don't show as error
+    if(e.error === 'aborted'){
+      console.log('[recognition] aborted (expected on stop/restart)');
+      return;
+    }
     // Show a clear status for every error so the user knows what's wrong.
     if(e.error === 'no-speech'){
       // Don't disable — Chrome's continuous mode just had a quiet moment.
@@ -1461,17 +1466,21 @@ async function startListening(){
     }
   };
 
+  // DEBOUNCED auto-restart (prevents tight loop on Chrome)
+  let _lastRestartTime = 0;
   recognition.onend = () => {
     if(!listening) return;
-    // Chrome sometimes fires onend even with continuous=true; restart with a small delay
-    // (well-known race condition documented in the original code, kept here).
+    const now = Date.now();
+    // Don't restart more than once per 1500ms
+    if(now - _lastRestartTime < 1500) return;
+    _lastRestartTime = now;
     setTimeout(() => {
       if(!listening) return;
       try { recognition.start(); }
       catch(e){
-        setTimeout(() => { if(listening){ try{ recognition.start(); }catch(_){} } }, 400);
+        setTimeout(() => { if(listening){ try{ recognition.start(); }catch(_){} } }, 500);
       }
-    }, 250);
+    }, 500);
   };
 
   // Diagnostic: surface context info so the user knows if mobile is blocking us.
