@@ -330,7 +330,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
     </div>
   </div>
 </div>
-<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v40</div>
+<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v41</div>
 
 <!-- VERSION BADGE — increment on every push so user can confirm fresh load -->
 
@@ -1072,7 +1072,7 @@ function resetState(){
 // Each page = 70 words. Only one page in DOM. Surah titles appear in flow.
 // Bismillah prepended for surahs 2-114 (except 9) as a separate block.
 // =========================================================================
-const PAGE_SIZE = 70;  // words per mushaf page
+const PAGE_SIZE = 100;  // words per mushaf page
 let pageStart = 0;
 let pageEnd = PAGE_SIZE;
 let allRefWords = [];  // global array of ALL 77,877 words
@@ -1225,6 +1225,20 @@ function renderPage(){
     }
   }
   inner.appendChild(frag);
+  // === Smart scroll: enable overflow-y if 3+ surahs on this page ===
+  // Count unique surahs in the page by scanning allRefWords[pageStart..pageEnd]
+  const surahsOnPage = new Set();
+  for(let i = pageStart; i < pageEnd; i++){
+    if(allRefWords[i]) surahsOnPage.add(allRefWords[i].surah);
+  }
+  // If 3+ surahs, allow scroll. Otherwise, keep hidden.
+  if(surahsOnPage.size >= 3){
+    inner.style.overflowY = 'auto';
+    document.getElementById('page')?.style.setProperty('overflow-y', 'auto');
+  } else {
+    inner.style.overflowY = 'hidden';
+    document.getElementById('page')?.style.setProperty('overflow-y', 'hidden');
+  }
   // Update page info
   const pageInfo = document.getElementById('pageInfo');
   if(pageInfo){
