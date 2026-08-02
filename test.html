@@ -299,7 +299,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 <body class="theme-light">
 <div class="theme-picker" id="themePicker">
   <button id="themeBtn" title="Change theme">⚙ Theme</button>
-  <button id="debugToggleBtn" title="Toggle debug panel" style="margin-left:4px">🐛 Debug</button>
+  <button id="debugToggleBtn" title="Show mistake statistics" style="margin-left:4px">📊 Error Details</button>
   <div class="dropdown">
     <div class="theme-option" data-theme="dark"><span class="swatch" style="background:#0a1f12"></span>Dark Green</div>
     <div class="theme-option" data-theme="light"><span class="swatch" style="background:#fafaf5"></span>Light</div>
@@ -307,7 +307,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
     <div class="theme-option" data-theme="royal"><span class="swatch" style="background:#0d1b2a"></span>Royal Blue</div>
   </div>
 </div>
-<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v10</div>
+<div id="versionBadge" style="position:fixed;top:8px;right:8px;z-index:9999;background:#000;color:#fff;padding:6px 12px;border-radius:6px;font-family:monospace;font-size:14px;font-weight:700;border:2px solid #2ecc71">v11</div>
 
 <!-- VERSION BADGE — increment on every push so user can confirm fresh load -->
 
@@ -389,8 +389,8 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 
 <!-- Optional Debug Panel (toggleable) -->
 <div class="debug-panel" id="debugPanel" style="display:none">
-  <h2>🐛 DEBUG — Words Marked as Errors</h2>
-  <p class="hint">Each row shows a word that was marked <b style="color:var(--red)">wrong</b> or <b style="color:var(--yellow)">unclear</b>: what the script <b>expected</b> (the Quranic text), what was <b>recited</b> (Chrome's transcription), and <b>why</b> it didn't match.</p>
+  <h2>📊 Mistake Statistics</h2>
+  <p class="hint">Each row shows a word that was marked <b style="color:var(--red)">wrong</b> or <b style="color:var(--yellow)">unclear</b>: what the script <b>expected</b> (the Quranic text), what was <b>recited</b> (what was heard), and <b>why</b> it didn't match.</p>
   <div id="debugList"></div>
   <button class="clear-btn" id="clearDebugBtn">Clear debug log</button>
 </div>
@@ -848,11 +848,10 @@ function processNewWord(rawWord){
 // DEBUG PANEL — render every mistake/unclear with full context.
 // =========================================================================
 function renderDebugPanel(){
-  // Debug panel removed for production. No-op.
-  return;
   const list = document.getElementById('debugList');
+  if(!list) return;  // panel not in DOM
   if(!debugLog.length){
-    list.innerHTML = '<div class="debug-empty">No errors yet. Start reciting and any mismatches will appear here.</div>';
+    list.innerHTML = '<div class="debug-empty">No mistakes yet. Start reciting and any mismatches will appear here.</div>';
     return;
   }
   // newest first
@@ -866,13 +865,13 @@ function renderDebugPanel(){
     return `
       <div class="${cls}">
         <div>
-          <div class="col-label">Expected (canonical)</div>
+          <div class="col-label">Expected (Quran)</div>
           <div class="arabic">${e.expected||'—'}</div>
           <div class="norm">${e.expectedNorm||'—'}</div>
           <div class="phoneme">IPA: ${e.expectedPhoneme||'—'}</div>
         </div>
         <div>
-          <div class="col-label">Recited (Chrome heard)</div>
+          <div class="col-label">Recited (heard)</div>
           <div class="arabic">${e.heard||'—'}</div>
           <div class="norm">${e.heardNorm||'—'}</div>
           <div class="phoneme">IPA: ${e.heardPhoneme||'—'}</div>
