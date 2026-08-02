@@ -579,7 +579,7 @@
 </head>
 <body class="theme-light">
 
-<div class="ver" id="ver">v10.3</div>
+<div class="ver" id="ver">v10.4</div>
 
 <button class="settings-btn" id="settingsBtn" title="Settings">⚙</button>
 <div class="settings-menu" id="settingsMenu">
@@ -1305,6 +1305,19 @@
     consecutiveMisses = 0;
   }
   // PRODUCTION'S processNewWord (copied verbatim + adapted for pageStart)
+  // Find the end index of the surah containing the given pointer position.
+  // This bounds the matcher's search to the current surah so wrong words
+  // don't get matched against other surahs in the global refWords array.
+  function findSurahEnd(p){
+    if(!refWords.length) return refWords.length;
+    const currentSurah = refWords[p] ? refWords[p].surah : null;
+    if(currentSurah == null) return refWords.length;
+    for(let i = p; i < refWords.length; i++){
+      if(refWords[i].surah !== currentSurah) return i;
+    }
+    return refWords.length;
+  }
+
   function processNewWord(rawWord){
     const norm = normalize(rawWord);
     if(!norm) return;
@@ -1356,7 +1369,8 @@
     // 2) far-window search (only after RESYNC_THRESHOLD misses)
     consecutiveMisses++;
     if(consecutiveMisses >= RESYNC_THRESHOLD){
-      const far = findMatch(norm, pointer + NEAR_WINDOW, pointer + FAR_WINDOW);
+      const farEnd = Math.min(pointer + FAR_WINDOW, surahEnd);
+      const far = findMatch(norm, pointer + NEAR_WINDOW, farEnd);
       if(far.idx !== -1){
         applyMatch(far.idx, far.match, rawWord);
         if(typeof updateMatcherDebug === 'function'){
