@@ -312,12 +312,13 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 
 
 /* === REAL MUSHAF LAYOUT (Quran.com style) === */
-/* justify: stretches lines to fill the full width, like a real mushaf.
-   The last line of each block is NOT justified by default — this matches
-   how the real mushaf looks (short lines stay left-aligned). */
+/* Amiri Quran is a Quran-specific font that renders alef wasla (ٱ)
+   correctly — the way it appears in the printed mushaf.
+   KFGQPC Uthmanic Script HAFS is not on Google Fonts, so we use
+   Amiri Quran as the primary mushaf font. */
 .mushaf-line {
-  font-family: 'KFGQPC Uthmanic Script HAFS', 'Amiri', serif;
-  font-size: 32px;
+  font-family: 'Amiri Quran', 'Amiri', 'Scheherazade New', 'KFGQPC Uthmanic Script HAFS', serif;
+  font-size: 36px;
   line-height: 2.4;
   text-align: justify;
   text-align-last: center;
@@ -326,11 +327,11 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
   padding: 0 8px;
   font-weight: 400;
   color: #ffffff;
-  /* Stretch the line to the container width — required for justify to work
-     in a single-line div. Without this, justify doesn't visually stretch
-     because the line is already at its natural width. */
   width: 100%;
   box-sizing: border-box;
+  /* Help the font render with the correct ligatures */
+  font-feature-settings: 'liga' 1, 'kern' 1, 'calt' 1;
+  text-rendering: optimizeLegibility;
 }
 .mushaf-line.bismillah-line {
   font-size: 30px;
@@ -417,7 +418,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
   color: rgba(255, 215, 0, 0.7);
 }
 .mushaf-surah-header .ar-name {
-  font-family: 'KFGQPC Uthmanic Script HAFS', 'Amiri', serif;
+  font-family: 'Amiri Quran', 'Amiri', 'Scheherazade New', serif;
   font-size: 22px;
   color: #d4af37;
   margin-left: 12px;
