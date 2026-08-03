@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📖</text></svg>">
-<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Amiri+Quran&family=Scheherazade+New:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=KFGQPC+Uthmanic+Script+HAFS&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Amiri+Quran&family=Scheherazade+New:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg: #0A1220;
@@ -329,9 +329,14 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
   color: #ffffff;
   width: 100%;
   box-sizing: border-box;
-  /* Help the font render with the correct ligatures */
-  font-feature-settings: 'liga' 1, 'kern' 1, 'calt' 1;
+  /* Proper Arabic rendering - required for alef wasla, ligatures, diacritics */
+  font-feature-settings: 'liga' 1, 'kern' 1, 'calt' 1, 'init' 1, 'medi' 1, 'fina' 1, 'isol' 1, 'mark' 1, 'mkmk' 1;
+  font-variant-ligatures: common-ligatures contextual;
+  -webkit-font-feature-settings: 'liga' 1, 'kern' 1, 'calt' 1, 'init' 1, 'medi' 1, 'fina' 1;
   text-rendering: optimizeLegibility;
+  /* Don't use OpenType contextual alternates that change shape based on context */
+  font-variant-east-asian: normal;
+  font-variant-numeric: normal;
 }
 .mushaf-line.bismillah-line {
   font-size: 30px;
