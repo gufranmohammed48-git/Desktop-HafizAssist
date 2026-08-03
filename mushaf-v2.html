@@ -914,15 +914,19 @@ function applyMatch(matchAt, matchInfo, heardWord){
   // If localPageEnd == refWords.length, the surah is done — advance to next surah instead
   // ALSO: guard with _isAutoFlipping to prevent multiple setTimeout(nextPage)
   // calls from a single Chrome result event (which processes many words at once)
-  if(pointer >= localPageEnd && localPageEnd < refWords.length && pageEnd < allRefWords.length && !_isAutoFlipping){
-    _isAutoFlipping = true;
-    statusEl.textContent = 'Page complete. Flipping to next page...';
-    setTimeout(() => {
-      nextPage();
-      _isAutoFlipping = false;  // reset guard AFTER flip completes
-      statusEl.textContent = 'Listening — keep reciting!';
-    }, 700);
-    return;
+  if(pointer >= localPageEnd && !_isAutoFlipping){
+    // Page complete — load the NEXT MUSHAF PAGE
+    // (Was: check pageEnd < allRefWords.length, but now pageEnd is just refWords.length)
+    if(_currentMushafPage < 604){
+      _isAutoFlipping = true;
+      statusEl.textContent = 'Page complete. Loading next mushaf page...';
+      setTimeout(() => {
+        loadMushafPage(_currentMushafPage + 1);
+        _isAutoFlipping = false;  // reset guard AFTER flip completes
+        statusEl.textContent = 'Listening — keep reciting!';
+      }, 700);
+      return;
+    }
   }
   if(pointer >= refWords.length && !_isAutoFlipping){
     // Surah complete — try to auto-advance to the next surah
@@ -1408,6 +1412,31 @@ async function loadMushafPage(pageNum){
     const data = await window.QuranAPI.fetchPage(pageNum, true);
     const words = window.QuranAPI.flattenPageWords(data);
     _pageWords = words;
+    // === Build refWords for the matcher ===
+    // refWords excludes end markers (matcher should only match real words)
+    // but refWord indices map to _pageWords positions for highlighting
+    refWords = [];
+    const pageIdxToRefIdx = new Map();  // maps _pageWords idx -> refWords idx
+    for(let i = 0; i < words.length; i++){
+      const w = words[i];
+      if(w.isEndMarker) continue;
+      const refIdx = refWords.length;
+      refWords.push({
+        text: w.text,
+        norm: normalize(w.text),
+        phoneme: phonemizeArabic(w.text),
+        rules: [],
+        surah: w.surah,
+        ayah: w.ayah,
+        position: w.position,
+        verseKey: w.verseKey,
+        pageNumber: w.pageNumber,
+        lineNumber: w.lineNumber,
+        globalIndex: i,  // index in _pageWords
+        el: null  // will be set in renderMushafPage
+      });
+      pageIdxToRefIdx.set(i, refIdx);
+    }
     // Group by line_number
     _pageLines = [];
     let currentLine = null;
@@ -1418,10 +1447,29 @@ async function loadMushafPage(pageNum){
         currentLine = {lineNumber: ln, surah: w.surah, firstAyah: w.ayah, words: []};
         _pageLines.push(currentLine);
       }
-      currentLine.words.push({w, i});
+      currentLine.words.push({w, i, refIdx: pageIdxToRefIdx.get(i)});
     }
     _currentMushafPage = pageNum;
+    // Reset pointer and stats
+    pointer = 0;
+    _maxPointerReached = 0;
+    _lastHighlightedPointer = -1;
+    _prevPastEnd = 0;
+    consecutiveMisses = 0;
+    activeSurah = refWords[0]?.surah || null;
+    // Set pageStart/pageEnd to refWords range
+    pageStart = 0;
+    pageEnd = refWords.length;
+    // Reset state
+    stats = {correct: 0, mistake: 0, unclear: 0};
+    debugLog = [];
+    committedWordCount = 0;
+    finalizedText = '';
+    confidences = [];
+    renderDebugPanel();
+    updateStats();
     renderMushafPage();
+    highlightCurrent();  // update .now class for the new page
     statusEl.textContent = `Page ${pageNum} of 604 loaded.`;
   } catch(e){
     console.error('[mushaf] Failed to load page', pageNum, e);
@@ -1471,18 +1519,23 @@ function renderMushafPage(){
     // === Render the line itself ===
     const lineDiv = document.createElement('div');
     lineDiv.className = 'mushaf-line';
-    for(const {w} of line.words){
+    for(const {w, i, refIdx} of line.words){
       if(w.isEndMarker){
         const marker = document.createElement('span');
         marker.className = 'ayah-marker';
         marker.textContent = w.text;
         lineDiv.appendChild(marker);
-      } else {
-        const span = document.createElement('span');
-        span.className = 'word';
-        span.textContent = w.text;
-        lineDiv.appendChild(span);
+        continue;
       }
+      // Regular word
+      const span = document.createElement('span');
+      span.className = 'word';
+      // CRITICAL: link the DOM element to the refWord for the matcher
+      if(refIdx !== undefined && refWords[refIdx]){
+        refWords[refIdx].el = span;
+      }
+      span.textContent = w.text;
+      lineDiv.appendChild(span);
     }
     frag.appendChild(lineDiv);
   }
