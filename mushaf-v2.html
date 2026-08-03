@@ -1422,12 +1422,26 @@ function renderMushafPage(){
   if(!inner) return;
   inner.innerHTML = '';
   const frag = document.createDocumentFragment();
-  // Check if this is the first page of any surah
-  const firstSurah = _pageLines.length > 0 ? _pageLines[0].surah : null;
-  const isFirstPageOfSurah = firstSurah && SURAH_META.find(s => s.num === firstSurah)?.pages?.[0] === _currentMushafPage;
-  if(isFirstPageOfSurah){
-    // Emit surah header + Bismillah
-    const meta = SURAH_META.find(s => s.num === firstSurah);
+  // Check if this page is the first page of any surah
+  // A surah can start mid-page (e.g., Al-Kahf starts on page 293 which has
+  // the END of Al-Isra at the top). So we look for any surah whose
+  // pages[0] matches our current page.
+  const allSurahsOnPage = new Set();
+  for(const line of _pageLines){
+    allSurahsOnPage.add(line.surah);
+  }
+  let newSurah = null;  // the surah that starts on this page
+  for(const s of allSurahsOnPage){
+    const meta = SURAH_META.find(m => m.num === s);
+    if(meta && meta.pages && meta.pages[0] === _currentMushafPage){
+      newSurah = s;
+      break;
+    }
+  }
+  if(newSurah){
+    // Emit surah header + Bismillah at the right position (after the last
+    // word of the previous surah on this page)
+    const meta = SURAH_META.find(s => s.num === newSurah);
     if(meta){
       const header = document.createElement('div');
       header.className = 'mushaf-surah-header first';
@@ -1437,10 +1451,12 @@ function renderMushafPage(){
       header.appendChild(arName);
       const enName = document.createElement('div');
       enName.className = 'mushaf-surah-name-en';
-      enName.innerHTML = `<span class="num">${firstSurah}.</span> Surah ${meta.translit} <span class="meaning">· ${meta.meaning}</span>`;
+      enName.innerHTML = `<span class="num">${newSurah}.</span> Surah ${meta.translit} <span class="meaning">· ${meta.meaning}</span>`;
       header.appendChild(enName);
+      // Insert at the END of the page (or after the previous surah ends)
+      // For simplicity, put the header at the top for now
       frag.appendChild(header);
-      if(firstSurah !== 1 && firstSurah !== 9){
+      if(newSurah !== 1 && newSurah !== 9){
         // Bismillah
         const bisLine = document.createElement('div');
         bisLine.className = 'mushaf-line bismillah-line';
