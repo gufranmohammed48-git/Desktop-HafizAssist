@@ -1102,6 +1102,11 @@ const transcriptBox= document.getElementById('transcriptBox');
 const transcriptText=document.getElementById('transcriptText');
 const transcriptConf=document.getElementById('transcriptConf');
 
+// Also build line index for the local data path
+function buildLineIndexForLocal(){
+  buildLineIndex();
+}
+
 function renderSurahGrid(filter){
   const q = (filter || '').trim().toLowerCase();
   surahGrid.innerHTML = '';
@@ -1183,8 +1188,9 @@ function resetState(){
 // Bismillah prepended for surahs 2-114 (except 9) as a separate block.
 // =========================================================================
 // REAL MUSHAF PAGINATION - 15 lines per page (matches the actual Madinah Mushaf)
-const PAGE_SIZE = 100;  // initial: 100 words. Will be replaced with line-based.
-const LINES_PER_PAGE = 15;  // standard mushaf has 15 lines per page
+// REAL MUSHAF: 15 lines per page (matches the actual Madinah Mushaf layout)
+const LINES_PER_PAGE = 15;
+const PAGE_SIZE = 100;  // legacy - kept for compatibility
 let pageStart = 0;
 let pageEnd = PAGE_SIZE;
 let allRefWords = [];  // global array of ALL 77,877 words
@@ -1265,6 +1271,8 @@ async function loadAllDataHybrid(){
         pageStart = 0;
         pageEnd = Math.min(PAGE_SIZE, allRefWords.length);
         console.log(`[hybrid] ✓ Loaded ${allRefWords.length} words from API`);
+        // Build line index for mushaf pagination
+        buildLineIndex();
         return true;
       }
     } catch(e){
@@ -1278,6 +1286,59 @@ async function loadAllDataHybrid(){
     return true;
   }
   return false;
+}
+
+// =========================================================================
+// LINE-BASED INDEXING (for real mushaf 15-line pages)
+// =========================================================================
+let _lineIndex = [];  // _lineIndex[surahNum] = array of {lineNum, wordIdx, endWordIdx}
+
+function buildLineIndex(){
+  _lineIndex = [];
+  for(let s = 1; s <= 114; s++){
+    _lineIndex[s] = [];
+  }
+  // Walk allRefWords and find line boundaries
+  let prevSurah = -1;
+  let prevLine = -1;
+  for(let i = 0; i < allRefWords.length; i++){
+    const w = allRefWords[i];
+    if(w.surah !== prevSurah || w.lineNumber !== prevLine){
+      // New line! Record it
+      const arr = _lineIndex[w.surah] || (_lineIndex[w.surah] = []);
+      arr.push({lineNum: w.lineNumber, wordIdx: i, endWordIdx: allRefWords.length});
+      prevSurah = w.surah;
+      prevLine = w.lineNumber;
+    }
+    // Update endWordIdx of the last line
+    const arr = _lineIndex[w.surah];
+    if(arr && arr.length > 0){
+      arr[arr.length - 1].endWordIdx = i + 1;
+    }
+  }
+  console.log('[mushaf] Built line index for ' + _lineIndex.filter(Boolean).length + ' surahs');
+}
+
+/**
+ * Get the page bounds for a surah + line number.
+ * @param {number} surahNum
+ * @param {number} lineStart - 0-based line index (e.g., 0 = first line, 15 = 16th line)
+ * @returns {{pageStart, pageEnd, totalLines, lineStartIdx, lineEndIdx}}
+ */
+function getPageBounds(surahNum, lineStart){
+  if(!_lineIndex[surahNum]){
+    return {pageStart: 0, pageEnd: 0, totalLines: 0, lineStartIdx: 0, lineEndIdx: 0};
+  }
+  const lines = _lineIndex[surahNum];
+  const totalLines = lines.length;
+  const lineEnd = Math.min(lineStart + LINES_PER_PAGE, totalLines);
+  if(lineStart >= totalLines){
+    // Past end of surah
+    return {pageStart: allRefWords.length, pageEnd: allRefWords.length, totalLines, lineStartIdx: totalLines, lineEndIdx: totalLines};
+  }
+  const pageStart = lines[lineStart].wordIdx;
+  const pageEnd = lineEnd < totalLines ? lines[lineEnd].wordIdx : lines[totalLines - 1].endWordIdx;
+  return {pageStart, pageEnd, totalLines, lineStartIdx: lineStart, lineEndIdx: lineEnd};
 }
 
 function buildGlobalRefWords(){
@@ -1476,6 +1537,8 @@ function emitSurahHeader(surahNum, isFirst, container){
 
 function setSurahPage(num){
   if(!allRefWords.length) buildGlobalRefWords();
+  // Make sure line index is built
+  if(!_lineIndex[num] || !_lineIndex[num].length) buildLineIndex();
   const startIdx = surahStartIndex[num] || 0;
   // Find the end of this surah
   let endIdx = allRefWords.length;
@@ -1484,14 +1547,13 @@ function setSurahPage(num){
   }
   // Set refWords to just this surah's words (so production matcher works)
   refWords = allRefWords.slice(startIdx, endIdx);
-  // Recalculate .el links for the current page
-  // (renderPage will set them, but the matcher needs them too)
-  // CRITICAL: pageStart = surah's start index, NOT page boundary.
-  // Otherwise when user clicks surah 2 (which starts at index 29),
-  // pageStart stays at 0 and the page shows mixed content from
-  // multiple surahs.
-  pageStart = startIdx;
-  pageEnd = Math.min(allRefWords.length, pageStart + PAGE_SIZE);
+  // === REAL MUSHAF PAGINATION: 15 lines per page ===
+  // Each "page" is exactly LINES_PER_PAGE lines from the API
+  // Start at line 0 of this surah (page 1 of the surah)
+  const bounds = getPageBounds(num, 0);
+  pageStart = bounds.pageStart;
+  pageEnd = bounds.pageEnd;
+  _currentPageLineStart = 0;  // track which 15-line block we're on
   // Set pointer to the first word of the surah (relative to refWords)
   pointer = 0;  // start at the beginning of this surah
   _maxPointerReached = 0;
@@ -1537,9 +1599,16 @@ function setSurahPage(num){
 }
 
 function nextPage(){
-  if(pageEnd >= allRefWords.length) return;
-  pageStart = pageEnd;
-  pageEnd = Math.min(allRefWords.length, pageStart + PAGE_SIZE);
+  // Line-based: move forward 15 lines within the current surah
+  if(!activeSurah) return;
+  const bounds = getPageBounds(activeSurah, _currentPageLineStart);
+  if(bounds.lineStartIdx >= bounds.totalLines) return;
+  const nextLineStart = _currentPageLineStart + LINES_PER_PAGE;
+  const nextBounds = getPageBounds(activeSurah, nextLineStart);
+  if(nextBounds.lineStartIdx >= nextBounds.totalLines) return;
+  pageStart = nextBounds.pageStart;
+  pageEnd = nextBounds.pageEnd;
+  _currentPageLineStart = nextLineStart;
   // Reset pointer to local index of new page's first word
   // CRITICAL: pointer is LOCAL (relative to refWords, the surah's slice)
   // The new page's first word is at global pageStart, which corresponds
@@ -1556,9 +1625,13 @@ function nextPage(){
 }
 
 function prevPage(){
-  if(pageStart === 0) return;
-  pageStart = Math.max(0, pageStart - PAGE_SIZE);
-  pageEnd = pageStart + PAGE_SIZE;
+  if(!activeSurah) return;
+  if(_currentPageLineStart <= 0) return;
+  const prevLineStart = Math.max(0, _currentPageLineStart - LINES_PER_PAGE);
+  const bounds = getPageBounds(activeSurah, prevLineStart);
+  pageStart = bounds.pageStart;
+  pageEnd = bounds.pageEnd;
+  _currentPageLineStart = prevLineStart;
   // Reset pointer to local index of new page's first word
   const surahGlobalStart = (activeSurah && surahStartIndex[activeSurah]) || 0;
   pointer = Math.max(0, pageStart - surahGlobalStart);
