@@ -49,7 +49,7 @@ async function fetchPage(pageNum, includeWords = true){
   if(_cache.pages[pageNum]) return _cache.pages[pageNum];
   let url = `${QURAN_API_BASE}/verses/by_page/${pageNum}?language=en&fields=text_uthmani`;
   if(includeWords){
-    url += '&words=true&word_fields=text_uthmani,text_imlaei,transliteration';
+    url += '&words=true&word_fields=text_uthmani,text_imlaei,transliteration,line_number,char_type_name';
   }
   const res = await fetch(url);
   if(!res.ok) throw new Error(`fetchPage(${pageNum}) failed: ${res.status}`);
@@ -118,17 +118,20 @@ function flattenPageWords(pageData){
   for(const verse of pageData.verses){
     if(verse.words){
       for(const w of verse.words){
-        // Skip 'end' markers (verse end markers like ﴿﴾)
-        if(w.char_type_name === 'end') continue;
+        // Skip 'pause' markers (small وقف marks)
         if(w.char_type_name === 'pause') continue;
         const [surah, ayah] = verse.verse_key.split(':').map(Number);
+        const isEndMarker = w.char_type_name === 'end';
         words.push({
           text: w.text_uthmani || w.text,
           surah,
           ayah,
           position: w.position,
           verseKey: verse.verse_key,
-          pageNumber: pageData.page_number || w.page_number
+          pageNumber: pageData.page_number || w.page_number,
+          lineNumber: w.line_number || 0,
+          isEndMarker: isEndMarker,
+          charType: w.char_type_name
         });
       }
     }

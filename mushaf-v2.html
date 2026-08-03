@@ -310,6 +310,111 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 .dropdown-section .theme-option{padding:6px 12px}
 .theme-option .swatch{width:14px;height:14px;border-radius:3px;border:1px solid var(--border)}
 
+
+/* === REAL MUSHAF LAYOUT (Quran.com style) === */
+.mushaf-line {
+  font-family: 'KFGQPC Uthmanic Script HAFS', 'Amiri', serif;
+  font-size: 32px;
+  line-height: 2.5;
+  text-align: center;
+  direction: rtl;
+  margin: 6px 0;
+  padding: 0 24px;
+  font-weight: 400;
+  color: #ffffff;
+}
+.mushaf-line.bismillah-line {
+  font-size: 30px;
+  color: #ffd700;
+  margin: 16px 0;
+}
+.mushaf-line .word {
+  display: inline;
+  padding: 2px 1px;
+  margin: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font-weight: inherit;
+  transition: color 0.2s ease, background 0.2s ease;
+  cursor: default;
+}
+/* Current word (now) — subtle yellow glow */
+.mushaf-line .word.now {
+  color: #ffd700;
+  text-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
+}
+/* Past words — dimmed */
+.mushaf-line .word.past {
+  color: rgba(255, 255, 255, 0.5);
+}
+/* Future words — bright */
+.mushaf-line .word.future {
+  color: #ffffff;
+}
+/* Ayat marker (verse end) - ornate circular frame like quran.com */
+.ayah-marker {
+  display: inline-block;
+  font-family: 'Amiri', serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: #d4af37;
+  margin: 0 6px;
+  padding: 2px 8px;
+  border: 1.5px solid #d4af37;
+  border-radius: 50%;
+  min-width: 28px;
+  min-height: 28px;
+  line-height: 24px;
+  text-align: center;
+  vertical-align: middle;
+  background: transparent;
+}
+/* Bismillah word - gold colored */
+.mushaf-line.bismillah-line .word {
+  color: #ffd700;
+}
+/* Surah header (centered, between lines) */
+.mushaf-surah-header {
+  text-align: center;
+  margin: 32px auto 24px;
+  padding: 16px 0;
+  border-top: 1px solid rgba(255, 215, 0, 0.2);
+  border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+}
+.mushaf-surah-header.first {
+  margin-top: 0;
+  border-top: none;
+}
+.mushaf-surah-name-ar {
+  font-family: 'KFGQPC Uthmanic Script HAFS', 'Amiri', serif;
+  font-size: 36px;
+  color: #d4af37;
+  margin-bottom: 4px;
+  line-height: 1.4;
+}
+.mushaf-surah-name-en {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 0.5px;
+}
+.mushaf-surah-name-en .num {
+  color: #d4af37;
+  font-weight: 700;
+}
+.mushaf-surah-name-en .meaning {
+  color: rgba(255, 215, 0, 0.6);
+}
+/* Page container: dark, like a real mushaf */
+#page-inner {
+  background: #0a1220;
+  border-radius: 8px;
+  padding: 32px 16px;
+  min-height: 600px;
+}
+/* End of page-outer wrapper: add subtle border like a book page */
+
 </style>
 </head>
 <body class="theme-light">
@@ -1143,6 +1248,9 @@ async function loadAllDataHybrid(){
               position: w.position,
               verseKey: w.verseKey,
               pageNumber: w.pageNumber,
+              lineNumber: w.lineNumber || 0,
+              isEndMarker: w.isEndMarker || false,
+              charType: w.charType || 'word',
               globalIndex: allRefWords.length
             });
           }
@@ -1213,45 +1321,70 @@ function renderPage(){
   inner.innerHTML = '';
   const frag = document.createDocumentFragment();
   let lastSurah = -1;
-  let isFirstSurah = (pageStart === 0);
-  // Find the first surah on this page — only emit its header if
-  // the page is the first one where this surah appears
-  const firstSurahOnPage = allRefWords[pageStart] ? allRefWords[pageStart].surah : null;
+  // Group words by line_number to make real mushaf lines
+  // Each line is one div, centered, with words in order
+  const lines = [];  // [{lineNumber, surah, words: [...]}]
+  let currentLine = null;
   for(let i = pageStart; i < pageEnd; i++){
     const w = allRefWords[i];
     if(!w) continue;
-    // Emit surah header (with Bismillah if applicable) when surah changes
-    if(w.surah !== lastSurah){
-      const meta = SURAH_META.find(s => s.num === w.surah);
-      if(meta){
-        // Only emit header on the FIRST page where this surah appears
-        // (track via the page where the surah starts)
-        const surahStartPage = Math.floor(surahStartIndex[w.surah] / PAGE_SIZE);
-        const isFirstPageOfSurah = (Math.floor(pageStart / PAGE_SIZE) === surahStartPage);
-        if(isFirstPageOfSurah){
+    // If surah changes, emit a surah header div (not part of any line)
+    if(w.surah !== lastSurah && lastSurah !== -1){
+      // (Header is emitted after the loop below as a separate flow)
+    }
+    // Start a new line if lineNumber changes (or first word)
+    if(!currentLine || currentLine.lineNumber !== w.lineNumber){
+      currentLine = {
+        lineNumber: w.lineNumber,
+        surah: w.surah,
+        firstAyah: w.ayah,
+        words: []
+      };
+      lines.push(currentLine);
+    }
+    currentLine.words.push({w, i});
+    lastSurah = w.surah;
+  }
+  // === Now render ===
+  let isFirstSurahOnPage = true;
+  for(const line of lines){
+    // If this is the first line of a new surah, emit a header
+    if(line.words[0] && line.words[0].w.surah !== lastSurah){
+      // (header logic moved below)
+    }
+  }
+  // Actually let me redo this more cleanly:
+  // For each line, if it's the first line of a surah, emit a header
+  // Otherwise just emit the line div
+  let prevSurah = -1;
+  for(const line of lines){
+    // Surah header (only on first line of a new surah)
+    if(line.surah !== prevSurah){
+      // Check if this is the first page where this surah appears
+      const surahGlobalStart = surahStartIndex[line.surah] || 0;
+      const isFirstPageOfSurah = (pageStart <= surahGlobalStart && surahGlobalStart < pageEnd);
+      if(isFirstPageOfSurah){
+        const meta = SURAH_META.find(s => s.num === line.surah);
+        if(meta){
           const header = document.createElement('div');
-          header.className = 'surah-header' + (isFirstSurah ? ' first' : '');
-          isFirstSurah = false;
-          const arName = document.createElement('span');
-          arName.className = 'ar-name';
+          header.className = 'mushaf-surah-header' + (isFirstSurahOnPage ? ' first' : '');
+          isFirstSurahOnPage = false;
+          const arName = document.createElement('div');
+          arName.className = 'mushaf-surah-name-ar';
           arName.textContent = meta.name;
-          const enName = document.createElement('span');
-          enName.className = 'en-name';
-          // Combined: "1. Al-Fatihah · The Opening" (2 lines total: Arabic + this)
-          enName.innerHTML = `${w.surah}. Surah ${meta.translit}<span class="meaning"> · ${meta.meaning}</span>`;
           header.appendChild(arName);
+          const enName = document.createElement('div');
+          enName.className = 'mushaf-surah-name-en';
+          enName.innerHTML = `<span class="num">${line.surah}.</span> Surah ${meta.translit} <span class="meaning">· ${meta.meaning}</span>`;
           header.appendChild(enName);
           frag.appendChild(header);
-          // For surahs 2-114 (except 9), emit Bismillah as regular words
-          // so the matcher can highlight them during recitation.
-          // The CSS will style them as a centered group.
-          if(w.surah !== 1 && w.surah !== 9){
-            // Wrap Bismillah in a centered div (per user request 2026-08-01)
-            const bisContainer = document.createElement('div');
-            bisContainer.className = 'bismillah-line';
+          // For surahs 2-114 (except 9), emit Bismillah as its own line
+          if(line.surah !== 1 && line.surah !== 9){
+            const bisLine = document.createElement('div');
+            bisLine.className = 'mushaf-line bismillah-line';
             for(let bi = 0; bi < BISMILLAH_WORDS.length; bi++){
-              const idx = i + bi;
-              if(idx >= pageEnd) break;  // page boundary
+              const idx = surahGlobalStart + bi;
+              if(idx >= pageEnd) break;
               const bw = allRefWords[idx];
               if(!bw || bw.ayah !== 'bismillah') break;
               const span = document.createElement('span');
@@ -1260,81 +1393,56 @@ function renderPage(){
               else if(idx === pointer) span.classList.add('now');
               else span.classList.add('future');
               span.textContent = bw.text;
-              bw.el = span;  // CRITICAL: link DOM element to refWord
-              bisContainer.appendChild(span);
+              bw.el = span;
+              bisLine.appendChild(span);
             }
-            frag.appendChild(bisContainer);
-            // Skip past the Bismillah words
-            i += BISMILLAH_WORDS.length - 1;
-            lastSurah = w.surah;
-            continue;
+            frag.appendChild(bisLine);
           }
         }
-        // On non-first pages, just update lastSurah and fall through
-        // to render the first word as a regular word
-        lastSurah = w.surah;
       }
+      prevSurah = line.surah;
     }
-    // Skip Bismillah words (they're rendered above for surahs 2-114)
-    if(w.ayah === 'bismillah' && w.surah > 1){
-      w.el = null;  // no DOM element needed (already rendered in header)
-      continue;
-    }
-    // === Regular word ===
-    const span = document.createElement('span');
-    span.className = 'word';
-    // Al-Fatihah's Bismillah (surah 1, ayah 1) gets the bismillah class
-    if(w.ayah === 'bismillah' && w.surah === 1){
-      span.classList.add('bismillah-word');
-    }
-    if(i < pointer) span.classList.add('past');
-    else if(i === pointer) span.classList.add('now');
-    else span.classList.add('future');
-    span.textContent = w.text;
-    // === Add phoneme tooltip on hover (shows IPA + Tajweed rules) ===
-    if(w.phoneme || (w.rules && w.rules.length)){
-      const tooltip = document.createElement('div');
-      tooltip.className = 'phoneme-tooltip';
-      let html = '';
-      if(w.phoneme){
-        html += `<div class="ipa">${w.phoneme}</div>`;
+    // === Render the line ===
+    const lineDiv = document.createElement('div');
+    lineDiv.className = 'mushaf-line';
+    for(const {w, i} of line.words){
+      // End-of-verse marker → render as circular frame
+      if(w.isEndMarker){
+        const marker = document.createElement('span');
+        marker.className = 'ayah-marker';
+        marker.textContent = w.text;
+        lineDiv.appendChild(marker);
+        continue;
       }
-      if(w.rules && w.rules.length){
-        // Show just the unique rule names (drop the char prefix)
-        const ruleNames = w.rules.map(r => r.includes(':') ? r.split(':')[1] : r).join(', ');
-        html += `<div class="rules">${ruleNames}</div>`;
-      }
-      tooltip.innerHTML = html;
-      span.appendChild(tooltip);
+      // Regular word
+      const span = document.createElement('span');
+      span.className = 'word';
+      if(i < pointer) span.classList.add('past');
+      else if(i === pointer) span.classList.add('now');
+      else span.classList.add('future');
+      span.textContent = w.text;
+      w.el = span;
+      lineDiv.appendChild(span);
     }
-    w.el = span;  // CRITICAL: link DOM element to refWord
-    frag.appendChild(span);
-    // === Verse marker at end of each ayah ===
-    // ONLY show if the next word (in allRefWords, not just this page) has
-    // a different ayah or surah. If the next word is on the next page but
-    // is the SAME ayah, the verse continues — don't show the marker here
-    // (it will be shown at the actual end of the verse on the next page).
-    const nextW = allRefWords[i+1];
-    const isEndOfAyah = nextW && (
-      nextW.ayah !== w.ayah ||
-      nextW.surah !== w.surah
-    );
-    if(isEndOfAyah && w.ayah !== 'bismillah'){
-      const vm = document.createElement('span');
-      vm.className = 'verse-marker';
-      vm.textContent = toArabicDigits(w.ayah);
-      frag.appendChild(vm);
-    }
+    frag.appendChild(lineDiv);
   }
   inner.appendChild(frag);
   // Update page info
   const pageInfo = document.getElementById('pageInfo');
   if(pageInfo){
-    const pageNum = Math.floor(pageStart / PAGE_SIZE) + 1;
-    const totalPages = Math.ceil(allRefWords.length / PAGE_SIZE);
     const firstWord = allRefWords[pageStart];
-    const surahName = firstWord ? SURAH_META.find(s => s.num === firstWord.surah)?.translit : '';
-    pageInfo.textContent = `Page ${pageNum} of ${totalPages}${surahName ? ' · ' + surahName + ' (' + firstWord.surah + '/114)' : ''}`;
+    const lastWord = allRefWords[pageEnd - 1];
+    if(firstWord && lastWord){
+      const firstMeta = SURAH_META.find(s => s.num === firstWord.surah);
+      const lastMeta = SURAH_META.find(s => s.num === lastWord.surah);
+      let info = '';
+      if(firstWord.surah === lastWord.surah){
+        info = `${firstMeta?.translit} (${firstWord.surah})`;
+      } else {
+        info = `${firstMeta?.translit} (${firstWord.surah}) → ${lastMeta?.translit} (${lastWord.surah})`;
+      }
+      pageInfo.textContent = info;
+    }
   }
 }
 
