@@ -1370,9 +1370,11 @@ function setSurahPage(num){
   refWords = allRefWords.slice(startIdx, endIdx);
   // Recalculate .el links for the current page
   // (renderPage will set them, but the matcher needs them too)
-  // Calculate which page contains the surah start
-  const pageNum = Math.floor(startIdx / PAGE_SIZE);
-  pageStart = pageNum * PAGE_SIZE;
+  // CRITICAL: pageStart = surah's start index, NOT page boundary.
+  // Otherwise when user clicks surah 2 (which starts at index 29),
+  // pageStart stays at 0 and the page shows mixed content from
+  // multiple surahs.
+  pageStart = startIdx;
   pageEnd = Math.min(allRefWords.length, pageStart + PAGE_SIZE);
   // Set pointer to the first word of the surah (relative to refWords)
   pointer = 0;  // start at the beginning of this surah
