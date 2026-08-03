@@ -339,10 +339,14 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
   transition: color 0.2s ease, background 0.2s ease;
   cursor: default;
 }
-/* Current word (now) — subtle yellow glow */
+/* Current word (now) — subtle background tint, no big border */
 .mushaf-line .word.now {
   color: #ffd700;
-  text-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
+  background: rgba(255, 215, 0, 0.08);
+  border-radius: 4px;
+  padding: 0 3px;
+  margin: 0 1px;
+  text-shadow: 0 0 4px rgba(255, 215, 0, 0.3);
 }
 /* Past words — dimmed */
 .mushaf-line .word.past {
