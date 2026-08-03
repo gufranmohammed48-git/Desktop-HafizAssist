@@ -1109,21 +1109,29 @@ async function loadAllDataHybrid(){
             pages: ch.pages  // [start, end]
           };
         }
-        // Now load verses for each chapter and build allRefWords
-        console.log('[hybrid] Loading verses for all 114 surahs from API...');
+        // Now load verses for ALL 114 surahs in PARALLEL, then build allRefWords in order
+        console.log('[hybrid] Loading verses for all 114 surahs from API in parallel...');
+        statusEl.textContent = 'Loading all 114 surahs...';
+        const promises = [];
+        for(let s = 1; s <= 114; s++){
+          promises.push(window.HybridLoader.loadChapterVersesHybrid(s).then(words => ({surah: s, words})));
+        }
+        const allSurahData = await Promise.all(promises);
+        // Sort by surah number (Promise.all preserves order, but to be safe)
+        allSurahData.sort((a, b) => a.surah - b.surah);
+        // Build allRefWords in surah order
         allRefWords = [];
         surahStartIndex = [];
-        for(let s = 1; s <= 114; s++){
-          surahStartIndex[s] = allRefWords.length;
-          const words = await window.HybridLoader.loadChapterVersesHybrid(s);
+        for(const {surah, words} of allSurahData){
           if(!words || words.length === 0){
-            console.warn(`[hybrid] No words for surah ${s}, skipping`);
+            console.warn(`[hybrid] No words for surah ${surah}, skipping`);
             continue;
           }
+          surahStartIndex[surah] = allRefWords.length;
           // Bismillah: prepend for surahs 2-114 except 9
-          if(s !== 1 && s !== 9){
+          if(surah !== 1 && surah !== 9){
             for(const bw of BISMILLAH_WORDS){
-              allRefWords.push({...bw, surah: s, globalIndex: allRefWords.length});
+              allRefWords.push({...bw, surah, globalIndex: allRefWords.length});
             }
           }
           // Add the words, generating phoneme on the fly

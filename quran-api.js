@@ -65,7 +65,7 @@ async function fetchPage(pageNum, includeWords = true){
  * @returns {Promise<Object>} {verses: [...]}
  */
 async function fetchChapterVerses(chapterNum, includeWords = true){
-  let url = `${QURAN_API_BASE}/verses/by_chapter/${chapterNum}?language=en&fields=text_uthmani`;
+  let url = `${QURAN_API_BASE}/verses/by_chapter/${chapterNum}?language=en&per_page=300&fields=text_uthmani`;
   if(includeWords){
     url += '&words=true&word_fields=text_uthmani,text_imlaei,transliteration';
   }

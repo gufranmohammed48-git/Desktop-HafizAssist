@@ -16,3 +16,4 @@ Thumbs.db
 # Don't ignore the actual app files
 !HafizAssist.html
 !phonemes-data.js
+node_modules/
