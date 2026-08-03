@@ -1021,8 +1021,8 @@ function renderSurahGrid(filter){
 }
 
 async function selectSurah(num, cardEl){
-  if(!phonemeData){
-    statusEl.textContent = 'Phoneme data still loading — try again in a moment.';
+  if(!allRefWords.length){
+    statusEl.textContent = 'Quran data still loading — try again in a moment.';
     return;
   }
   activeSurah = num;
