@@ -1870,7 +1870,9 @@ function highlightCurrent(){
   if(_lastHighlightedPointer >= 0 && _lastHighlightedPointer < refWords.length && refWords[_lastHighlightedPointer] && refWords[_lastHighlightedPointer].el){
     refWords[_lastHighlightedPointer].el.classList.remove("now");
   }
-  for(let i = _prevPastEnd; i < _maxPointerReached; i++){
+  // FIX: was i<_maxPointerReached which used the OLD value
+  // (before this call's update). Changed to pointer (the new value).
+  for(let i = _prevPastEnd; i < pointer; i++){
     if(refWords[i] && refWords[i].el){
       const w = refWords[i].el;
       w.classList.add("past");
