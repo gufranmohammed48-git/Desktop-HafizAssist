@@ -1346,16 +1346,9 @@ function renderPage(){
     lastSurah = w.surah;
   }
   // === Now render ===
+  // Track which words have been rendered (for Bismillah deduplication)
+  const rendered = new Set();
   let isFirstSurahOnPage = true;
-  for(const line of lines){
-    // If this is the first line of a new surah, emit a header
-    if(line.words[0] && line.words[0].w.surah !== lastSurah){
-      // (header logic moved below)
-    }
-  }
-  // Actually let me redo this more cleanly:
-  // For each line, if it's the first line of a surah, emit a header
-  // Otherwise just emit the line div
   let prevSurah = -1;
   for(const line of lines){
     // Surah header (only on first line of a new surah)
@@ -1395,6 +1388,7 @@ function renderPage(){
               span.textContent = bw.text;
               bw.el = span;
               bisLine.appendChild(span);
+              rendered.add(idx);  // Mark as rendered so main loop skips
             }
             frag.appendChild(bisLine);
           }
@@ -1406,6 +1400,8 @@ function renderPage(){
     const lineDiv = document.createElement('div');
     lineDiv.className = 'mushaf-line';
     for(const {w, i} of line.words){
+      // Skip already-rendered words (Bismillah)
+      if(rendered.has(i)) continue;
       // End-of-verse marker → render as circular frame
       if(w.isEndMarker){
         const marker = document.createElement('span');
