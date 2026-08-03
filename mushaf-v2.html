@@ -1399,9 +1399,11 @@ function renderPage(){
     // === Render the line ===
     const lineDiv = document.createElement('div');
     lineDiv.className = 'mushaf-line';
+    let lineHasContent = false;
     for(const {w, i} of line.words){
       // Skip already-rendered words (Bismillah)
       if(rendered.has(i)) continue;
+      lineHasContent = true;
       // End-of-verse marker → render as circular frame
       if(w.isEndMarker){
         const marker = document.createElement('span');
@@ -1420,7 +1422,10 @@ function renderPage(){
       w.el = span;
       lineDiv.appendChild(span);
     }
-    frag.appendChild(lineDiv);
+    // Only append if line has content (skip lines that were entirely Bismillah)
+    if(lineHasContent){
+      frag.appendChild(lineDiv);
+    }
   }
   inner.appendChild(frag);
   // Update page info
