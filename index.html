@@ -1084,6 +1084,83 @@ const BISMILLAH_WORDS = [
   {text:'ٱلرَّحِيمِ', norm:'الرحيم', phoneme:'rraħi:mi', surah:0, ayah:'bismillah', position:4}
 ];
 
+// =========================================================================
+// HYBRID DATA LOADER — tries API first, falls back to local phonemes-data.js
+// =========================================================================
+let _useAPIData = false;  // flag: are we using API data or local?
+
+async function loadAllDataHybrid(){
+  // Try API first via the HybridLoader
+  if(window.HybridLoader && window.QuranAPI){
+    try {
+      console.log('[hybrid] Loading chapters from API...');
+      const chapters = await window.HybridLoader.loadChaptersHybrid();
+      if(chapters && chapters.length === 114){
+        console.log('[hybrid] ✓ Got 114 chapters from API');
+        // Update SURAH_META from API
+        for(const ch of chapters){
+          SURAH_META[ch.id - 1] = {
+            num: ch.id,
+            name: ch.name_arabic,
+            translit: ch.name_simple,
+            meaning: ch.translated_name?.name || '',
+            verses: ch.verses_count,
+            bismillahPre: ch.bismillah_pre,
+            pages: ch.pages  // [start, end]
+          };
+        }
+        // Now load verses for each chapter and build allRefWords
+        console.log('[hybrid] Loading verses for all 114 surahs from API...');
+        allRefWords = [];
+        surahStartIndex = [];
+        for(let s = 1; s <= 114; s++){
+          surahStartIndex[s] = allRefWords.length;
+          const words = await window.HybridLoader.loadChapterVersesHybrid(s);
+          if(!words || words.length === 0){
+            console.warn(`[hybrid] No words for surah ${s}, skipping`);
+            continue;
+          }
+          // Bismillah: prepend for surahs 2-114 except 9
+          if(s !== 1 && s !== 9){
+            for(const bw of BISMILLAH_WORDS){
+              allRefWords.push({...bw, surah: s, globalIndex: allRefWords.length});
+            }
+          }
+          // Add the words, generating phoneme on the fly
+          for(const w of words){
+            allRefWords.push({
+              text: w.text,
+              norm: normalize(w.text),
+              phoneme: phonemizeArabic(w.text),
+              rules: [],
+              surah: w.surah,
+              ayah: w.ayah,
+              position: w.position,
+              verseKey: w.verseKey,
+              pageNumber: w.pageNumber,
+              globalIndex: allRefWords.length
+            });
+          }
+        }
+        _useAPIData = true;
+        pageStart = 0;
+        pageEnd = Math.min(PAGE_SIZE, allRefWords.length);
+        console.log(`[hybrid] ✓ Loaded ${allRefWords.length} words from API`);
+        return true;
+      }
+    } catch(e){
+      console.warn('[hybrid] API load failed, falling back to local:', e);
+    }
+  }
+  // Fall back to local phonemeData
+  console.log('[hybrid] Using local phonemes-data.js');
+  if(phonemeData){
+    buildGlobalRefWords();
+    return true;
+  }
+  return false;
+}
+
 function buildGlobalRefWords(){
   if(!phonemeData) return;
   allRefWords = [];
@@ -1797,11 +1874,28 @@ window.__matcher__ = {
 // =========================================================================
 (async function boot(){
   try{
-    phonemeData = await loadPhonemeData();
-    buildGlobalRefWords();  // build global refWords array
-    if(!phonemeData){
-      statusEl.textContent = 'Phoneme data failed to load. Make sure phonemes-data.js is in the same directory as this HTML.';
-      return;
+    // Show loading status
+    statusEl.textContent = 'Loading Quran text...';
+    // Try API first via HybridLoader
+    let _dataLoaded = false;
+    if(window.HybridLoader && window.QuranAPI){
+      try {
+        statusEl.textContent = 'Fetching from Quran.com API...';
+        _dataLoaded = await loadAllDataHybrid();
+      } catch(e){
+        console.warn('[boot] API load failed:', e);
+      }
+    }
+    if(!_dataLoaded){
+      statusEl.textContent = 'API unavailable, loading local data...';
+      phonemeData = await loadPhonemeData();
+      if(phonemeData){
+        buildGlobalRefWords();  // build global refWords array
+        _dataLoaded = true;
+      } else {
+        statusEl.textContent = 'Data load failed. Check your internet connection and that phonemes-data.js is in the same directory as this HTML.';
+        return;
+      }
     }
     renderSurahGrid('');
     // Auto-select Al-Fatihah so user can start immediately
