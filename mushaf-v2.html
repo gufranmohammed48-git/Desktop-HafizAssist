@@ -312,16 +312,25 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 
 
 /* === REAL MUSHAF LAYOUT (Quran.com style) === */
+/* justify: stretches lines to fill the full width, like a real mushaf.
+   The last line of each block is NOT justified by default — this matches
+   how the real mushaf looks (short lines stay left-aligned). */
 .mushaf-line {
   font-family: 'KFGQPC Uthmanic Script HAFS', 'Amiri', serif;
   font-size: 32px;
-  line-height: 2.5;
-  text-align: center;
+  line-height: 2.4;
+  text-align: justify;
+  text-align-last: center;
   direction: rtl;
-  margin: 6px 0;
-  padding: 0 24px;
+  margin: 4px 0;
+  padding: 0 8px;
   font-weight: 400;
   color: #ffffff;
+  /* Stretch the line to the container width — required for justify to work
+     in a single-line div. Without this, justify doesn't visually stretch
+     because the line is already at its natural width. */
+  width: 100%;
+  box-sizing: border-box;
 }
 .mushaf-line.bismillah-line {
   font-size: 30px;
@@ -381,37 +390,40 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 .mushaf-line.bismillah-line .word {
   color: #ffd700;
 }
-/* Surah header (centered, between lines) */
+/* Surah header (ONE LINE: number + transliteration + meaning + Arabic) */
 .mushaf-surah-header {
   text-align: center;
-  margin: 32px auto 24px;
-  padding: 16px 0;
-  border-top: 1px solid rgba(255, 215, 0, 0.2);
-  border-bottom: 1px solid rgba(255, 215, 0, 0.2);
-}
-.mushaf-surah-header.first {
-  margin-top: 0;
-  border-top: none;
-}
-.mushaf-surah-name-ar {
-  font-family: 'KFGQPC Uthmanic Script HAFS', 'Amiri', serif;
-  font-size: 36px;
-  color: #d4af37;
-  margin-bottom: 4px;
-  line-height: 1.4;
-}
-.mushaf-surah-name-en {
+  margin: 20px auto 12px;
+  padding: 8px 0;
   font-family: 'Inter', sans-serif;
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.6);
-  letter-spacing: 0.5px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 0.3px;
+  direction: ltr;
+  white-space: nowrap;
+  border-top: 1px solid rgba(255, 215, 0, 0.15);
+  border-bottom: 1px solid rgba(255, 215, 0, 0.15);
+  /* Compensate for LTR dir so the gold accent is centered */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
 }
-.mushaf-surah-name-en .num {
+.mushaf-surah-header .num {
   color: #d4af37;
   font-weight: 700;
 }
-.mushaf-surah-name-en .meaning {
-  color: rgba(255, 215, 0, 0.6);
+.mushaf-surah-header .meaning {
+  color: rgba(255, 215, 0, 0.7);
+}
+.mushaf-surah-header .ar-name {
+  font-family: 'KFGQPC Uthmanic Script HAFS', 'Amiri', serif;
+  font-size: 22px;
+  color: #d4af37;
+  margin-left: 12px;
+  direction: rtl;
+  display: inline-block;
+  line-height: 1;
 }
 /* Page container: dark, like a real mushaf */
 #page-inner {
@@ -1422,51 +1434,41 @@ function renderMushafPage(){
   if(!inner) return;
   inner.innerHTML = '';
   const frag = document.createDocumentFragment();
-  // Check if this page is the first page of any surah
-  // A surah can start mid-page (e.g., Al-Kahf starts on page 293 which has
-  // the END of Al-Isra at the top). So we look for any surah whose
-  // pages[0] matches our current page.
-  const allSurahsOnPage = new Set();
-  for(const line of _pageLines){
-    allSurahsOnPage.add(line.surah);
-  }
-  let newSurah = null;  // the surah that starts on this page
-  for(const s of allSurahsOnPage){
-    const meta = SURAH_META.find(m => m.num === s);
-    if(meta && meta.pages && meta.pages[0] === _currentMushafPage){
-      newSurah = s;
-      break;
+  
+  // Find ALL surahs on this page and their starting line indices
+  // surahStartLineIdx[surah] = index in _pageLines where this surah starts
+  const surahStartLineIdx = {};
+  let prevSurah = -1;
+  for(let i = 0; i < _pageLines.length; i++){
+    const line = _pageLines[i];
+    if(line.surah !== prevSurah){
+      surahStartLineIdx[line.surah] = i;
+      prevSurah = line.surah;
     }
   }
-  if(newSurah){
-    // Emit surah header + Bismillah at the right position (after the last
-    // word of the previous surah on this page)
-    const meta = SURAH_META.find(s => s.num === newSurah);
-    if(meta){
-      const header = document.createElement('div');
-      header.className = 'mushaf-surah-header first';
-      const arName = document.createElement('div');
-      arName.className = 'mushaf-surah-name-ar';
-      arName.textContent = meta.name;
-      header.appendChild(arName);
-      const enName = document.createElement('div');
-      enName.className = 'mushaf-surah-name-en';
-      enName.innerHTML = `<span class="num">${newSurah}.</span> Surah ${meta.translit} <span class="meaning">· ${meta.meaning}</span>`;
-      header.appendChild(enName);
-      // Insert at the END of the page (or after the previous surah ends)
-      // For simplicity, put the header at the top for now
-      frag.appendChild(header);
-      if(newSurah !== 1 && newSurah !== 9){
-        // Bismillah
-        const bisLine = document.createElement('div');
-        bisLine.className = 'mushaf-line bismillah-line';
-        bisLine.textContent = 'بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ';
-        frag.appendChild(bisLine);
+  
+  // Render each line, inserting a surah header where a new surah starts
+  for(let i = 0; i < _pageLines.length; i++){
+    const line = _pageLines[i];
+    // Check if this is the first line of a new surah on this page
+    if(surahStartLineIdx[line.surah] === i){
+      const meta = SURAH_META.find(s => s.num === line.surah);
+      if(meta){
+        // === Surah header (ONE LINE: number + transliteration + meaning + Arabic) ===
+        const header = document.createElement('div');
+        header.className = 'mushaf-surah-header';
+        header.innerHTML = `<span class="num">${line.surah}.</span> Surah ${meta.translit} <span class="meaning">· ${meta.meaning}</span> <span class="ar-name">${meta.name}</span>`;
+        frag.appendChild(header);
+        // === Bismillah for surahs 2-114 (except 9) ===
+        if(line.surah !== 1 && line.surah !== 9){
+          const bisLine = document.createElement('div');
+          bisLine.className = 'mushaf-line bismillah-line';
+          bisLine.textContent = 'بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ';
+          frag.appendChild(bisLine);
+        }
       }
     }
-  }
-  // Render each line
-  for(const line of _pageLines){
+    // === Render the line itself ===
     const lineDiv = document.createElement('div');
     lineDiv.className = 'mushaf-line';
     for(const {w} of line.words){
@@ -1485,10 +1487,20 @@ function renderMushafPage(){
     frag.appendChild(lineDiv);
   }
   inner.appendChild(frag);
+  
   // Update page info
   const pageInfo = document.getElementById('pageInfo');
   if(pageInfo){
-    pageInfo.textContent = `Page ${_currentMushafPage} of 604`;
+    const surahsOnPage = Object.keys(surahStartLineIdx);
+    let infoText = `Page ${_currentMushafPage} of 604`;
+    if(surahsOnPage.length > 0){
+      const surahNames = surahsOnPage.map(s => {
+        const m = SURAH_META.find(mm => mm.num === parseInt(s));
+        return m ? m.translit : `Surah ${s}`;
+      });
+      infoText += ` · ${surahNames.join(', ')}`;
+    }
+    pageInfo.textContent = infoText;
   }
 }
 
