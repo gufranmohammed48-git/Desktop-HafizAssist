@@ -341,12 +341,15 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 }
 /* Current word (now) — subtle background tint, no big border */
 .mushaf-line .word.now {
-  color: #ffd700;
-  background: rgba(255, 215, 0, 0.08);
+  color: #ffd700 !important;
+  background: rgba(255, 215, 0, 0.10) !important;
+  border: none !important;
   border-radius: 4px;
   padding: 0 3px;
   margin: 0 1px;
-  text-shadow: 0 0 4px rgba(255, 215, 0, 0.3);
+  text-shadow: 0 0 6px rgba(255, 215, 0, 0.3);
+  box-shadow: none !important;
+  transform: none !important;
 }
 /* Past words — dimmed */
 .mushaf-line .word.past {
