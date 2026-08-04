@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📖</text></svg>">
-<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Amiri+Quran&family=Scheherazade+New:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg: #0A1220;
@@ -312,12 +312,12 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 
 
 /* === REAL MUSHAF LAYOUT (Quran.com style) === */
-/* Amiri Quran is a Quran-specific font that renders alef wasla (ٱ)
-   correctly — the way it appears in the printed mushaf.
-   KFGQPC Uthmanic Script HAFS is not on Google Fonts, so we use
-   Amiri Quran as the primary mushaf font. */
+/* Use Amiri (the widely-supported, proven mushaf font) which
+   correctly renders alef wasla (ٱ) and all Quranic diacritics.
+   Don't use font-feature-settings or font-variant-ligatures — they
+   can cause incorrect glyph substitution in some browsers. */
 .mushaf-line {
-  font-family: 'Amiri Quran', 'Amiri', 'Scheherazade New', 'KFGQPC Uthmanic Script HAFS', serif;
+  font-family: 'Amiri', 'Scheherazade New', serif;
   font-size: 36px;
   line-height: 2.4;
   text-align: justify;
@@ -329,14 +329,6 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
   color: #ffffff;
   width: 100%;
   box-sizing: border-box;
-  /* Proper Arabic rendering - required for alef wasla, ligatures, diacritics */
-  font-feature-settings: 'liga' 1, 'kern' 1, 'calt' 1, 'init' 1, 'medi' 1, 'fina' 1, 'isol' 1, 'mark' 1, 'mkmk' 1;
-  font-variant-ligatures: common-ligatures contextual;
-  -webkit-font-feature-settings: 'liga' 1, 'kern' 1, 'calt' 1, 'init' 1, 'medi' 1, 'fina' 1;
-  text-rendering: optimizeLegibility;
-  /* Don't use OpenType contextual alternates that change shape based on context */
-  font-variant-east-asian: normal;
-  font-variant-numeric: normal;
 }
 .mushaf-line.bismillah-line {
   font-size: 30px;
@@ -423,7 +415,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
   color: rgba(255, 215, 0, 0.7);
 }
 .mushaf-surah-header .ar-name {
-  font-family: 'Amiri Quran', 'Amiri', 'Scheherazade New', serif;
+  font-family: 'Amiri', 'Scheherazade New', serif;
   font-size: 22px;
   color: #d4af37;
   margin-left: 12px;
