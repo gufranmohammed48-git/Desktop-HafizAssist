@@ -7,10 +7,11 @@
 const QURAN_API_BASE = 'https://api.quran.com/api/v4';
 const QURAN_AUDIO_BASE = 'https://audio.qurancdn.com/';  // base for relative audio URLs
 const QURAN_TEXT_BASE = 'https://api.quran.com/api/v4/quran/verses/uthmani';  // full Uthmani text
-// QPC HAFS fonts are PAGE-SPECIFIC (each page has its own 420-glyph set).
-// Use verses.quran.com (which sends CORS headers) instead of quran.com
-// (which blocks CORS). URL pattern: https://verses.quran.com/fonts/quran/hafs/v1/woff2/p{N}.woff2
-const QPC_FONT_BASE = 'https://verses.quran.com/fonts/quran/hafs/v1/woff2/p';
+// QPC HAFS fonts were page-specific PUA-based fonts. We tried this
+// approach for mushaf rendering but it was fragile (CORS, font load
+// failures, missing glyphs for some pages). Pivoted to Amiri Quran
+// (Google Font) which renders standard Arabic text in mushaf style.
+// The functions below are kept for API compatibility but are no-ops.
 
 // Simple in-memory cache to avoid re-fetching
 const _cache = {
@@ -61,8 +62,6 @@ async function fetchPage(pageNum, includeWords = true){
   if(!res.ok) throw new Error(`fetchPage(${pageNum}) failed: ${res.status}`);
   const data = await res.json();
   _cache.pages[pageNum] = data;
-  // Also prefetch code_v1 (PUA codes) for this page so we can render in QPC HAFS font
-  fetchPagePUACodes(pageNum).catch(() => {});  // non-fatal
   return data;
 }
 
