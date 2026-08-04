@@ -984,6 +984,21 @@ function applyMatch(matchAt, matchInfo, heardWord){
       _lastAutoFlipTime = now;
       statusEl.textContent = 'Page complete. Loading next mushaf page...';
       setTimeout(() => {
+        // FIX (v3): Clear the speech transcript so the matcher doesn't
+        // carry over words from the previous page. Without this, the
+        // next _runReProcess() tick re-processes the full transcript
+        // (finalizedText + interim) against the NEW page's refWords,
+        // and any words that happen to match the new page's first few
+        // words get marked as .past (user saw "4 highlighted words by
+        // default" after auto-flip). Clearing the transcript makes the
+        // new page start fresh — the user just continues reciting.
+        // We touch ONLY the auto-flip setTimeout here, NOT loadMushafPage
+        // or setSurahPage or the manual next/prev page, so other paths
+        // are unchanged.
+        finalizedText = '';
+        _pendingFullText = '';
+        _pendingWords = [];
+        committedWordCount = 0;
         loadMushafPage(_currentMushafPage + 1);
         _isAutoFlipping = false;  // reset guard AFTER flip completes
         statusEl.textContent = 'Listening — keep reciting!';
