@@ -314,8 +314,9 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 /* === REAL MUSHAF LAYOUT (Quran.com style) === */
 /* Use Amiri (the widely-supported, proven mushaf font) which
    correctly renders alef wasla (ٱ) and all Quranic diacritics.
-   Don't use font-feature-settings or font-variant-ligatures — they
-   can cause incorrect glyph substitution in some browsers. */
+   Word spacing is critical — without it, words in adjacent
+   <span> elements touch each other. We use letter-spacing for
+   small gaps + word-spacing for larger gaps. */
 .mushaf-line {
   font-family: 'Amiri', 'Scheherazade New', serif;
   font-size: 36px;
@@ -329,6 +330,16 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
   color: #ffffff;
   width: 100%;
   box-sizing: border-box;
+  /* Visible word spacing — critical for mushaf readability.
+     This is the gap BETWEEN words, not within them. */
+  word-spacing: 0.4em;
+  /* Preserve spaces in the text (don't collapse them) */
+  white-space: pre-wrap;
+}
+.mushaf-line .word {
+  /* Extra margin around each word for clearer separation.
+     margin-inline is the RTL-aware version of margin-left/right. */
+  margin-inline: 0.15em;
 }
 .mushaf-line.bismillah-line {
   font-size: 30px;
