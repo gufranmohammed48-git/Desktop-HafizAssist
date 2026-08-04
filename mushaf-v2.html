@@ -11,6 +11,12 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📖</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
+@font-face {
+  font-family: 'QPC HAFS';
+  src: url('assets/qpc-hafs.woff2') format('woff2');
+  font-display: swap;
+}
+
   :root{
     --bg: #0A1220;
     --panel: #101A2C;
@@ -317,8 +323,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
    Word spacing is critical — without it, words in adjacent
    <span> elements touch each other. We use letter-spacing for
    small gaps + word-spacing for larger gaps. */
-.mushaf-line {
-  font-family: 'Amiri', 'Scheherazade New', serif;
+  font-family: 'QPC HAFS', 'Amiri', 'Scheherazade New', serif;;
   font-size: 36px;
   line-height: 2.4;
   text-align: justify;
