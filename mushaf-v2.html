@@ -1508,14 +1508,19 @@ function renderMushafPage(){
     }
   }
   
-  // Render each line, inserting a surah header where a new surah starts
+  // Render each line, inserting a surah header ONLY on the first
+  // page of each surah (where the surah actually starts in the API).
+  // We use meta.pages[0] === _currentMushafPage to check, not just
+  // "first line of page" (which would be true for every page of a
+  // multi-page surah, causing the title to repeat).
   for(let i = 0; i < _pageLines.length; i++){
     const line = _pageLines[i];
     // Check if this is the first line of a new surah on this page
     if(surahStartLineIdx[line.surah] === i){
       const meta = SURAH_META.find(s => s.num === line.surah);
-      if(meta){
+      if(meta && meta.pages && meta.pages[0] === _currentMushafPage){
         // === Surah header (ONE LINE: number + transliteration + meaning + Arabic) ===
+        // ONLY emit on the FIRST page of this surah in the API
         const header = document.createElement('div');
         header.className = 'mushaf-surah-header';
         header.innerHTML = `<span class="num">${line.surah}.</span> Surah ${meta.translit} <span class="meaning">· ${meta.meaning}</span> <span class="ar-name">${meta.name}</span>`;
