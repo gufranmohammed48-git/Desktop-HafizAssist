@@ -917,8 +917,12 @@ function applyMatch(matchAt, matchInfo, heardWord){
   // CRITICAL: pointer is LOCAL (relative to refWords, the surah's slice)
   // but pageEnd is GLOBAL (relative to allRefWords).
   // We need to compute the local page end for the current surah.
-  const surahGlobalStart = (activeSurah && surahStartIndex[activeSurah]) || 0;
-  const localPageEnd = Math.min(refWords.length, pageEnd - surahGlobalStart);
+  // CRITICAL FIX: in the mushaf page system, refWords IS the page's words
+  // (set by loadMushafPage). So localPageEnd is just refWords.length — there's
+  // no need to subtract surahGlobalStart (that's the OLD surah-based system).
+  // The previous code did `pageEnd - surahGlobalStart` which was 1 for
+  // Al-Baqarah (29 - 29 = 0, +1 = 1), causing immediate auto-flip.
+  const localPageEnd = refWords.length;
   // ONLY flip page if there are MORE words in this surah after this page
   // If localPageEnd == refWords.length, the surah is done — advance to next surah instead
   // ALSO: guard with _isAutoFlipping to prevent multiple setTimeout(nextPage)
