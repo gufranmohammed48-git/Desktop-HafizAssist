@@ -318,10 +318,12 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 
 
 /* === REAL MUSHAF LAYOUT (Quran.com style) === */
-/* QPC HAFS is quran.com's official Madinah Mushaf font.
-   Each word is rendered as a single PUA glyph (mushaf ligature).
-   Code_v1 data from the API provides the correct PUA codepoint for each word.
-   Fallback: Amiri if PUA codes not yet loaded. */
+/* QPC HAFS is quran.com's official Madinah Mushaf font (p2.woff2 bundled).
+   Each word in the Quran = 1 PUA codepoint (U+FB50-U+FEFC range).
+   The bundled font has 420 PUA glyphs covering the full range used by
+   the code_v1 API. quran.com has page-specific fonts (p1.woff2, p2.woff2,
+   ..., p604.woff2) but their CORS policy blocks browser loading — we use
+   the bundled p2.woff2 which renders every page in mushaf style. */
 .mushaf-line {
   font-family: 'QPC HAFS', 'Amiri', 'Scheherazade New', serif;
   font-size: 42px;
@@ -1441,6 +1443,7 @@ let _pageWords = [];  // words on the current API page
 let _pageLines = [];  // words grouped by line for the current page
 let _pagePUACodes = {};  // verse_key -> space-separated PUA codes (QPC HAFS glyphs)
 let _puaMode = false;     // true when PUA codes are loaded — render with QPC HAFS
+let _pageFontFamily = null;  // e.g. "QPC_P100" — page-specific QPC HAFS font
 
 async function loadMushafPage(pageNum){
   if(!window.QuranAPI) return;
@@ -1477,11 +1480,20 @@ async function loadMushafPage(pageNum){
     // === Fetch QPC HAFS PUA codes (non-fatal if fails) ===
     _puaMode = false;
     _pagePUACodes = {};
+    _pageFontFamily = null;
     try {
+      // Fetch PUA codes first
       _pagePUACodes = await window.QuranAPI.fetchPagePUACodes(pageNum);
       _puaMode = Object.keys(_pagePUACodes).length > 0;
+      // Load the page-specific QPC HAFS font from verses.quran.com (which has CORS).
+      // This is critical for mushaf rendering — each page's font has the correct
+      // mushaf ligatures for that page's words.
       if(_puaMode){
-        console.log(`[mushaf] Loaded PUA codes for ${Object.keys(_pagePUACodes).length} verses on page ${pageNum}`);
+        const fontLoaded = await window.QuranAPI.loadQPCFontForPage(pageNum);
+        if(fontLoaded){
+          _pageFontFamily = window.QuranAPI.qpcFontFamilyForPage(pageNum);
+        }
+        console.log(`[mushaf] Loaded PUA codes for ${Object.keys(_pagePUACodes).length} verses on page ${pageNum}${_pageFontFamily ? ` (font: ${_pageFontFamily})` : ' (fallback to bundled)'}`);
       }
     } catch(puaErr){
       console.warn('[mushaf] PUA codes not available, falling back to Amiri', puaErr);
@@ -1519,7 +1531,7 @@ async function loadMushafPage(pageNum){
     updateStats();
     renderMushafPage();
     highlightCurrent();  // update .now class for the new page
-    statusEl.textContent = `Page ${pageNum} of 604 loaded.` + (_puaMode ? ' (QPC HAFS)' : ' (Amiri fallback)');
+    statusEl.textContent = `Page ${pageNum} of 604 loaded.` + (_puaMode ? ` (QPC HAFS ${_pageFontFamily})` : ' (Amiri fallback)');
   } catch(e){
     console.error('[mushaf] Failed to load page', pageNum, e);
     statusEl.textContent = `Failed to load page ${pageNum}.`;
@@ -1544,6 +1556,15 @@ function renderMushafPage(){
     }
   }
   
+  // PUA word index tracker — shared across all lines of this page so that
+  // a verse which spans multiple lines uses sequential PUA codes (not the
+  // same codes repeated per line). Keyed by verseKey, value is the next
+  // word index to consume from the verse's code_v1 string.
+  const puaWordIdx = {};
+  for(const verseKey of Object.keys(_pagePUACodes || {})){
+    puaWordIdx[verseKey] = 0;
+  }
+
   // Render each line, inserting a surah header ONLY on the first
   // page of each surah (where the surah actually starts in the API).
   // We use meta.pages[0] === _currentMushafPage to check, not just
@@ -1565,9 +1586,18 @@ function renderMushafPage(){
         if(line.surah !== 1 && line.surah !== 9){
           const bisLine = document.createElement('div');
           bisLine.className = 'mushaf-line bismillah-line' + (_puaMode ? ' pua-mode' : '');
-          // In PUA mode, use Al-Fatihah 1:1's PUA codes (Bismillah glyphs)
+          // In PUA mode, use Al-Fatihah 1:1's PUA codes (Bismillah glyphs).
+          // Bismillah is on page 1, so load QPC_P001 font for it.
           if(_puaMode && _pagePUACodes['1:1']){
             bisLine.textContent = _pagePUACodes['1:1'];
+            // Ensure page 1's font is loaded
+            if(!window.QuranAPI._cache.loadedFonts.has(1)){
+              window.QuranAPI.loadQPCFontForPage(1).then(() => {
+                bisLine.style.fontFamily = '"QPC_P001", "QPC HAFS", Amiri, serif';
+              });
+            } else {
+              bisLine.style.fontFamily = '"QPC_P001", "QPC HAFS", Amiri, serif';
+            }
           } else {
             bisLine.textContent = 'بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ';
           }
@@ -1578,22 +1608,14 @@ function renderMushafPage(){
     // === Render the line itself ===
     const lineDiv = document.createElement('div');
     lineDiv.className = 'mushaf-line' + (_puaMode ? ' pua-mode' : '');
-    // Get PUA codes for this line's verses (in order)
-    let lineVerseKeys = [];
-    if(_puaMode){
-      // Build list of verse keys in line order
-      const seen = new Set();
-      for(const {w} of line.words){
-        if(w.verseKey && !seen.has(w.verseKey)){
-          seen.add(w.verseKey);
-          lineVerseKeys.push(w.verseKey);
-        }
-      }
+    // In PUA mode, apply the page-specific QPC HAFS font family inline
+    // (e.g. "QPC_P100") so the dynamic font we just loaded is used.
+    // Fallback to bundled 'QPC HAFS' (p2.woff2, 420 glyphs) if page font failed.
+    if(_puaMode && _pageFontFamily){
+      lineDiv.style.fontFamily = `"${_pageFontFamily}", "QPC HAFS", 'Amiri', 'Scheherazade New', serif`;
     }
-    // For PUA mode, we'll maintain a per-verse word index so we can
-    // pick the right PUA code for each word in order
-    const puaWordIdx = {};  // verseKey -> next word index to consume
-    for(const vk of lineVerseKeys) puaWordIdx[vk] = 0;
+    // puaWordIdx is initialized above the line loop (shared across all lines)
+    // so multi-line verses use sequential PUA codes.
 
     for(const {w, i, refIdx} of line.words){
       if(w.isEndMarker){

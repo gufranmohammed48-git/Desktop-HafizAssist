@@ -7,13 +7,18 @@
 const QURAN_API_BASE = 'https://api.quran.com/api/v4';
 const QURAN_AUDIO_BASE = 'https://audio.qurancdn.com/';  // base for relative audio URLs
 const QURAN_TEXT_BASE = 'https://api.quran.com/api/v4/quran/verses/uthmani';  // full Uthmani text
+// QPC HAFS fonts are PAGE-SPECIFIC (each page has its own 420-glyph set).
+// Use verses.quran.com (which sends CORS headers) instead of quran.com
+// (which blocks CORS). URL pattern: https://verses.quran.com/fonts/quran/hafs/v1/woff2/p{N}.woff2
+const QPC_FONT_BASE = 'https://verses.quran.com/fonts/quran/hafs/v1/woff2/p';
 
 // Simple in-memory cache to avoid re-fetching
 const _cache = {
   chapters: null,           // {1: {name, verses, pages}, ...}
   pages: {},                // {1: {verses: [...], words: [...]}, ...}
   audio: {},                // {verseKey: url}
-  puaCodes: {}              // {verseKey: code_v1 string} — QPC HAFS glyph codes
+  puaCodes: {},             // {verseKey: code_v1 string} — QPC HAFS glyph codes
+  loadedFonts: new Set()    // page numbers whose QPC HAFS font has been loaded
 };
 
 /**
@@ -94,6 +99,50 @@ async function fetchVersePUACodes(verseKey){
   if(!res.ok) throw new Error(`fetchVersePUACodes(${verseKey}) failed: ${res.status}`);
   const data = await res.json();
   return data.verses?.[0]?.code_v1 || '';
+}
+
+/**
+ * Dynamically load the QPC HAFS font for a specific mushaf page.
+ * QPC HAFS fonts are page-specific — each page has 420 PUA glyphs in
+ * its own file (e.g. p1.woff2, p2.woff2, ..., p604.woff2).
+ * The fonts are registered as `QPC_P001`, `QPC_P002`, etc.
+ * Cached so each page font is only fetched once per session.
+ *
+ * NOTE: quran.com does NOT send CORS headers, so loading fonts from
+ * `quran.com/fonts/...` fails with NetworkError in browsers. This
+ * function still attempts to load per-page fonts and falls back to the
+ * bundled `qpc-hafs.woff2` (which is p2.woff2, 420 PUA glyphs covering
+ * U+FB50-U+FEFC — enough to render any mushaf page, though not with
+ * the exact per-page ligatures).
+ * @param {number} pageNum - mushaf page number (1-604)
+ * @returns {Promise<boolean>} true if font is loaded (or already was), false on error
+ */
+async function loadQPCFontForPage(pageNum){
+  if(_cache.loadedFonts.has(pageNum)) return true;
+  const familyName = `QPC_P${String(pageNum).padStart(3, '0')}`;
+  try {
+    if(Array.from(document.fonts).some(f => f.family === familyName && f.status === 'loaded')){
+      _cache.loadedFonts.add(pageNum);
+      return true;
+    }
+    const font = new FontFace(familyName, `url(${QPC_FONT_BASE}${pageNum}.woff2)`, { crossOrigin: 'anonymous' });
+    const loaded = await font.load();
+    document.fonts.add(loaded);
+    _cache.loadedFonts.add(pageNum);
+    return true;
+  } catch(e){
+    console.warn(`[QPC] Failed to load font for page ${pageNum}:`, e.message);
+    return false;
+  }
+}
+
+/**
+ * Get the font-family name for a specific page.
+ * @param {number} pageNum
+ * @returns {string} e.g. "QPC_P001"
+ */
+function qpcFontFamilyForPage(pageNum){
+  return `QPC_P${String(pageNum).padStart(3, '0')}`;
 }
 
 /**
@@ -188,5 +237,7 @@ window.QuranAPI = {
   fetchVerseAudio,
   fetchRecitations,
   flattenPageWords,
-  clearCache: () => { _cache.chapters = null; _cache.pages = {}; _cache.audio = {}; _cache.puaCodes = {}; }
+  loadQPCFontForPage,
+  qpcFontFamilyForPage,
+  clearCache: () => { _cache.chapters = null; _cache.pages = {}; _cache.audio = {}; _cache.puaCodes = {}; _cache.loadedFonts = new Set(); }
 };
