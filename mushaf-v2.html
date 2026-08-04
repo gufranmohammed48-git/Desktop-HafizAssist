@@ -322,7 +322,10 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
    See https://fonts.google.com/specimen/Amiri+Quran */
 .mushaf-line {
   font-family: 'Amiri Quran', 'Amiri', 'Scheherazade New', serif;
-  font-size: 42px;
+  /* FIX (v96): Reduced from 42px to 36px to prevent single-word
+     orphan lines (فِيهِ appearing alone on its own line) caused
+     by lines overflowing the container width. */
+  font-size: 36px;
   line-height: 2.4;
   text-align: justify;
   text-align-last: center;
@@ -335,9 +338,16 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
   box-sizing: border-box;
   /* Visible word spacing — critical for mushaf readability.
      This is the gap BETWEEN words, not within them. */
-  word-spacing: 0.4em;
+  word-spacing: 0.3em;
   /* Preserve spaces in the text (don't collapse them) */
   white-space: pre-wrap;
+  /* FIX (v96): hyphens none prevents weird mid-word breaks in Arabic
+     (the browser shouldn't try to hyphen-break Arabic words anyway,
+     but this is explicit). overflow-wrap: break-word lets very long
+     words wrap to the next line as a single unit rather than
+     overflowing horizontally. */
+  hyphens: none;
+  overflow-wrap: break-word;
 }
 .mushaf-line .word {
   /* Extra margin around each word for clearer separation.
@@ -352,7 +362,10 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 .mushaf-line .word {
   display: inline-block;
   padding: 2px 1px;
-  margin: 0 4px;
+  /* FIX (v96): Reduced horizontal margin from 4px to 2px so more
+     words fit on each line. The inter-word gap is still visible
+     thanks to the parent's word-spacing. */
+  margin: 0 2px;
   border: none;
   background: transparent;
   color: inherit;
@@ -1832,15 +1845,14 @@ function nextPage(){
   if(_currentMushafPage >= 604) return;
   loadMushafPage(_currentMushafPage + 1);
   _currentPageLineStart += LINES_PER_PAGE;
-  // Reset pointer to local index of new page's first word
-  // CRITICAL: pointer is LOCAL (relative to refWords, the surah's slice)
-  // The new page's first word is at global pageStart, which corresponds
-  // to local index (pageStart - surahGlobalStart) in refWords
-  const surahGlobalStart = (activeSurah && surahStartIndex[activeSurah]) || 0;
-  pointer = Math.max(0, pageStart - surahGlobalStart);
-  _maxPointerReached = pointer;
+  // FIX (v96): In the mushaf page system, refWords IS the new page's
+  // words (set by loadMushafPage). pointer must be 0 so the first
+  // word of the new page is the .now word (not the first 4-6 words
+  // being marked as .past from the OLD surah-relative calculation).
+  pointer = 0;
+  _maxPointerReached = 0;
   _lastHighlightedPointer = -1;
-  _prevPastEnd = pointer;
+  _prevPastEnd = 0;
   consecutiveMisses = 0;
   renderPage();
   updateStats();
@@ -1851,12 +1863,13 @@ function prevPage(){
   if(_currentMushafPage <= 1) return;
   loadMushafPage(_currentMushafPage - 1);
   _currentPageLineStart = Math.max(0, _currentPageLineStart - LINES_PER_PAGE);
-  // Reset pointer to local index of new page's first word
-  const surahGlobalStart = (activeSurah && surahStartIndex[activeSurah]) || 0;
-  pointer = Math.max(0, pageStart - surahGlobalStart);
-  _maxPointerReached = pointer;
+  // FIX (v96): Same as nextPage — pointer = 0, not the stale
+  // surah-relative calculation that was highlighting 4-6 words
+  // as .past on the new page.
+  pointer = 0;
+  _maxPointerReached = 0;
   _lastHighlightedPointer = -1;
-  _prevPastEnd = pointer;
+  _prevPastEnd = 0;
   consecutiveMisses = 0;
   renderPage();
   updateStats();
