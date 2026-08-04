@@ -702,7 +702,8 @@ let consecutiveMisses = 0;
 let _lastHighlightedPointer = -1;
 let _prevPastEnd = 0;  // index of first non-.past word
 let _maxPointerReached = 0;
-let _isAutoFlipping = false;  // guard to prevent multiple auto-flips per Chrome result  // furthest pointer reached this surah
+let _isAutoFlipping = false;  // guard to prevent multiple auto-flips per Chrome result
+let _lastAutoFlipTime = 0;  // timestamp of last auto-flip, used to prevent rapid double-flips  // furthest pointer reached this surah
 let _lastProcessedWordCount = 0;  // unused, kept for legacy
 let _pendingReProcess = false;  // rAF throttle for the heavy re-processing
 let _pendingFullText  = "";     // latest fullText waiting to be re-processed
@@ -929,9 +930,19 @@ function applyMatch(matchAt, matchInfo, heardWord){
   // calls from a single Chrome result event (which processes many words at once)
   if(pointer >= localPageEnd && !_isAutoFlipping){
     // Page complete — load the NEXT MUSHAF PAGE
-    // (Was: check pageEnd < allRefWords.length, but now pageEnd is just refWords.length)
+    // Guard against double-flip: if the user keeps talking during the
+    // 700ms transition, the matcher could process the next page's
+    // words and trigger ANOTHER auto-flip immediately.
+    // Solution: check that 2 seconds have passed since the last flip.
+    const now = Date.now();
+    const timeSinceLastFlip = now - (_lastAutoFlipTime || 0);
+    if(timeSinceLastFlip < 2000){
+      // Too soon since last flip - ignore this one
+      return;
+    }
     if(_currentMushafPage < 604){
       _isAutoFlipping = true;
+      _lastAutoFlipTime = now;
       statusEl.textContent = 'Page complete. Loading next mushaf page...';
       setTimeout(() => {
         loadMushafPage(_currentMushafPage + 1);
