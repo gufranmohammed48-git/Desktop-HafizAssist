@@ -318,13 +318,13 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 
 
 /* === REAL MUSHAF LAYOUT (Quran.com style) === */
-/* Use Amiri (the widely-supported, proven mushaf font) which
-   correctly renders alef wasla (ٱ) and all Quranic diacritics.
-   Word spacing is critical — without it, words in adjacent
-   <span> elements touch each other. We use letter-spacing for
-   small gaps + word-spacing for larger gaps. */
-  font-family: 'Amiri', 'Scheherazade New', serif;
-  font-size: 36px;
+/* QPC HAFS is quran.com's official Madinah Mushaf font.
+   Each word is rendered as a single PUA glyph (mushaf ligature).
+   Code_v1 data from the API provides the correct PUA codepoint for each word.
+   Fallback: Amiri if PUA codes not yet loaded. */
+.mushaf-line {
+  font-family: 'QPC HAFS', 'Amiri', 'Scheherazade New', serif;
+  font-size: 42px;
   line-height: 2.4;
   text-align: justify;
   text-align-last: center;
@@ -341,6 +341,12 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
   /* Preserve spaces in the text (don't collapse them) */
   white-space: pre-wrap;
 }
+/* When the mushaf line contains PUA codes (QPC HAFS mode), 
+   slightly reduce font size since PUA glyphs are larger */
+.mushaf-line.pua-mode {
+  font-size: 38px;
+  word-spacing: 0.5em;
+}
 .mushaf-line .word {
   /* Extra margin around each word for clearer separation.
      margin-inline is the RTL-aware version of margin-left/right. */
@@ -352,9 +358,9 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
   margin: 16px 0;
 }
 .mushaf-line .word {
-  display: inline;
+  display: inline-block;
   padding: 2px 1px;
-  margin: 0;
+  margin: 0 4px;
   border: none;
   background: transparent;
   color: inherit;
@@ -1433,6 +1439,8 @@ function buildGlobalRefWords(){
 // =========================================================================
 let _pageWords = [];  // words on the current API page
 let _pageLines = [];  // words grouped by line for the current page
+let _pagePUACodes = {};  // verse_key -> space-separated PUA codes (QPC HAFS glyphs)
+let _puaMode = false;     // true when PUA codes are loaded — render with QPC HAFS
 
 async function loadMushafPage(pageNum){
   if(!window.QuranAPI) return;
@@ -1465,6 +1473,18 @@ async function loadMushafPage(pageNum){
         el: null  // will be set in renderMushafPage
       });
       pageIdxToRefIdx.set(i, refIdx);
+    }
+    // === Fetch QPC HAFS PUA codes (non-fatal if fails) ===
+    _puaMode = false;
+    _pagePUACodes = {};
+    try {
+      _pagePUACodes = await window.QuranAPI.fetchPagePUACodes(pageNum);
+      _puaMode = Object.keys(_pagePUACodes).length > 0;
+      if(_puaMode){
+        console.log(`[mushaf] Loaded PUA codes for ${Object.keys(_pagePUACodes).length} verses on page ${pageNum}`);
+      }
+    } catch(puaErr){
+      console.warn('[mushaf] PUA codes not available, falling back to Amiri', puaErr);
     }
     // Group by line_number
     _pageLines = [];
@@ -1499,7 +1519,7 @@ async function loadMushafPage(pageNum){
     updateStats();
     renderMushafPage();
     highlightCurrent();  // update .now class for the new page
-    statusEl.textContent = `Page ${pageNum} of 604 loaded.`;
+    statusEl.textContent = `Page ${pageNum} of 604 loaded.` + (_puaMode ? ' (QPC HAFS)' : ' (Amiri fallback)');
   } catch(e){
     console.error('[mushaf] Failed to load page', pageNum, e);
     statusEl.textContent = `Failed to load page ${pageNum}.`;
@@ -1544,31 +1564,67 @@ function renderMushafPage(){
         // === Bismillah for surahs 2-114 (except 9) ===
         if(line.surah !== 1 && line.surah !== 9){
           const bisLine = document.createElement('div');
-          bisLine.className = 'mushaf-line bismillah-line';
-          bisLine.textContent = 'بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ';
+          bisLine.className = 'mushaf-line bismillah-line' + (_puaMode ? ' pua-mode' : '');
+          // In PUA mode, use Al-Fatihah 1:1's PUA codes (Bismillah glyphs)
+          if(_puaMode && _pagePUACodes['1:1']){
+            bisLine.textContent = _pagePUACodes['1:1'];
+          } else {
+            bisLine.textContent = 'بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ';
+          }
           frag.appendChild(bisLine);
         }
       }
     }
     // === Render the line itself ===
     const lineDiv = document.createElement('div');
-    lineDiv.className = 'mushaf-line';
+    lineDiv.className = 'mushaf-line' + (_puaMode ? ' pua-mode' : '');
+    // Get PUA codes for this line's verses (in order)
+    let lineVerseKeys = [];
+    if(_puaMode){
+      // Build list of verse keys in line order
+      const seen = new Set();
+      for(const {w} of line.words){
+        if(w.verseKey && !seen.has(w.verseKey)){
+          seen.add(w.verseKey);
+          lineVerseKeys.push(w.verseKey);
+        }
+      }
+    }
+    // For PUA mode, we'll maintain a per-verse word index so we can
+    // pick the right PUA code for each word in order
+    const puaWordIdx = {};  // verseKey -> next word index to consume
+    for(const vk of lineVerseKeys) puaWordIdx[vk] = 0;
+
     for(const {w, i, refIdx} of line.words){
       if(w.isEndMarker){
+        // Add a space before the marker
+        lineDiv.appendChild(document.createTextNode(' '));
         const marker = document.createElement('span');
         marker.className = 'ayah-marker';
         marker.textContent = w.text;
         lineDiv.appendChild(marker);
         continue;
       }
-      // Regular word
+      // Regular word — add a leading space so words don't touch each other
+      lineDiv.appendChild(document.createTextNode(' '));
       const span = document.createElement('span');
       span.className = 'word';
       // CRITICAL: link the DOM element to the refWord for the matcher
       if(refIdx !== undefined && refWords[refIdx]){
         refWords[refIdx].el = span;
       }
-      span.textContent = w.text;
+      // === QPC HAFS rendering: use PUA code if available ===
+      if(_puaMode && _pagePUACodes[w.verseKey]){
+        const codes = _pagePUACodes[w.verseKey].split(/\s+/);
+        const idx = puaWordIdx[w.verseKey]++;
+        if(idx < codes.length && codes[idx]){
+          span.textContent = codes[idx];  // PUA code — QPC HAFS will render as mushaf glyph
+        } else {
+          span.textContent = w.text;  // fallback to Arabic text
+        }
+      } else {
+        span.textContent = w.text;
+      }
       lineDiv.appendChild(span);
     }
     frag.appendChild(lineDiv);

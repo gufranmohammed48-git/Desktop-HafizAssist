@@ -12,7 +12,8 @@ const QURAN_TEXT_BASE = 'https://api.quran.com/api/v4/quran/verses/uthmani';  //
 const _cache = {
   chapters: null,           // {1: {name, verses, pages}, ...}
   pages: {},                // {1: {verses: [...], words: [...]}, ...}
-  audio: {}                 // {verseKey: url}
+  audio: {},                // {verseKey: url}
+  puaCodes: {}              // {verseKey: code_v1 string} — QPC HAFS glyph codes
 };
 
 /**
@@ -55,7 +56,44 @@ async function fetchPage(pageNum, includeWords = true){
   if(!res.ok) throw new Error(`fetchPage(${pageNum}) failed: ${res.status}`);
   const data = await res.json();
   _cache.pages[pageNum] = data;
+  // Also prefetch code_v1 (PUA codes) for this page so we can render in QPC HAFS font
+  fetchPagePUACodes(pageNum).catch(() => {});  // non-fatal
   return data;
+}
+
+/**
+ * Fetch QPC HAFS PUA codes (code_v1) for a specific page.
+ * Each word in the Quran maps to a PUA codepoint in quran.com's official mushaf font.
+ * Endpoint: /quran/verses/code_v1?page_number=N
+ * Returns: { "1:1": "code1 code2 code3 ...", "1:2": "...", ... }
+ * @param {number} pageNum - mushaf page number (1-604)
+ * @returns {Promise<Object>} Map of verse_key -> space-separated PUA codes
+ */
+async function fetchPagePUACodes(pageNum){
+  if(_cache.puaCodes[pageNum]) return _cache.puaCodes[pageNum];
+  const url = `${QURAN_API_BASE}/quran/verses/code_v1?page_number=${pageNum}`;
+  const res = await fetch(url);
+  if(!res.ok) throw new Error(`fetchPagePUACodes(${pageNum}) failed: ${res.status}`);
+  const data = await res.json();
+  const result = {};
+  for(const v of data.verses){
+    result[v.verse_key] = v.code_v1;
+  }
+  _cache.puaCodes[pageNum] = result;
+  return result;
+}
+
+/**
+ * Get PUA codes for a single verse (for fallback paths).
+ * @param {string} verseKey - e.g. "1:1"
+ * @returns {Promise<string>} space-separated PUA codes
+ */
+async function fetchVersePUACodes(verseKey){
+  const url = `${QURAN_API_BASE}/quran/verses/code_v1?verse_key=${encodeURIComponent(verseKey)}`;
+  const res = await fetch(url);
+  if(!res.ok) throw new Error(`fetchVersePUACodes(${verseKey}) failed: ${res.status}`);
+  const data = await res.json();
+  return data.verses?.[0]?.code_v1 || '';
 }
 
 /**
@@ -144,9 +182,11 @@ window.QuranAPI = {
   fetchAllChapters,
   fetchChapter,
   fetchPage,
+  fetchPagePUACodes,
+  fetchVersePUACodes,
   fetchChapterVerses,
   fetchVerseAudio,
   fetchRecitations,
   flattenPageWords,
-  clearCache: () => { _cache.chapters = null; _cache.pages = {}; _cache.audio = {}; }
+  clearCache: () => { _cache.chapters = null; _cache.pages = {}; _cache.audio = {}; _cache.puaCodes = {}; }
 };
