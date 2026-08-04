@@ -513,7 +513,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 <header>
   <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
   <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
-  <div class="version-badge" id="versionBadge" title="Current build version">v3</div>
+  <div class="version-badge" id="versionBadge" title="Current build version">v4</div>
 </header>
 
 <p class="lede">
@@ -747,6 +747,16 @@ let _lastProcessedWordCount = 0;  // unused, kept for legacy
 let _pendingReProcess = false;  // rAF throttle for the heavy re-processing
 let _pendingFullText  = "";     // latest fullText waiting to be re-processed
 let _pendingWords     = [];     // latest words array waiting to be re-processed
+let _pageFlipGuard    = false;  // when true, _runReProcess skips one tick to prevent
+                                 // OLD words (from the previous page) from being
+                                 // matched against the NEW page after auto-flip.
+                                 // Chrome's SpeechRecognition keeps event.results
+                                 // around even after we clear our transcript vars,
+                                 // so the next onresult re-populates finalizedText
+                                 // with the OLD words. By skipping one matcher tick
+                                 // AND clearing finalizedText in that skip, the next
+                                 // onresult builds a fresh transcript starting from
+                                 // the user's NEW words only.
 let stats          = {correct:0, mistake:0, unclear:0};
 let debugLog       = [];     // every mistake/unclear pushed here for the debug panel
 const MAX_DEBUG_LOG = 50;     // cap to prevent memory bloat during long recitations
@@ -1553,6 +1563,11 @@ async function loadMushafPage(pageNum){
     confidences = [];
     renderDebugPanel();
     updateStats();
+    // FIX (v4): Tell _runReProcess to skip one tick after a page flip.
+    // Without this, the next onresult (which Chrome always sends) would
+    // re-populate finalizedText with the OLD words from event.results
+    // and the matcher would mark 4 random words on the new page as .past.
+    _pageFlipGuard = true;
     renderMushafPage();
     highlightCurrent();  // update .now class for the new page
     statusEl.textContent = `Page ${pageNum} of 604 loaded. (Amiri Quran)`;
@@ -2103,6 +2118,56 @@ async function startListening(){
   function _runReProcess(){
     _pendingReProcess = false;
     if(!refWords.length) return;  // surah not loaded yet
+
+    // FIX (v4): Skip one full processing tick immediately after a page
+    // flip. The matcher's transcript (finalizedText, _pendingWords)
+    // still contains words from the previous page at this point.
+    // If we processed them now, they would be re-matched against the
+    // new page's refWords and any matches would mark the new page's
+    // words as .past (the '4 highlighted words by default' bug).
+    //
+    // Why we need the skip-tick:
+    //   Chrome's SpeechRecognition keeps event.results populated with
+    //   the OLD words. The next onresult would re-add them to
+    //   finalizedText via the cumulative '+=' pattern. So just clearing
+    //   finalizedText here isn't enough — the next tick would re-populate
+    //   it. Skipping this tick AND clearing the transcript means the
+    //   NEXT tick starts with a fresh transcript (just the user's new
+    //   words, since Chrome's event.results is still old but we're not
+    //   adding OLD words because we cleared finalizedText).
+    //
+    // The user may lose 1-2 words they said during the page-flip
+    // transition, but the new page starts clean.
+    if(_pageFlipGuard){
+      _pageFlipGuard = false;
+      // Clear all .past classes on the new page so it starts visually clean
+      for(let i = 0; i < refWords.length; i++){
+        if(refWords[i] && refWords[i].el){
+          refWords[i].el.classList.remove('past', 'now', 'future');
+          refWords[i].el.dataset.status = '';
+        }
+      }
+      // Reset matcher state for the new page
+      pointer = 0;
+      _maxPointerReached = 0;
+      _prevPastEnd = 0;
+      _lastHighlightedPointer = -1;
+      committedWordCount = 0;
+      consecutiveMisses = 0;
+      stats = {correct:0, mistake:0, unclear:0};
+      debugLog = [];
+      // Clear the cumulative transcript so the NEXT onresult builds
+      // a fresh transcript starting from the user's new words (Chrome
+      // re-populates event.results but we cleared finalizedText so
+      // the cumulative total starts from 0, not from the OLD words).
+      finalizedText = '';
+      _pendingFullText = '';
+      _pendingWords = [];
+      // Re-apply .now to the first word
+      highlightCurrent();
+      return;
+    }
+
     const words = _pendingWords;
 
     // Reset dataset.status ONLY for words we haven't reached yet
