@@ -344,10 +344,12 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
    See https://fonts.google.com/specimen/Amiri+Quran */
 .mushaf-line {
   font-family: 'Amiri Quran', 'Amiri', 'Scheherazade New', serif;
-  /* FIX (v96): Reduced from 42px to 36px to prevent single-word
-     orphan lines (فِيهِ appearing alone on its own line) caused
-     by lines overflowing the container width. */
-  font-size: 36px;
+  /* FIX (v5): Reduced from 36px to 28px to fully prevent single-word
+     orphan lines. At 36px, very long words or short final words on
+     a page (e.g. فِيهِ) still overflowed and wrapped alone. 28px
+     gives plenty of room for the longest Quranic words to fit on
+     one line, while staying readable for recitation. */
+  font-size: 28px;
   line-height: 2.4;
   text-align: justify;
   text-align-last: center;
@@ -356,18 +358,14 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
   padding: 0 8px;
   font-weight: 400;
   color: #ffffff;
+  /* FIX (v5): Force every line to fill the full width. text-align:
+     justify stretches the inter-word gaps to fill the line, and
+     text-align-last: center keeps the very last line centered (so
+     a short last line doesn't get awkwardly justified). */
   width: 100%;
   box-sizing: border-box;
-  /* Visible word spacing — critical for mushaf readability.
-     This is the gap BETWEEN words, not within them. */
   word-spacing: 0.3em;
-  /* Preserve spaces in the text (don't collapse them) */
   white-space: pre-wrap;
-  /* FIX (v96): hyphens none prevents weird mid-word breaks in Arabic
-     (the browser shouldn't try to hyphen-break Arabic words anyway,
-     but this is explicit). overflow-wrap: break-word lets very long
-     words wrap to the next line as a single unit rather than
-     overflowing horizontally. */
   hyphens: none;
   overflow-wrap: break-word;
 }
@@ -494,13 +492,6 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
       <div class="theme-option" data-theme="sepia"><span class="swatch" style="background:#f4ecd8"></span>Sepia (Mushaf)</div>
       <div class="theme-option" data-theme="royal"><span class="swatch" style="background:#0d1b2a"></span>Royal Blue</div>
     </div>
-    <div class="dropdown-divider"></div>
-    <div class="dropdown-section">
-      <div class="dropdown-label">Quran Font</div>
-      <div class="theme-option font-option" data-font="Amiri" style="font-family:'Amiri',serif">Amiri (Classic)</div>
-      <div class="theme-option font-option" data-font="KFGQPC Uthmanic Script HAFS" style="font-family:'KFGQPC Uthmanic Script HAFS',serif;font-size:14px">KFGQPC Uthmanic</div>
-      <div class="theme-option font-option" data-font="Scheherazade New" style="font-family:'Scheherazade New',serif">Scheherazade New</div>
-    </div>
   </div>
 </div>
 
@@ -513,7 +504,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 <header>
   <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
   <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
-  <div class="version-badge" id="versionBadge" title="Current build version">v4</div>
+  <div class="version-badge" id="versionBadge" title="Current build version">v5</div>
 </header>
 
 <p class="lede">
@@ -2452,39 +2443,8 @@ if(_savedTheme && ['dark','light','sepia','royal'].includes(_savedTheme)){
   document.body.className = 'theme-' + _savedTheme;
 }
 // ==== END THEME PICKER ====
-
-// ==== QURAN FONT PICKER ====
-const FONT_OPTIONS = {
-  'Amiri': "'Amiri', serif",
-  'KFGQPC Uthmanic Script HAFS': "'KFGQPC Uthmanic Script HAFS', 'Amiri', serif",
-  'Scheherazade New': "'Scheherazade New', 'Amiri', serif"
-};
-function applyQuranFont(fontName){
-  const fontValue = FONT_OPTIONS[fontName] || FONT_OPTIONS['Amiri'];
-  // Set on both html and body for maximum compatibility
-  document.documentElement.style.setProperty('--quran-font', fontValue);
-  document.body.style.setProperty('--quran-font', fontValue);
-  try { localStorage.setItem('hifzapp-font', fontName); } catch(e){}
-  // No force re-render - it was causing scroll-to-top
-  // The CSS variable change is enough; browser will re-render naturally
-}
-document.querySelectorAll('.font-option').forEach(opt => {
-  opt.addEventListener('click', (e) => {
-    e.stopPropagation();  // prevent the .theme-option handler from also firing
-    const fontName = opt.dataset.font;
-    applyQuranFont(fontName);
-    settingsPicker.classList.remove('open');
-  });
-});
-// Load saved font
-let _savedFont = null;
-try { _savedFont = localStorage.getItem('hifzapp-font'); } catch(e){}
-if(_savedFont && FONT_OPTIONS[_savedFont]){
-  applyQuranFont(_savedFont);
-} else {
-  applyQuranFont('Amiri');  // default
-}
-// ==== END QURAN FONT PICKER ====
+// (Quran Font picker removed — we now use Amiri Quran only, the
+//  mushaf-style Google Font. See https://fonts.google.com/specimen/Amiri+Quran)
 
 // ==== SENSITIVITY SLIDER ====
 // Range: 0 = easy (0.05 = very lenient), 100 = strict (0.50 = very strict)
