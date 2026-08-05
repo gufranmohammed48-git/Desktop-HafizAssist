@@ -345,31 +345,53 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 .mushaf-line {
   font-family: 'Amiri Quran', 'Amiri', 'Scheherazade New', serif;
   /* FIX (v8): User asked for 22px — easier to read than 20px.
-     At 22px most pages have no orphan words, but a few very long
-     lines (like page 5's فِيهِ) may still wrap a single word.
-     This is the best compromise between size and orphan-free.
-     FIX (v11): bumped to 23px to test legibility — user wanted
-     the whole page a little larger. */
+     FIX (v11): bumped to 23px to test legibility. */
   font-size: 23px;
   line-height: 2.2;
+  /* FIX (v13): Forced FULL JUSTIFICATION so every mushaf line starts
+     at the same X position and ends at the same X position, like a
+     real mushaf. The combination:
+       1) text-align: justify
+       2) text-align-last: justify (was 'center' in v12 — would
+          break the last-line alignment)
+       3) word-spacing: 0 (let justify handle the inter-word gap)
+       4) ::after spacer (see below) that takes 100% of the line
+          width — this is the classic CSS trick to make justify
+          activate even on lines that DON'T wrap naturally
+     Without the ::after, a logical mushaf line of 6 short words
+     that fits inside the container stays on one physical line and
+     text-align: justify is a no-op (justification only applies to
+     wrapped lines). The ::after forces the browser to treat the
+     line as if it has a second physical line, which makes the
+     justify algorithm distribute the words evenly. */
   text-align: justify;
-  text-align-last: center;
+  text-align-last: justify;
   direction: rtl;
   margin: 4px 0;
   padding: 0 8px;
-  /* FIX (v11): User reversed v10 — too heavy. Revert mushaf text
-     to normal weight. Only the chapter title (.mushaf-surah-header)
-     stays bold now. */
+  /* FIX (v11): normal weight, only chapter title is bold. */
   font-weight: 400;
-  /* FIX (v9): was hardcoded to color: #ffffff which made mushaf text
-     invisible on light/sepia themes. Use the theme's text color. */
+  /* FIX (v9): theme-aware text color. */
   color: var(--text);
   width: 100%;
   box-sizing: border-box;
-  word-spacing: 0.2em;
+  word-spacing: 0;
   white-space: pre-wrap;
   hyphens: none;
   overflow-wrap: break-word;
+}
+/* FIX (v13): Invisible 100%-width spacer that forces text-align:justify
+   to activate on every mushaf line, even short ones. Without this the
+   line stays left-aligned (or right-aligned for RTL) and the words
+   bunch together at the right edge, leaving the left half empty. */
+.mushaf-line::after {
+  content: "";
+  display: inline-block;
+  width: 100%;
+  height: 0;
+  line-height: 0;
+  overflow: hidden;
+  vertical-align: top;
 }
 .mushaf-line .word {
   /* Extra margin around each word for clearer separation.
@@ -562,7 +584,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 <header>
   <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
   <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
-  <div class="version-badge" id="versionBadge" title="Current build version">v12</div>
+  <div class="version-badge" id="versionBadge" title="Current build version">v13</div>
 </header>
 
 <p class="lede">
