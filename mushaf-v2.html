@@ -344,13 +344,13 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
    See https://fonts.google.com/specimen/Amiri+Quran */
 .mushaf-line {
   font-family: 'Amiri Quran', 'Amiri', 'Scheherazade New', serif;
-  /* FIX (v5): Reduced from 36px to 28px to fully prevent single-word
-     orphan lines. At 36px, very long words or short final words on
-     a page (e.g. فِيهِ) still overflowed and wrapped alone. 28px
-     gives plenty of room for the longest Quranic words to fit on
-     one line, while staying readable for recitation. */
-  font-size: 28px;
-  line-height: 2.4;
+  /* FIX (v7): Reduced from 22px to 20px. Page 5 (and similar pages
+     with very long lines) still had orphan words like فِيهِ on
+     their own line because the line was too long to fit the next
+     word. At 20px, even the longest mushaf lines fit with one
+     extra word. The text is still readable for recitation. */
+  font-size: 20px;
+  line-height: 2.0;
   text-align: justify;
   text-align-last: center;
   direction: rtl;
@@ -358,13 +358,9 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
   padding: 0 8px;
   font-weight: 400;
   color: #ffffff;
-  /* FIX (v5): Force every line to fill the full width. text-align:
-     justify stretches the inter-word gaps to fill the line, and
-     text-align-last: center keeps the very last line centered (so
-     a short last line doesn't get awkwardly justified). */
   width: 100%;
   box-sizing: border-box;
-  word-spacing: 0.3em;
+  word-spacing: 0.2em;
   white-space: pre-wrap;
   hyphens: none;
   overflow-wrap: break-word;
@@ -381,11 +377,11 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 }
 .mushaf-line .word {
   display: inline-block;
-  padding: 2px 1px;
-  /* FIX (v96): Reduced horizontal margin from 4px to 2px so more
-     words fit on each line. The inter-word gap is still visible
-     thanks to the parent's word-spacing. */
-  margin: 0 2px;
+  padding: 1px 0;
+  /* FIX (v6): Reduced margin to 0 (was 2px) to give the longest
+     Quranic words maximum room to fit on one line. The inter-word
+     visual gap is maintained by the parent's word-spacing. */
+  margin: 0;
   border: none;
   background: transparent;
   color: inherit;
@@ -504,7 +500,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 <header>
   <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
   <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
-  <div class="version-badge" id="versionBadge" title="Current build version">v5</div>
+  <div class="version-badge" id="versionBadge" title="Current build version">v7</div>
 </header>
 
 <p class="lede">
