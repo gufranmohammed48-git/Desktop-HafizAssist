@@ -401,6 +401,35 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
   transition: color 0.2s ease, background 0.2s ease;
   cursor: default;
 }
+/* FIX (v16): Kashida (Arabic tatweel) gap between every pair of words.
+   This is the traditional Arabic justification technique used in
+   printed mushafs. The span contains 5 Arabic tatweel characters
+   (ـ) which render as horizontal-line bridges between the words.
+   flex-grow: 1 makes the gap absorb the natural space-between
+   distribution. The kashida characters are centered in the gap and
+   stretched slightly with letter-spacing so the line looks filled
+   with kashida instead of empty whitespace. */
+.mushaf-line .kashida-gap {
+  flex: 1 1 auto;
+  display: inline-block;
+  text-align: center;
+  color: inherit;
+  font-size: inherit;
+  font-family: inherit;
+  /* Spaced-out kashida characters look more like real mushaf kashida
+     than a tight cluster. */
+  letter-spacing: 0.4em;
+  /* Vertical-align baseline so the kashida sits on the same line
+     as the words. */
+  vertical-align: baseline;
+  /* Slightly faded so the kashida is visible but doesn't compete
+     with the words. */
+  opacity: 0.7;
+  /* Prevent line break inside the kashida */
+  white-space: nowrap;
+  /* No background or border — the kashida is text only */
+  background: transparent;
+}
 .mushaf-line.bismillah-line {
   /* FIX (v10): Match the surah-header Arabic name size so bismillah
      and chapter title look balanced. Was 30px.
@@ -585,7 +614,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 <header>
   <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
   <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
-  <div class="version-badge" id="versionBadge" title="Current build version">v15</div>
+  <div class="version-badge" id="versionBadge" title="Current build version">v16</div>
 </header>
 
 <p class="lede">
@@ -1698,7 +1727,8 @@ function renderMushafPage(){
     lineDiv.className = 'mushaf-line';
     // Standard Arabic text — Amiri Quran will render in mushaf style
 
-    for(const {w, i, refIdx} of line.words){
+    for(let wi = 0; wi < line.words.length; wi++){
+      const {w, i, refIdx} = line.words[wi];
       if(w.isEndMarker){
         // Add a space before the marker
         lineDiv.appendChild(document.createTextNode(' '));
@@ -1719,6 +1749,21 @@ function renderMushafPage(){
       // Use the standard Arabic text from the API — Amiri Quran handles mushaf ligatures
       span.textContent = w.text;
       lineDiv.appendChild(span);
+      // FIX (v16): Insert kashida (Arabic tatweel) between every pair of
+      // words. Kashida is the traditional Arabic justification technique:
+      // a horizontal line character (ـ) that visually stretches the line
+      // like a real printed mushaf instead of using empty whitespace.
+      // The kashida is in a flex item with flex-grow: 1 so the gap
+      // absorbs the natural space-between distribution. The 5 tatweel
+      // characters provide enough visual presence to look like real
+      // mushaf kashida. .kashida-gap is a flex item (not a .word), so
+      // the matcher is unaffected — it only reads .word elements.
+      if(wi < line.words.length - 1){
+        const kashida = document.createElement('span');
+        kashida.className = 'kashida-gap';
+        kashida.textContent = 'ـــــ';  // 5 Arabic tatweel characters
+        lineDiv.appendChild(kashida);
+      }
     }
     frag.appendChild(lineDiv);
   }
@@ -1825,7 +1870,8 @@ function renderPage(){
     const lineDiv = document.createElement('div');
     lineDiv.className = 'mushaf-line';
     let lineHasContent = false;
-    for(const {w, i} of line.words){
+    for(let wi = 0; wi < line.words.length; wi++){
+      const {w, i} = line.words[wi];
       // Skip already-rendered words (Bismillah)
       if(rendered.has(i)) continue;
       lineHasContent = true;
@@ -1846,6 +1892,15 @@ function renderPage(){
       span.textContent = w.text;
       w.el = span;
       lineDiv.appendChild(span);
+      // FIX (v16): Insert kashida between every pair of words (see main
+      // render path above for full explanation). The kashida is NOT a
+      // .word element, so the matcher only matches .word items.
+      if(wi < line.words.length - 1){
+        const kashida = document.createElement('span');
+        kashida.className = 'kashida-gap';
+        kashida.textContent = 'ـــــ';  // 5 Arabic tatweel characters
+        lineDiv.appendChild(kashida);
+      }
     }
     // Only append if line has content (skip lines that were entirely Bismillah)
     if(lineHasContent){
