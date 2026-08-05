@@ -344,8 +344,11 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
    See https://fonts.google.com/specimen/Amiri+Quran */
 .mushaf-line {
   font-family: 'Amiri Quran', 'Amiri', 'Scheherazade New', serif;
-  /* FIX (v8): 22px base. FIX (v11): bumped to 23px. */
-  font-size: 23px;
+  /* FIX (v8): 22px base. FIX (v11): 23px. FIX (v15): 24px.
+     Larger words fill more of the line width, so flex space-between
+     has less empty space to distribute and the inter-word gaps look
+     natural instead of stretched. */
+  font-size: 24px;
   line-height: 2.2;
   /* FIX (v14): Use flexbox space-between for proper Arabic mushaf
      justification. Previous v13 attempt used CSS text-align:justify
@@ -373,12 +376,13 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
   word-spacing: 0;
   hyphens: none;
   overflow-wrap: break-word;
-  /* The flex items (.word) need to NOT stretch to fill empty space
-     — only the GAPS between them stretch. flex: 0 0 auto means the
-     word takes its content width, and justify-content handles the
-     gap distribution. */
-  gap: 0 0.15em;  /* small visual gap between words; main gaps
-                      come from justify-content space-between */
+  /* FIX (v15): removed the flex `gap` (was 0 0.15em). With flex
+     space-between active, the natural space between words is
+     provided by the text nodes (' ') the JS appends before each
+     word. Adding a flex gap on top was double-spacing. Now
+     justify-content only stretches the natural space, which is
+     much less aggressive. */
+  gap: 0;
 }
 /* FIX (v14): Words inside a flex container are flex items. They
    must NOT have margin: 0 (was 0 already) and must NOT collapse
@@ -401,8 +405,9 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
   /* FIX (v10): Match the surah-header Arabic name size so bismillah
      and chapter title look balanced. Was 30px.
      FIX (v11): bumped to 23px with the rest of the page.
-     FIX (v14): use flex space-between to justify bismillah. */
-  font-size: 23px;
+     FIX (v14): use flex space-between to justify bismillah.
+     FIX (v15): bumped to 24px with the rest of the page. */
+  font-size: 24px;
   color: #ffd700;
   margin: 16px 0;
   /* FIX (v11): removed bold (was 700 in v10). Bismillah stays
@@ -522,8 +527,8 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 }
 .mushaf-surah-header .ar-name {
   font-family: 'Amiri', 'Scheherazade New', serif;
-  /* FIX (v11): bumped to 23px to match the rest of the page bump. */
-  font-size: 23px;
+  /* FIX (v11): bumped to 23px. FIX (v15): bumped to 24px. */
+  font-size: 24px;
   color: #d4af37;
   margin-left: 12px;
   direction: rtl;
@@ -536,12 +541,22 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 /* Page container — uses theme variables so it changes with the active
    theme. FIX (v9): was hardcoded to background: #0a1220 (always dark)
    which made the mushaf page look identical across all 4 themes. */
+/* Page container — capped at 720px (FIX v15) so on wide screens the
+   mushaf is a centered book-like column, NOT a full-width line.
+   A 720px-wide mushaf fits roughly 10-12 Quranic words per line
+   at 23px font, so flex space-between only has to stretch the
+   gaps by a small amount instead of the huge stretches that
+   happened on a 1062px-wide line. */
 #page-inner {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 8px;
-  padding: 32px 16px;
+  padding: 32px 28px;
   min-height: 600px;
+  max-width: 720px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
 }
 /* End of page-outer wrapper: add subtle border like a book page */
 
@@ -570,7 +585,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 <header>
   <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
   <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
-  <div class="version-badge" id="versionBadge" title="Current build version">v14</div>
+  <div class="version-badge" id="versionBadge" title="Current build version">v15</div>
 </header>
 
 <p class="lede">
