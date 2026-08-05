@@ -481,7 +481,13 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
   padding: 8px 0;
   font-family: 'Inter', sans-serif;
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.7);
+  /* FIX (v12): was hardcoded rgba(255,255,255,.7) which made the
+     English transliteration (e.g. "Surah Al-Fatihah") invisible on
+     light/sepia themes because the text was 70% white on a near-white
+     card background. Now uses the theme's dim text color so the
+     English title is visible on every theme. The .num, .meaning, and
+     .ar-name spans override with their own colors below. */
+  color: var(--text-dim);
   letter-spacing: 0.3px;
   direction: ltr;
   white-space: nowrap;
@@ -501,7 +507,10 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
   font-weight: 700;
 }
 .mushaf-surah-header .meaning {
-  color: rgba(255, 215, 0, 0.7);
+  /* FIX (v12): was rgba(255,215,0,.7) — gold 70% which is invisible
+     on cream/sepia backgrounds. Now use --text-dim so the meaning
+     (e.g. "The Opener") is readable on any theme. */
+  color: var(--text-dim);
 }
 .mushaf-surah-header .ar-name {
   font-family: 'Amiri', 'Scheherazade New', serif;
@@ -553,7 +562,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 <header>
   <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
   <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
-  <div class="version-badge" id="versionBadge" title="Current build version">v11</div>
+  <div class="version-badge" id="versionBadge" title="Current build version">v12</div>
 </header>
 
 <p class="lede">
