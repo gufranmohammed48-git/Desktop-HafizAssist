@@ -356,7 +356,9 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
   margin: 4px 0;
   padding: 0 8px;
   font-weight: 400;
-  color: #ffffff;
+  /* FIX (v9): was hardcoded to color: #ffffff which made mushaf text
+     invisible on light/sepia themes. Use the theme's text color. */
+  color: var(--text);
   width: 100%;
   box-sizing: border-box;
   word-spacing: 0.2em;
@@ -388,7 +390,9 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
   transition: color 0.2s ease, background 0.2s ease;
   cursor: default;
 }
-/* Current word (now) — subtle background tint, no big border */
+/* Current word (now) — gold accent, theme-aware. The .now class
+   always wins because of !important so the user's current
+   recitation position is always visible regardless of theme. */
 .mushaf-line .word.now {
   color: #ffd700 !important;
   background: rgba(255, 215, 0, 0.10) !important;
@@ -400,13 +404,42 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
   box-shadow: none !important;
   transform: none !important;
 }
-/* Past words — dimmed */
+/* Past words — dimmed (FIX v9: was hardcoded white-50% which was
+   invisible on light themes). Now uses theme text color at 50%
+   opacity so it works on any theme. */
 .mushaf-line .word.past {
-  color: rgba(255, 255, 255, 0.5);
+  opacity: 0.5;
 }
-/* Future words — bright */
+/* Future words — use the theme text color (FIX v9: was hardcoded
+   white which was invisible on light themes). */
 .mushaf-line .word.future {
-  color: #ffffff;
+  color: var(--text);
+}
+/* Unclear words (FIX v9): on the mushaf line, mark with a strong
+   yellow background and underline so the user can see exactly
+   which words the recognizer is uncertain about. Uses !important
+   to override the default text color. */
+.mushaf-line .word[data-status="unclear"] {
+  background: rgba(241, 196, 15, 0.25) !important;
+  color: #b8860b !important;
+  text-decoration: underline dotted #b8860b !important;
+  border-radius: 3px;
+  padding: 0 3px;
+}
+/* Mistake words (FIX v9): strong red underline for clarity */
+.mushaf-line .word[data-status="mistake"] {
+  background: rgba(231, 76, 60, 0.2) !important;
+  color: #c0392b !important;
+  text-decoration: line-through wavy #c0392b !important;
+  border-radius: 3px;
+  padding: 0 3px;
+}
+/* Correct words (FIX v9): subtle green background */
+.mushaf-line .word[data-status="correct"] {
+  background: rgba(46, 204, 113, 0.2) !important;
+  color: #1e8449 !important;
+  border-radius: 3px;
+  padding: 0 3px;
 }
 /* Ayat marker (verse end) - ornate circular frame like quran.com */
 .ayah-marker {
@@ -465,9 +498,12 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
   display: inline-block;
   line-height: 1;
 }
-/* Page container: dark, like a real mushaf */
+/* Page container — uses theme variables so it changes with the active
+   theme. FIX (v9): was hardcoded to background: #0a1220 (always dark)
+   which made the mushaf page look identical across all 4 themes. */
 #page-inner {
-  background: #0a1220;
+  background: var(--card);
+  border: 1px solid var(--border);
   border-radius: 8px;
   padding: 32px 16px;
   min-height: 600px;
@@ -499,7 +535,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 <header>
   <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
   <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
-  <div class="version-badge" id="versionBadge" title="Current build version">v8</div>
+  <div class="version-badge" id="versionBadge" title="Current build version">v9</div>
 </header>
 
 <p class="lede">
@@ -568,18 +604,13 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
   </div>
 </section>
 
-<!-- Collapsible Mistake Statistics (closed by default) -->
-<div class="debug-panel" id="debugPanel">
-  <div class="debug-panel-header" id="debugPanelHeader">
-    <h2>📊 Mistake Statistics</h2>
-    <button class="debug-close-btn" id="debugCloseBtn" title="Collapse this section">✕</button>
-  </div>
-  <div class="debug-panel-body" id="debugPanelBody">
-    <p class="hint">Each row shows a word that was marked <b style="color:var(--red)">wrong</b> or <b style="color:var(--yellow)">unclear</b>: what the script <b>expected</b> (the Quranic text), what was <b>recited</b> (what was heard), and <b>why</b> it didn't match.</p>
-    <div id="debugList"></div>
-    <button class="clear-btn" id="clearDebugBtn">Clear mistake log</button>
-  </div>
-</div>
+<!-- Mistake Statistics HIDDEN (v9). User said it was "horrible" — English
+     labels, takes too much space, and the underlying matching
+     engine is internal anyway. The top header still shows the
+     correct/mistake/unclear counters in 4 stat badges. The
+     DOM target for the debug list is kept (empty) so the JS
+     that tries to render mistake rows doesn't crash. -->
+<div id="debugPanel" style="display:none"></div>
 
 </div>
 
@@ -1541,13 +1572,17 @@ async function loadMushafPage(pageNum){
     // Set pageStart/pageEnd to refWords range
     pageStart = 0;
     pageEnd = refWords.length;
-    // Reset state
-    stats = {correct: 0, mistake: 0, unclear: 0};
+    // FIX (v9): DO NOT reset stats here. The user wants the
+    // CORRECT/MISTAKES/UNCLEAR counters at the top to keep
+    // accumulating across the whole recitation session (across
+    // page flips, prev/next page clicks, etc.) so they can see
+    // their running total. The explicit Reset button (in the UI)
+    // and the surah-pick handler are the only places that should
+    // reset the session counters now.
     debugLog = [];
     committedWordCount = 0;
     finalizedText = '';
     confidences = [];
-    renderDebugPanel();
     updateStats();
     // FIX (v4): Tell _runReProcess to skip one tick after a page flip.
     // Without this, the next onresult (which Chrome always sends) would
@@ -2140,7 +2175,13 @@ async function startListening(){
       _lastHighlightedPointer = -1;
       committedWordCount = 0;
       consecutiveMisses = 0;
-      stats = {correct:0, mistake:0, unclear:0};
+      // FIX (v9): DO NOT reset `stats` here on auto-flip. The user
+      // expects the CORRECT/MISTAKES/UNCLEAR counters at the top to
+      // keep accumulating across the entire recitation session so they
+      // can see their running total. We only reset the per-page state
+      // (pointer, transcript, classes) so the new page renders fresh,
+      // but the counters persist until the user picks a new surah or
+      // hits the explicit Reset button.
       debugLog = [];
       // Clear the cumulative transcript so the NEXT onresult builds
       // a fresh transcript starting from the user's new words (Chrome
