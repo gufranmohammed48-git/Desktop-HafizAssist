@@ -355,7 +355,12 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
   direction: rtl;
   margin: 4px 0;
   padding: 0 8px;
-  font-weight: 400;
+  /* FIX (v10): User asked to try all-mushaf text in BOLD. The
+     matcher's .past/.now/.future/.data-status rules override
+     font-weight on individual words where needed, so this just
+     sets a heavier base for the normal "future" / unrecited
+     text. Was font-weight: 400. */
+  font-weight: 700;
   /* FIX (v9): was hardcoded to color: #ffffff which made mushaf text
      invisible on light/sepia themes. Use the theme's text color. */
   color: var(--text);
@@ -372,9 +377,12 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
   margin-inline: 0.15em;
 }
 .mushaf-line.bismillah-line {
-  font-size: 30px;
+  /* FIX (v10): Match the surah-header Arabic name size (22px)
+     so bismillah and chapter title look balanced. Was 30px. */
+  font-size: 22px;
   color: #ffd700;
   margin: 16px 0;
+  font-weight: 700;
 }
 .mushaf-line .word {
   display: inline-block;
@@ -481,6 +489,9 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
   justify-content: center;
   align-items: center;
   gap: 4px;
+  /* FIX (v10): bold all the surah header text to match the
+     mushaf line weight. */
+  font-weight: 700;
 }
 .mushaf-surah-header .num {
   color: #d4af37;
@@ -535,7 +546,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 <header>
   <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
   <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
-  <div class="version-badge" id="versionBadge" title="Current build version">v9</div>
+  <div class="version-badge" id="versionBadge" title="Current build version">v10</div>
 </header>
 
 <p class="lede">
