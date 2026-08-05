@@ -403,12 +403,12 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 }
 /* FIX (v16): Kashida (Arabic tatweel) gap between every pair of words.
    This is the traditional Arabic justification technique used in
-   printed mushafs. The span contains 5 Arabic tatweel characters
+   printed mushafs. The span contains Arabic tatweel characters
    (ـ) which render as horizontal-line bridges between the words.
    flex-grow: 1 makes the gap absorb the natural space-between
    distribution. The kashida characters are centered in the gap and
-   stretched slightly with letter-spacing so the line looks filled
-   with kashida instead of empty whitespace. */
+   stretched with letter-spacing so the line looks filled with
+   kashida instead of empty whitespace. */
 .mushaf-line .kashida-gap {
   flex: 1 1 auto;
   display: inline-block;
@@ -416,15 +416,20 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
   color: inherit;
   font-size: inherit;
   font-family: inherit;
-  /* Spaced-out kashida characters look more like real mushaf kashida
-     than a tight cluster. */
-  letter-spacing: 0.4em;
+  /* FIX (v17): wider letter-spacing so kashida is more visible,
+     especially on mobile where the small font makes 0.4em kashida
+     look like a thin invisible line. 0.8em is much more visible. */
+  letter-spacing: 0.8em;
   /* Vertical-align baseline so the kashida sits on the same line
      as the words. */
   vertical-align: baseline;
-  /* Slightly faded so the kashida is visible but doesn't compete
-     with the words. */
-  opacity: 0.7;
+  /* FIX (v17): full opacity (was 0.7) so kashida is clearly visible.
+     The kashida is a normal text character so 1.0 looks natural,
+     not aggressive. */
+  opacity: 1;
+  /* FIX (v17): prevent kashida from being cut off on the right edge
+     when centered in a narrow gap */
+  padding-right: 0.4em;
   /* Prevent line break inside the kashida */
   white-space: nowrap;
   /* No background or border — the kashida is text only */
@@ -614,7 +619,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 <header>
   <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
   <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
-  <div class="version-badge" id="versionBadge" title="Current build version">v16</div>
+  <div class="version-badge" id="versionBadge" title="Current build version">v17</div>
 </header>
 
 <p class="lede">
@@ -1761,7 +1766,7 @@ function renderMushafPage(){
       if(wi < line.words.length - 1){
         const kashida = document.createElement('span');
         kashida.className = 'kashida-gap';
-        kashida.textContent = 'ـــــ';  // 5 Arabic tatweel characters
+        kashida.textContent = 'ــــــــ';  // 8 Arabic tatweel characters (was 5 in v16, too short on mobile)
         lineDiv.appendChild(kashida);
       }
     }
@@ -1898,7 +1903,7 @@ function renderPage(){
       if(wi < line.words.length - 1){
         const kashida = document.createElement('span');
         kashida.className = 'kashida-gap';
-        kashida.textContent = 'ـــــ';  // 5 Arabic tatweel characters
+        kashida.textContent = 'ــــــــ';  // 8 Arabic tatweel characters (was 5 in v16, too short on mobile)
         lineDiv.appendChild(kashida);
       }
     }
