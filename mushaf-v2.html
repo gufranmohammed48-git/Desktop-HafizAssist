@@ -347,20 +347,20 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
   /* FIX (v8): User asked for 22px — easier to read than 20px.
      At 22px most pages have no orphan words, but a few very long
      lines (like page 5's فِيهِ) may still wrap a single word.
-     This is the best compromise between size and orphan-free. */
-  font-size: 22px;
+     This is the best compromise between size and orphan-free.
+     FIX (v11): bumped to 23px to test legibility — user wanted
+     the whole page a little larger. */
+  font-size: 23px;
   line-height: 2.2;
   text-align: justify;
   text-align-last: center;
   direction: rtl;
   margin: 4px 0;
   padding: 0 8px;
-  /* FIX (v10): User asked to try all-mushaf text in BOLD. The
-     matcher's .past/.now/.future/.data-status rules override
-     font-weight on individual words where needed, so this just
-     sets a heavier base for the normal "future" / unrecited
-     text. Was font-weight: 400. */
-  font-weight: 700;
+  /* FIX (v11): User reversed v10 — too heavy. Revert mushaf text
+     to normal weight. Only the chapter title (.mushaf-surah-header)
+     stays bold now. */
+  font-weight: 400;
   /* FIX (v9): was hardcoded to color: #ffffff which made mushaf text
      invisible on light/sepia themes. Use the theme's text color. */
   color: var(--text);
@@ -377,12 +377,15 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
   margin-inline: 0.15em;
 }
 .mushaf-line.bismillah-line {
-  /* FIX (v10): Match the surah-header Arabic name size (22px)
-     so bismillah and chapter title look balanced. Was 30px. */
-  font-size: 22px;
+  /* FIX (v10): Match the surah-header Arabic name size so bismillah
+     and chapter title look balanced. Was 30px.
+     FIX (v11): bumped to 23px with the rest of the page. */
+  font-size: 23px;
   color: #ffd700;
   margin: 16px 0;
-  font-weight: 700;
+  /* FIX (v11): removed bold (was 700 in v10). Bismillah stays
+     gold-colored but normal weight — only chapter title is bold. */
+  font-weight: 400;
 }
 .mushaf-line .word {
   display: inline-block;
@@ -502,12 +505,16 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 }
 .mushaf-surah-header .ar-name {
   font-family: 'Amiri', 'Scheherazade New', serif;
-  font-size: 22px;
+  /* FIX (v11): bumped to 23px to match the rest of the page bump. */
+  font-size: 23px;
   color: #d4af37;
   margin-left: 12px;
   direction: rtl;
   display: inline-block;
   line-height: 1;
+  /* FIX (v11): explicit bold so the chapter title is the only bold
+     thing on the page (mushaf text + bismillah reverted to 400). */
+  font-weight: 700;
 }
 /* Page container — uses theme variables so it changes with the active
    theme. FIX (v9): was hardcoded to background: #0a1220 (always dark)
@@ -546,7 +553,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 <header>
   <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
   <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
-  <div class="version-badge" id="versionBadge" title="Current build version">v10</div>
+  <div class="version-badge" id="versionBadge" title="Current build version">v11</div>
 </header>
 
 <p class="lede">
