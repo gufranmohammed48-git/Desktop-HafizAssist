@@ -344,28 +344,23 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
    See https://fonts.google.com/specimen/Amiri+Quran */
 .mushaf-line {
   font-family: 'Amiri Quran', 'Amiri', 'Scheherazade New', serif;
-  /* FIX (v8): User asked for 22px — easier to read than 20px.
-     FIX (v11): bumped to 23px to test legibility. */
+  /* FIX (v8): 22px base. FIX (v11): bumped to 23px. */
   font-size: 23px;
   line-height: 2.2;
-  /* FIX (v13): Forced FULL JUSTIFICATION so every mushaf line starts
-     at the same X position and ends at the same X position, like a
-     real mushaf. The combination:
-       1) text-align: justify
-       2) text-align-last: justify (was 'center' in v12 — would
-          break the last-line alignment)
-       3) word-spacing: 0 (let justify handle the inter-word gap)
-       4) ::after spacer (see below) that takes 100% of the line
-          width — this is the classic CSS trick to make justify
-          activate even on lines that DON'T wrap naturally
-     Without the ::after, a logical mushaf line of 6 short words
-     that fits inside the container stays on one physical line and
-     text-align: justify is a no-op (justification only applies to
-     wrapped lines). The ::after forces the browser to treat the
-     line as if it has a second physical line, which makes the
-     justify algorithm distribute the words evenly. */
-  text-align: justify;
-  text-align-last: justify;
+  /* FIX (v14): Use flexbox space-between for proper Arabic mushaf
+     justification. Previous v13 attempt used CSS text-align:justify
+     with a 100%-width ::after spacer, but that over-stretched the
+     gaps between words into huge empty spaces (8 words spread
+     across 1062px with massive gaps). The flex approach is closer
+     to real mushaf behavior: first word sits at the right edge,
+     last word sits at the left edge, and middle words distribute
+     evenly. For long lines that wrap, each flex row also uses
+     space-between, so wrapped portions stay justified too. */
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
   direction: rtl;
   margin: 4px 0;
   padding: 0 8px;
@@ -376,52 +371,43 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
   width: 100%;
   box-sizing: border-box;
   word-spacing: 0;
-  white-space: pre-wrap;
   hyphens: none;
   overflow-wrap: break-word;
+  /* The flex items (.word) need to NOT stretch to fill empty space
+     — only the GAPS between them stretch. flex: 0 0 auto means the
+     word takes its content width, and justify-content handles the
+     gap distribution. */
+  gap: 0 0.15em;  /* small visual gap between words; main gaps
+                      come from justify-content space-between */
 }
-/* FIX (v13): Invisible 100%-width spacer that forces text-align:justify
-   to activate on every mushaf line, even short ones. Without this the
-   line stays left-aligned (or right-aligned for RTL) and the words
-   bunch together at the right edge, leaving the left half empty. */
-.mushaf-line::after {
-  content: "";
-  display: inline-block;
-  width: 100%;
-  height: 0;
-  line-height: 0;
-  overflow: hidden;
-  vertical-align: top;
-}
+/* FIX (v14): Words inside a flex container are flex items. They
+   must NOT have margin: 0 (was 0 already) and must NOT collapse
+   inline-block display into flex item display. */
 .mushaf-line .word {
-  /* Extra margin around each word for clearer separation.
-     margin-inline is the RTL-aware version of margin-left/right. */
-  margin-inline: 0.15em;
+  flex: 0 0 auto;
+  display: inline-block;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font-weight: inherit;
+  font-size: inherit;
+  font-family: inherit;
+  transition: color 0.2s ease, background 0.2s ease;
+  cursor: default;
 }
 .mushaf-line.bismillah-line {
   /* FIX (v10): Match the surah-header Arabic name size so bismillah
      and chapter title look balanced. Was 30px.
-     FIX (v11): bumped to 23px with the rest of the page. */
+     FIX (v11): bumped to 23px with the rest of the page.
+     FIX (v14): use flex space-between to justify bismillah. */
   font-size: 23px;
   color: #ffd700;
   margin: 16px 0;
   /* FIX (v11): removed bold (was 700 in v10). Bismillah stays
      gold-colored but normal weight — only chapter title is bold. */
   font-weight: 400;
-}
-.mushaf-line .word {
-  display: inline-block;
-  padding: 1px 0;
-  /* FIX (v6): Reduced margin to 0 (was 2px) to give the longest
-     Quranic words maximum room to fit on one line. The inter-word
-     visual gap is maintained by the parent's word-spacing. */
-  margin: 0;
-  border: none;
-  background: transparent;
-  color: inherit;
-  font-weight: inherit;
-  transition: color 0.2s ease, background 0.2s ease;
-  cursor: default;
 }
 /* Current word (now) — gold accent, theme-aware. The .now class
    always wins because of !important so the user's current
@@ -584,7 +570,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 <header>
   <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
   <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
-  <div class="version-badge" id="versionBadge" title="Current build version">v13</div>
+  <div class="version-badge" id="versionBadge" title="Current build version">v14</div>
 </header>
 
 <p class="lede">
