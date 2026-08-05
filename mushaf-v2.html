@@ -344,13 +344,12 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
    See https://fonts.google.com/specimen/Amiri+Quran */
 .mushaf-line {
   font-family: 'Amiri Quran', 'Amiri', 'Scheherazade New', serif;
-  /* FIX (v7): Reduced from 22px to 20px. Page 5 (and similar pages
-     with very long lines) still had orphan words like فِيهِ on
-     their own line because the line was too long to fit the next
-     word. At 20px, even the longest mushaf lines fit with one
-     extra word. The text is still readable for recitation. */
-  font-size: 20px;
-  line-height: 2.0;
+  /* FIX (v8): User asked for 22px — easier to read than 20px.
+     At 22px most pages have no orphan words, but a few very long
+     lines (like page 5's فِيهِ) may still wrap a single word.
+     This is the best compromise between size and orphan-free. */
+  font-size: 22px;
+  line-height: 2.2;
   text-align: justify;
   text-align-last: center;
   direction: rtl;
@@ -500,7 +499,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 <header>
   <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
   <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
-  <div class="version-badge" id="versionBadge" title="Current build version">v7</div>
+  <div class="version-badge" id="versionBadge" title="Current build version">v8</div>
 </header>
 
 <p class="lede">
