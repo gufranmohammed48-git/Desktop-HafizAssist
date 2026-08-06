@@ -547,18 +547,17 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 /* Page container — uses theme variables so it changes with the active
    theme. FIX (v9): was hardcoded to background: #0a1220 (always dark)
    which made the mushaf page look identical across all 4 themes. */
-/* FIX (v21): Page container — 600px (was 700px in v20). User
-   said v20 still had too much space between words. A narrower
-   container means the words fill a larger percentage of the
-   line width, so the justify-stretched inter-word spaces are
-   smaller. Reduced by 100px as user requested. */
+/* FIX (v22): Page container — 500px (was 600px in v21). User
+   said v21 was better, asked for another -100px to reduce
+   spaces even more. Narrower container = words fill more of
+   the line = smaller inter-word spaces. */
 #page-inner {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 32px 28px;
   min-height: 600px;
-  max-width: 600px;
+  max-width: 500px;
   margin: 0 auto;
   width: 100%;
   box-sizing: border-box;
@@ -590,7 +589,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 <header>
   <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
   <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
-  <div class="version-badge" id="versionBadge" title="Current build version">v21</div>
+  <div class="version-badge" id="versionBadge" title="Current build version">v22</div>
 </header>
 
 <p class="lede">
