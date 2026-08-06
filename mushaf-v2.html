@@ -344,52 +344,32 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
    See https://fonts.google.com/specimen/Amiri+Quran */
 .mushaf-line {
   font-family: 'Amiri Quran', 'Amiri', 'Scheherazade New', serif;
-  /* FIX (v8): 22px base. FIX (v11): 23px. FIX (v15): 24px.
-     Larger words fill more of the line width, so flex space-between
-     has less empty space to distribute and the inter-word gaps look
-     natural instead of stretched. */
+  /* FIX (v19): Back to text-align:justify (no kashida, no flex).
+     User wants the quran.com look: clean text, lines that fill the
+     page width, no visible kashida dashes between every word. The
+     browser's text-align:justify stretches inter-word spaces on
+     wrapped lines (standard newspaper justification). For short
+     lines that don't wrap, they fall back to right-alignment
+     (natural Arabic flow), which is what quran.com also does. */
   font-size: 24px;
   line-height: 2.2;
-  /* FIX (v14): Use flexbox space-between for proper Arabic mushaf
-     justification. Previous v13 attempt used CSS text-align:justify
-     with a 100%-width ::after spacer, but that over-stretched the
-     gaps between words into huge empty spaces (8 words spread
-     across 1062px with massive gaps). The flex approach is closer
-     to real mushaf behavior: first word sits at the right edge,
-     last word sits at the left edge, and middle words distribute
-     evenly. For long lines that wrap, each flex row also uses
-     space-between, so wrapped portions stay justified too. */
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: baseline;
+  text-align: justify;
+  text-align-last: center;
   direction: rtl;
   margin: 4px 0;
   padding: 0 8px;
-  /* FIX (v11): normal weight, only chapter title is bold. */
   font-weight: 400;
-  /* FIX (v9): theme-aware text color. */
   color: var(--text);
   width: 100%;
   box-sizing: border-box;
   word-spacing: 0;
   hyphens: none;
   overflow-wrap: break-word;
-  /* FIX (v15): removed the flex `gap` (was 0 0.15em). With flex
-     space-between active, the natural space between words is
-     provided by the text nodes (' ') the JS appends before each
-     word. Adding a flex gap on top was double-spacing. Now
-     justify-content only stretches the natural space, which is
-     much less aggressive. */
-  gap: 0;
+  white-space: pre-wrap;
 }
-/* FIX (v14): Words inside a flex container are flex items. They
-   must NOT have margin: 0 (was 0 already) and must NOT collapse
-   inline-block display into flex item display. */
+/* FIX (v19): Words are inline again (not flex items). */
 .mushaf-line .word {
-  flex: 0 0 auto;
-  display: inline-block;
+  display: inline;
   padding: 0;
   margin: 0;
   border: none;
@@ -406,27 +386,9 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
    The span contains Arabic tatweel characters (ـ) which render as
    horizontal-line bridges between the words. flex-grow: 1 makes the
    gap absorb the natural space-between distribution. */
+/* FIX (v19): kashida-gap is no longer inserted. Hide the rule. */
 .mushaf-line .kashida-gap {
-  flex: 1 1 auto;
-  display: inline-block;
-  text-align: center;
-  color: inherit;
-  font-size: inherit;
-  font-family: inherit;
-  /* FIX (v18): dialed back to a middle-ground visible kashida.
-     0.5em letter-spacing is visible on both mobile and desktop
-     without being too thick on desktop (where the v17 0.8em made
-     kashida look like heavy black bars and caused lines to wrap). */
-  letter-spacing: 0.5em;
-  /* Vertical-align baseline so the kashida sits on the same line
-     as the words. */
-  vertical-align: baseline;
-  /* FIX (v17): full opacity so kashida is clearly visible. */
-  opacity: 1;
-  /* Prevent line break inside the kashida */
-  white-space: nowrap;
-  /* No background or border — the kashida is text only */
-  background: transparent;
+  display: none;
 }
 .mushaf-line.bismillah-line {
   /* FIX (v10): Match the surah-header Arabic name size so bismillah
@@ -568,19 +530,19 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 /* Page container — uses theme variables so it changes with the active
    theme. FIX (v9): was hardcoded to background: #0a1220 (always dark)
    which made the mushaf page look identical across all 4 themes. */
-/* Page container — capped at 720px (FIX v15) so on wide screens the
-   mushaf is a centered book-like column, NOT a full-width line.
-   A 720px-wide mushaf fits roughly 10-12 Quranic words per line
-   at 23px font, so flex space-between only has to stretch the
-   gaps by a small amount instead of the huge stretches that
-   happened on a 1062px-wide line. */
+/* FIX (v19): Page container — wider to look like quran.com.
+   quran.com's mushaf fills the full viewport width with big text
+   on every line. Going from 720px → 1100px max-width gives more
+   room for words per line at 24px, so most lines are nearly full
+   and justify only stretches a small amount. On mobile the
+   max-width falls back to the screen width. */
 #page-inner {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 32px 28px;
   min-height: 600px;
-  max-width: 720px;
+  max-width: 1100px;
   margin: 0 auto;
   width: 100%;
   box-sizing: border-box;
@@ -612,7 +574,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 <header>
   <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
   <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
-  <div class="version-badge" id="versionBadge" title="Current build version">v18</div>
+  <div class="version-badge" id="versionBadge" title="Current build version">v19</div>
 </header>
 
 <p class="lede">
@@ -1747,21 +1709,11 @@ function renderMushafPage(){
       // Use the standard Arabic text from the API — Amiri Quran handles mushaf ligatures
       span.textContent = w.text;
       lineDiv.appendChild(span);
-      // FIX (v16): Insert kashida (Arabic tatweel) between every pair of
-      // words. Kashida is the traditional Arabic justification technique:
-      // a horizontal line character (ـ) that visually stretches the line
-      // like a real printed mushaf instead of using empty whitespace.
-      // The kashida is in a flex item with flex-grow: 1 so the gap
-      // absorbs the natural space-between distribution. The 5 tatweel
-      // characters provide enough visual presence to look like real
-      // mushaf kashida. .kashida-gap is a flex item (not a .word), so
-      // the matcher is unaffected — it only reads .word elements.
-      if(wi < line.words.length - 1){
-        const kashida = document.createElement('span');
-        kashida.className = 'kashida-gap';
-        kashida.textContent = 'ـــــــ';  // 6 Arabic tatweel characters
-        lineDiv.appendChild(kashida);
-      }
+      // FIX (v19): NO kashida insertion. The user wants the quran.com
+      // look — clean text with no visible kashida dashes between every
+      // word. The browser's text-align: justify handles justification
+      // (stretching spaces) for wrapped lines, and the natural right
+      // alignment handles short lines.
     }
     frag.appendChild(lineDiv);
   }
@@ -1890,15 +1842,7 @@ function renderPage(){
       span.textContent = w.text;
       w.el = span;
       lineDiv.appendChild(span);
-      // FIX (v16): Insert kashida between every pair of words (see main
-      // render path above for full explanation). The kashida is NOT a
-      // .word element, so the matcher only matches .word items.
-      if(wi < line.words.length - 1){
-        const kashida = document.createElement('span');
-        kashida.className = 'kashida-gap';
-        kashida.textContent = 'ـــــــ';  // 6 Arabic tatweel characters
-        lineDiv.appendChild(kashida);
-      }
+      // FIX (v19): NO kashida insertion (see main render path).
     }
     // Only append if line has content (skip lines that were entirely Bismillah)
     if(lineHasContent){
