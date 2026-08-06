@@ -562,16 +562,19 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 /* Page container — uses theme variables so it changes with the active
    theme. FIX (v9): was hardcoded to background: #0a1220 (always dark)
    which made the mushaf page look identical across all 4 themes. */
-/* FIX (v28): REVERT to v26 page-inner 500px (was 700px in v27).
-   User said v27 'doesn't seem right'. Back to the v26 settings:
-   22px font, 500px container, flex + space-between layout. */
+/* FIX (v30): Page container — 550px (was 500px in v22-v29).
+   With the 24px font (v30) the 500px container clipped a lot
+   of words on the longer mushaf lines. 550px gives ~50px more
+   room so 1-2 extra words fit per line. Still no orphan single-
+   word lines because the orphan-words are absorbed into the
+   previous line (clipped along with it). */
 #page-inner {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 32px 28px;
   min-height: 600px;
-  max-width: 500px;
+  max-width: 550px;
   margin: 0 auto;
   width: 100%;
   box-sizing: border-box;
@@ -603,7 +606,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 <header>
   <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
   <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
-  <div class="version-badge" id="versionBadge" title="Current build version">v30</div>
+  <div class="version-badge" id="versionBadge" title="Current build version">v31</div>
 </header>
 
 <p class="lede">
