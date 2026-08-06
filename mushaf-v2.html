@@ -366,6 +366,18 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
   hyphens: none;
   overflow-wrap: break-word;
   white-space: pre-wrap;
+  /* FIX (v24): text-wrap: balance — the modern CSS solution to
+     the orphan-word problem. Without this, the browser breaks
+     the line at whatever point fits, which often leaves a single
+     word alone on the last row (e.g. فِيهِ, الصَّوْعِقِ, يَخْطَفُ
+     on their own lines in the user's screenshot). With text-wrap:
+     balance, the browser tries to make all visual rows have
+     similar width, so the last row gets 2-3 words instead of 1.
+     Supported in Chrome 114+, Firefox 121+, Safari 17.4+. */
+  text-wrap: balance;
+  /* The ::after spacer is already in place for text-align:justify.
+     With text-wrap:balance, the browser may also try to balance
+     the text distribution across rows automatically. */
 }
 /* FIX (v20): Invisible spacer that forces text-align:justify to
    activate on every line, even short ones. Without this, lines
@@ -607,7 +619,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 <header>
   <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
   <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
-  <div class="version-badge" id="versionBadge" title="Current build version">v23</div>
+  <div class="version-badge" id="versionBadge" title="Current build version">v24</div>
 </header>
 
 <p class="lede">
