@@ -345,17 +345,10 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 .mushaf-line {
   font-family: 'Amiri Quran', 'Amiri', 'Scheherazade New', serif;
   font-size: 22px;
-  /* FIX (v23): line-height 2.2 → 1.9. The 2.2 spacing was way too
-     loose (inter-line gap of ~26px at 22px font). User said
-     'there is too much spacing between one line and the next
-     line'. 1.9 gives a tighter, more Quran-like line height. */
   line-height: 1.9;
   text-align: justify;
   text-align-last: justify;
   direction: rtl;
-  /* FIX (v23): margin 4px 0 → 1px 0. Removes extra vertical space
-     between mushaf lines. The line-height 1.9 already provides
-     enough breathing room; the 4px margin was doubling the gap. */
   margin: 1px 0;
   padding: 0 8px;
   font-weight: 400;
@@ -364,20 +357,33 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
   box-sizing: border-box;
   word-spacing: 0;
   hyphens: none;
-  overflow-wrap: break-word;
-  white-space: pre-wrap;
-  /* FIX (v24): text-wrap: balance — the modern CSS solution to
-     the orphan-word problem. Without this, the browser breaks
-     the line at whatever point fits, which often leaves a single
-     word alone on the last row (e.g. فِيهِ, الصَّوْعِقِ, يَخْطَفُ
-     on their own lines in the user's screenshot). With text-wrap:
-     balance, the browser tries to make all visual rows have
-     similar width, so the last row gets 2-3 words instead of 1.
-     Supported in Chrome 114+, Firefox 121+, Safari 17.4+. */
-  text-wrap: balance;
-  /* The ::after spacer is already in place for text-align:justify.
-     With text-wrap:balance, the browser may also try to balance
-     the text distribution across rows automatically. */
+  /* FIX (v25): THE FIX USER ASKED FOR 4 TIMES.
+     Each .mushaf-line is now a fixed-height container with
+     overflow:hidden and white-space:nowrap. This forces every
+     line to be exactly ONE visual row — no wrapping, no orphan
+     words. Words that don't fit in the container width are
+     clipped (hidden). The user explicitly asked for this:
+     'can we use a container for every line and set the CSS
+     properties so nothing comes out of the container because
+     we can even set the height of the container'.
+     The height is set to the line-height (1.9em) so the line
+     is exactly one visual row tall. white-space:nowrap keeps
+     all words on one line. overflow:hidden clips anything
+     that doesn't fit horizontally. The result: every line is
+     one row, no orphans ever. The trade-off is that very long
+     lines (more words than fit in the container width) will
+     have their trailing words clipped — those words are still
+     in the DOM so the matcher still tracks them, but they
+     aren't visible. To make all words fit, the user can:
+     1) Make the font smaller
+     2) Make the page-inner wider
+     3) Both */
+  height: 1.9em;  /* one visual row, exactly line-height tall */
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: clip;
+  /* Remove the multi-line text-wrap settings since we now
+     force single line per container. */
 }
 /* FIX (v20): Invisible spacer that forces text-align:justify to
    activate on every line, even short ones. Without this, lines
@@ -619,7 +625,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 <header>
   <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
   <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
-  <div class="version-badge" id="versionBadge" title="Current build version">v24</div>
+  <div class="version-badge" id="versionBadge" title="Current build version">v25</div>
 </header>
 
 <p class="lede">
