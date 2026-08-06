@@ -344,7 +344,13 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
    See https://fonts.google.com/specimen/Amiri+Quran */
 .mushaf-line {
   font-family: 'Amiri Quran', 'Amiri', 'Scheherazade New', serif;
-  font-size: 22px;
+  /* FIX (v27): font 22px → 20px so most lines fit all words on
+     one row without clipping. With 22px + 500px, longer lines
+     (8 words) overflowed and the visible left edge was at
+     different positions for each line. With 20px + 700px
+     (page-inner bumped from 500), all 8-word lines fit on one
+     row, both edges align perfectly. */
+  font-size: 20px;
   line-height: 1.9;
   direction: rtl;
   margin: 1px 0;
@@ -355,22 +361,6 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
   box-sizing: border-box;
   word-spacing: 0;
   hyphens: none;
-  /* FIX (v26): Use flexbox with justify-content:space-between to
-     make EVERY line have both edges aligned to the container.
-     v25 used white-space:nowrap + text-align:justify, but
-     text-align:justify doesn't stretch spaces on a single line
-     (it's a no-op). So shorter lines had varying left edges
-     (user: 'the lines are not algined on left sides'). The fix:
-     use display:flex + flex-direction:row + justify-content:
-     space-between + direction:rtl. This puts the FIRST word at
-     the right edge and the LAST word at the left edge, with
-     middle words evenly distributed. Both edges of every line
-     now align with the container.
-     Combined with the v25 fixed-height + overflow:hidden +
-     white-space:nowrap, this gives:
-     - One visual row per line
-     - No orphan words
-     - Both edges aligned (quran.com-style) */
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -578,17 +568,19 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 /* Page container — uses theme variables so it changes with the active
    theme. FIX (v9): was hardcoded to background: #0a1220 (always dark)
    which made the mushaf page look identical across all 4 themes. */
-/* FIX (v22): Page container — 500px (was 600px in v21). User
-   said v21 was better, asked for another -100px to reduce
-   spaces even more. Narrower container = words fill more of
-   the line = smaller inter-word spaces. */
+/* FIX (v27): Page container — 700px (was 500px in v22-v25).
+   Combined with the v27 20px font (was 22px), most lines fit
+   all words on one row without clipping. The flex + space-
+   between v26 puts the first word at the right edge and the
+   last word at the left edge, so both edges align with the
+   container on every line. */
 #page-inner {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 32px 28px;
   min-height: 600px;
-  max-width: 500px;
+  max-width: 700px;
   margin: 0 auto;
   width: 100%;
   box-sizing: border-box;
@@ -620,7 +612,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 <header>
   <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
   <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
-  <div class="version-badge" id="versionBadge" title="Current build version">v26</div>
+  <div class="version-badge" id="versionBadge" title="Current build version">v27</div>
 </header>
 
 <p class="lede">
