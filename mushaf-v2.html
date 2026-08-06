@@ -344,20 +344,19 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
    See https://fonts.google.com/specimen/Amiri+Quran */
 .mushaf-line {
   font-family: 'Amiri Quran', 'Amiri', 'Scheherazade New', serif;
-  /* FIX (v20): 22px (was 24px) so the natural line width is closer
-     to the container width, so justify doesn't have to stretch
-     spaces too much. */
   font-size: 22px;
-  line-height: 2.2;
-  /* FIX (v20): text-align:justify + ::after spacer (added below)
-     so EVERY line is both-edges justified (not just wrapped lines).
-     This is the quran.com-style justification: spaces are stretched
-     to fill the line, no kashida visible. The 22px font means most
-     lines wrap to 2-3 visual rows, each row justified. */
+  /* FIX (v23): line-height 2.2 → 1.9. The 2.2 spacing was way too
+     loose (inter-line gap of ~26px at 22px font). User said
+     'there is too much spacing between one line and the next
+     line'. 1.9 gives a tighter, more Quran-like line height. */
+  line-height: 1.9;
   text-align: justify;
   text-align-last: justify;
   direction: rtl;
-  margin: 4px 0;
+  /* FIX (v23): margin 4px 0 → 1px 0. Removes extra vertical space
+     between mushaf lines. The line-height 1.9 already provides
+     enough breathing room; the 4px margin was doubling the gap. */
+  margin: 1px 0;
   padding: 0 8px;
   font-weight: 400;
   color: var(--text);
@@ -420,18 +419,31 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
      gold-colored but normal weight — only chapter title is bold. */
   font-weight: 400;
 }
-/* Current word (now) — gold accent, theme-aware. The .now class
-   always wins because of !important so the user's current
-   recitation position is always visible regardless of theme. */
+/* Current word (now) — gold accent, theme-aware.
+   FIX (v23): REMOVED padding and margin to prevent line width
+   changes when a word is highlighted. The user reported that
+   when a word gets the .now class, the line widens and pushes
+   a word to the next line, creating an orphan word. The fix:
+   use box-shadow (purely visual, zero layout impact) for the
+   highlight ring instead of padding (which adds 6px to the
+   element's box width) + margin (which adds 2px). Now the
+   word's box size NEVER changes between .future → .now → .past
+   state, so the line width stays constant and no orphan words
+   are created during recitation. */
 .mushaf-line .word.now {
   color: #ffd700 !important;
-  background: rgba(255, 215, 0, 0.10) !important;
+  background: rgba(255, 215, 0, 0.15) !important;
   border: none !important;
   border-radius: 4px;
-  padding: 0 3px;
-  margin: 0 1px;
-  text-shadow: 0 0 6px rgba(255, 215, 0, 0.3);
-  box-shadow: none !important;
+  /* NO padding, NO margin — these would widen the word and break
+     the line layout. Visual highlight uses box-shadow instead. */
+  padding: 0 !important;
+  margin: 0 !important;
+  text-shadow: 0 0 6px rgba(255, 215, 0, 0.4);
+  /* box-shadow with 0px spread creates a ring around the word
+     without affecting layout. The first shadow is the gold ring,
+     the second is a soft glow. */
+  box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.4), 0 0 8px rgba(255, 215, 0, 0.25) !important;
   transform: none !important;
 }
 /* Past words — dimmed (FIX v9: was hardcoded white-50% which was
@@ -445,31 +457,37 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 .mushaf-line .word.future {
   color: var(--text);
 }
-/* Unclear words (FIX v9): on the mushaf line, mark with a strong
-   yellow background and underline so the user can see exactly
-   which words the recognizer is uncertain about. Uses !important
-   to override the default text color. */
+/* Unclear words — yellow background, dotted underline.
+   FIX (v23): removed padding (was 0 3px) to prevent line width
+   changes when a word becomes unclear. Use box-shadow for the
+   rounded background effect without layout impact. */
 .mushaf-line .word[data-status="unclear"] {
   background: rgba(241, 196, 15, 0.25) !important;
   color: #b8860b !important;
   text-decoration: underline dotted #b8860b !important;
   border-radius: 3px;
-  padding: 0 3px;
+  /* No padding — use box-shadow for the visual frame */
+  padding: 0 !important;
+  box-shadow: 0 0 0 1px rgba(184, 134, 11, 0.3);
 }
-/* Mistake words (FIX v9): strong red underline for clarity */
+/* Mistake words — red background, wavy strikethrough.
+   FIX (v23): removed padding (was 0 3px) — same reason. */
 .mushaf-line .word[data-status="mistake"] {
   background: rgba(231, 76, 60, 0.2) !important;
   color: #c0392b !important;
   text-decoration: line-through wavy #c0392b !important;
   border-radius: 3px;
-  padding: 0 3px;
+  padding: 0 !important;
+  box-shadow: 0 0 0 1px rgba(192, 57, 43, 0.3);
 }
-/* Correct words (FIX v9): subtle green background */
+/* Correct words — subtle green background.
+   FIX (v23): removed padding (was 0 3px) — same reason. */
 .mushaf-line .word[data-status="correct"] {
   background: rgba(46, 204, 113, 0.2) !important;
   color: #1e8449 !important;
   border-radius: 3px;
-  padding: 0 3px;
+  padding: 0 !important;
+  box-shadow: 0 0 0 1px rgba(30, 132, 73, 0.3);
 }
 /* Ayat marker (verse end) - ornate circular frame like quran.com */
 .ayah-marker {
@@ -589,7 +607,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 <header>
   <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
   <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
-  <div class="version-badge" id="versionBadge" title="Current build version">v22</div>
+  <div class="version-badge" id="versionBadge" title="Current build version">v23</div>
 </header>
 
 <p class="lede">
