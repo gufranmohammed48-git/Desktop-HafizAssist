@@ -344,13 +344,12 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
    See https://fonts.google.com/specimen/Amiri+Quran */
 .mushaf-line {
   font-family: 'Amiri Quran', 'Amiri', 'Scheherazade New', serif;
-  /* FIX (v27): font 22px → 20px so most lines fit all words on
-     one row without clipping. With 22px + 500px, longer lines
-     (8 words) overflowed and the visible left edge was at
-     different positions for each line. With 20px + 700px
-     (page-inner bumped from 500), all 8-word lines fit on one
-     row, both edges align perfectly. */
-  font-size: 20px;
+  /* FIX (v28): REVERT to v26 settings — 22px font + 500px
+     container. User said v27 'doesn't seem right'. v27's 20px
+     font was too small to read comfortably, and 700px was wider
+     than the user wants. Back to the v26 flex + space-between
+     + nowrap layout but with the original 22px/500px sizes. */
+  font-size: 22px;
   line-height: 1.9;
   direction: rtl;
   margin: 1px 0;
@@ -568,19 +567,16 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 /* Page container — uses theme variables so it changes with the active
    theme. FIX (v9): was hardcoded to background: #0a1220 (always dark)
    which made the mushaf page look identical across all 4 themes. */
-/* FIX (v27): Page container — 700px (was 500px in v22-v25).
-   Combined with the v27 20px font (was 22px), most lines fit
-   all words on one row without clipping. The flex + space-
-   between v26 puts the first word at the right edge and the
-   last word at the left edge, so both edges align with the
-   container on every line. */
+/* FIX (v28): REVERT to v26 page-inner 500px (was 700px in v27).
+   User said v27 'doesn't seem right'. Back to the v26 settings:
+   22px font, 500px container, flex + space-between layout. */
 #page-inner {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 32px 28px;
   min-height: 600px;
-  max-width: 700px;
+  max-width: 500px;
   margin: 0 auto;
   width: 100%;
   box-sizing: border-box;
@@ -612,7 +608,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 <header>
   <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
   <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
-  <div class="version-badge" id="versionBadge" title="Current build version">v27</div>
+  <div class="version-badge" id="versionBadge" title="Current build version">v28</div>
 </header>
 
 <p class="lede">
