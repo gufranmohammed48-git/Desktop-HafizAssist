@@ -346,8 +346,6 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
   font-family: 'Amiri Quran', 'Amiri', 'Scheherazade New', serif;
   font-size: 22px;
   line-height: 1.9;
-  text-align: justify;
-  text-align-last: justify;
   direction: rtl;
   margin: 1px 0;
   padding: 0 8px;
@@ -357,33 +355,30 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
   box-sizing: border-box;
   word-spacing: 0;
   hyphens: none;
-  /* FIX (v25): THE FIX USER ASKED FOR 4 TIMES.
-     Each .mushaf-line is now a fixed-height container with
-     overflow:hidden and white-space:nowrap. This forces every
-     line to be exactly ONE visual row — no wrapping, no orphan
-     words. Words that don't fit in the container width are
-     clipped (hidden). The user explicitly asked for this:
-     'can we use a container for every line and set the CSS
-     properties so nothing comes out of the container because
-     we can even set the height of the container'.
-     The height is set to the line-height (1.9em) so the line
-     is exactly one visual row tall. white-space:nowrap keeps
-     all words on one line. overflow:hidden clips anything
-     that doesn't fit horizontally. The result: every line is
-     one row, no orphans ever. The trade-off is that very long
-     lines (more words than fit in the container width) will
-     have their trailing words clipped — those words are still
-     in the DOM so the matcher still tracks them, but they
-     aren't visible. To make all words fit, the user can:
-     1) Make the font smaller
-     2) Make the page-inner wider
-     3) Both */
-  height: 1.9em;  /* one visual row, exactly line-height tall */
+  /* FIX (v26): Use flexbox with justify-content:space-between to
+     make EVERY line have both edges aligned to the container.
+     v25 used white-space:nowrap + text-align:justify, but
+     text-align:justify doesn't stretch spaces on a single line
+     (it's a no-op). So shorter lines had varying left edges
+     (user: 'the lines are not algined on left sides'). The fix:
+     use display:flex + flex-direction:row + justify-content:
+     space-between + direction:rtl. This puts the FIRST word at
+     the right edge and the LAST word at the left edge, with
+     middle words evenly distributed. Both edges of every line
+     now align with the container.
+     Combined with the v25 fixed-height + overflow:hidden +
+     white-space:nowrap, this gives:
+     - One visual row per line
+     - No orphan words
+     - Both edges aligned (quran.com-style) */
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: baseline;
+  height: 1.9em;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: clip;
-  /* Remove the multi-line text-wrap settings since we now
-     force single line per container. */
 }
 /* FIX (v20): Invisible spacer that forces text-align:justify to
    activate on every line, even short ones. Without this, lines
@@ -625,7 +620,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 <header>
   <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
   <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
-  <div class="version-badge" id="versionBadge" title="Current build version">v25</div>
+  <div class="version-badge" id="versionBadge" title="Current build version">v26</div>
 </header>
 
 <p class="lede">
