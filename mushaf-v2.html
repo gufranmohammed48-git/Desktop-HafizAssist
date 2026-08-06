@@ -344,13 +344,19 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
    See https://fonts.google.com/specimen/Amiri+Quran */
 .mushaf-line {
   font-family: 'Amiri Quran', 'Amiri', 'Scheherazade New', serif;
-  /* FIX (v28): REVERT to v26 settings — 22px font + 500px
-     container. User said v27 'doesn't seem right'. v27's 20px
-     font was too small to read comfortably, and 700px was wider
-     than the user wants. Back to the v26 flex + space-between
-     + nowrap layout but with the original 22px/500px sizes. */
+  /* FIX (v29): REVERT to v25 — no flex, no space-between. Just
+     a fixed-height container with white-space:nowrap +
+     overflow:hidden. User said go back one more to v25.
+     v25 was: each line is a div container with fixed height
+     (1.9em = one visual row), overflow:hidden so content
+     doesn't escape, white-space:nowrap so no wrapping.
+     The text inside is right-aligned (natural RTL) with the
+     left edge varying based on line content. This is the
+     original approach the user asked for 4 times. */
   font-size: 22px;
   line-height: 1.9;
+  text-align: justify;
+  text-align-last: justify;
   direction: rtl;
   margin: 1px 0;
   padding: 0 8px;
@@ -360,10 +366,6 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
   box-sizing: border-box;
   word-spacing: 0;
   hyphens: none;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: baseline;
   height: 1.9em;
   overflow: hidden;
   white-space: nowrap;
@@ -608,7 +610,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 <header>
   <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
   <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
-  <div class="version-badge" id="versionBadge" title="Current build version">v28</div>
+  <div class="version-badge" id="versionBadge" title="Current build version">v29</div>
 </header>
 
 <p class="lede">
