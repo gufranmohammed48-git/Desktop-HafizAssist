@@ -362,6 +362,17 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
   overflow: hidden;
   white-space: nowrap;
   text-overflow: clip;
+  /* FIX (v32): Add back the flex + space-between from v26 so the
+     LEFT side of every line aligns with the container. The
+     first word sits at the right edge, the last word at the
+     left edge, middle words distribute evenly. Combined with
+     the v30 nowrap + overflow:hidden, the line is one row
+     and both edges align with the container. Content that
+     doesn't fit is clipped (overflow:hidden). */
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: baseline;
 }
 /* FIX (v20): Invisible spacer that forces text-align:justify to
    activate on every line, even short ones. Without this, lines
@@ -606,7 +617,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 <header>
   <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
   <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
-  <div class="version-badge" id="versionBadge" title="Current build version">v31</div>
+  <div class="version-badge" id="versionBadge" title="Current build version">v32</div>
 </header>
 
 <p class="lede">
