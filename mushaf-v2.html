@@ -344,16 +344,8 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
    See https://fonts.google.com/specimen/Amiri+Quran */
 .mushaf-line {
   font-family: 'Amiri Quran', 'Amiri', 'Scheherazade New', serif;
-  /* FIX (v29): REVERT to v25 — no flex, no space-between. Just
-     a fixed-height container with white-space:nowrap +
-     overflow:hidden. User said go back one more to v25.
-     v25 was: each line is a div container with fixed height
-     (1.9em = one visual row), overflow:hidden so content
-     doesn't escape, white-space:nowrap so no wrapping.
-     The text inside is right-aligned (natural RTL) with the
-     left edge varying based on line content. This is the
-     original approach the user asked for 4 times. */
-  font-size: 22px;
+  /* FIX (v30): font-size 22px → 24px (+2px as user requested). */
+  font-size: 24px;
   line-height: 1.9;
   text-align: justify;
   text-align-last: justify;
@@ -411,6 +403,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
   display: none;
 }
 .mushaf-line.bismillah-line {
+  font-size: 24px;
   /* FIX (v10): Match the surah-header Arabic name size so bismillah
      and chapter title look balanced. Was 30px.
      FIX (v11): bumped to 23px with the rest of the page.
@@ -610,7 +603,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 <header>
   <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
   <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
-  <div class="version-badge" id="versionBadge" title="Current build version">v29</div>
+  <div class="version-badge" id="versionBadge" title="Current build version">v30</div>
 </header>
 
 <p class="lede">
