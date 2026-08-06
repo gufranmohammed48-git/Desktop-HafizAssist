@@ -308,7 +308,20 @@
   --bismillah-color:#2e7d32;
 }
 body.theme-light{--bg:#fafaf5;--card:#ffffff;--card-hover:#f0f4ed;--border:rgba(46,125,50,.2);--text:#1a3a1a;--text-dim:#6a7a6a;--primary:#2e7d32;--primary-soft:rgba(46,125,50,.12);--yellow:#b8860b;--yellow-soft:rgba(184,134,11,.10);--accent:#1565c0;--now-glow:rgba(46,125,50,.45);--shadow:rgba(0,0,0,.15);--bismillah-bg:rgba(46,125,50,.08);--bismillah-border:rgba(46,125,50,.30);--bismillah-color:#2e7d32--primary-text:#0a1f12;}
-body.theme-dark{--bg:#0a1f12;--card:rgba(255,255,255,.04);--card-hover:rgba(255,255,255,.08);--border:rgba(46,204,113,.25);--text:#e8f5e9;--text-dim:#a5d6a7;--primary:#2ecc71;--primary-soft:rgba(46,204,113,.18);--yellow:#f1c40f;--yellow-soft:rgba(241,196,15,.18);--accent:#3498db;--now-glow:rgba(46,204,113,.55);--shadow:rgba(0,0,0,.5);--bismillah-bg:rgba(46,204,113,.10);--bismillah-border:rgba(46,204,113,.35);--bismillah-color:#2ecc71}
+/* FIX (v33): Dark Green theme — increased contrast for better
+   readability. User said 'i can't read the v32 clearly use diff
+   color and bg'. The text was light green on dark green
+   (#e8f5e9 on rgba(255,255,255,.04)) — too low contrast.
+   Now:
+   - --bg: pure black #0a1410 (was dark green #0a1f12)
+   - --text: pure white #ffffff (was light green #e8f5e9)
+   - --card: very dark green #0a1f12 (was near-transparent on bg)
+   - Surah page-inner background: solid dark green #0a1f12
+     with a clear border
+   The mushaf text is now bright white on near-black, which is
+   the standard high-contrast reading layout used in many Quran
+   apps. */
+body.theme-dark{--bg:#0a1410;--card:#0a1f12;--card-hover:rgba(255,255,255,.06);--border:rgba(46,204,113,.4);--text:#ffffff;--text-dim:#a5d6a7;--primary:#2ecc71;--primary-soft:rgba(46,204,113,.2);--yellow:#f1c40f;--yellow-soft:rgba(241,196,15,.2);--accent:#3498db;--now-glow:rgba(46,204,113,.6);--shadow:rgba(0,0,0,.6);--bismillah-bg:rgba(46,204,113,.12);--bismillah-border:rgba(46,204,113,.4);--bismillah-color:#2ecc71}
 body.theme-sepia{--bg:#f4ecd8;--card:#faf3e0;--card-hover:#f0e6d0;--border:rgba(139,90,43,.25);--text:#3e2c1c;--text-dim:#7a6045;--primary:#8b5a2b;--primary-soft:rgba(139,90,43,.14);--yellow:#a67c00;--yellow-soft:rgba(166,124,0,.14);--accent:#5d4e8e;--now-glow:rgba(139,90,43,.5);--shadow:rgba(0,0,0,.18);--bismillah-bg:rgba(139,90,43,.10);--bismillah-border:rgba(139,90,43,.35);--bismillah-color:#8b5a2b--primary-text:#faf3e0;}
 body.theme-royal{--bg:#0d1b2a;--card:rgba(255,255,255,.05);--card-hover:rgba(255,255,255,.10);--border:rgba(212,175,55,.30);--text:#f5f0e0;--text-dim:#a89e7e;--primary:#d4af37;--primary-soft:rgba(212,175,55,.15);--yellow:#e8c547;--yellow-soft:rgba(232,197,71,.15);--accent:#c0a96e;--now-glow:rgba(212,175,55,.55);--shadow:rgba(0,0,0,.5);--bismillah-bg:rgba(212,175,55,.10);--bismillah-border:rgba(212,175,55,.40);--bismillah-color:#d4af37}
 body{background:var(--bg);color:var(--text);transition:background .3s ease,color .3s ease;margin:0;padding:0;overflow-x:hidden}
@@ -616,7 +629,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 <header>
   <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
   <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
-  <div class="version-badge" id="versionBadge" title="Current build version">v33</div>
+  <div class="version-badge" id="versionBadge" title="Current build version">v34</div>
 </header>
 
 <p class="lede">
