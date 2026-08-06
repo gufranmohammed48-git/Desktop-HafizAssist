@@ -308,20 +308,12 @@
   --bismillah-color:#2e7d32;
 }
 body.theme-light{--bg:#fafaf5;--card:#ffffff;--card-hover:#f0f4ed;--border:rgba(46,125,50,.2);--text:#1a3a1a;--text-dim:#6a7a6a;--primary:#2e7d32;--primary-soft:rgba(46,125,50,.12);--yellow:#b8860b;--yellow-soft:rgba(184,134,11,.10);--accent:#1565c0;--now-glow:rgba(46,125,50,.45);--shadow:rgba(0,0,0,.15);--bismillah-bg:rgba(46,125,50,.08);--bismillah-border:rgba(46,125,50,.30);--bismillah-color:#2e7d32--primary-text:#0a1f12;}
-/* FIX (v33): Dark Green theme — increased contrast for better
-   readability. User said 'i can't read the v32 clearly use diff
-   color and bg'. The text was light green on dark green
-   (#e8f5e9 on rgba(255,255,255,.04)) — too low contrast.
-   Now:
-   - --bg: pure black #0a1410 (was dark green #0a1f12)
-   - --text: pure white #ffffff (was light green #e8f5e9)
-   - --card: very dark green #0a1f12 (was near-transparent on bg)
-   - Surah page-inner background: solid dark green #0a1f12
-     with a clear border
-   The mushaf text is now bright white on near-black, which is
-   the standard high-contrast reading layout used in many Quran
-   apps. */
-body.theme-dark{--bg:#0a1410;--card:#0a1f12;--card-hover:rgba(255,255,255,.06);--border:rgba(46,204,113,.4);--text:#ffffff;--text-dim:#a5d6a7;--primary:#2ecc71;--primary-soft:rgba(46,204,113,.2);--yellow:#f1c40f;--yellow-soft:rgba(241,196,15,.2);--accent:#3498db;--now-glow:rgba(46,204,113,.6);--shadow:rgba(0,0,0,.6);--bismillah-bg:rgba(46,204,113,.12);--bismillah-border:rgba(46,204,113,.4);--bismillah-color:#2ecc71}
+/* FIX (v35): Dark Green theme — MAXIMUM contrast (pure white
+   on pure black). User said 'v34 can't read it'. Going to the
+   absolute maximum contrast now: pure white #ffffff text on
+   pure black #000000 background. This is the standard reading
+   mode used in most mushaf apps. */
+body.theme-dark{--bg:#000000;--card:#0a1410;--card-hover:rgba(255,255,255,.08);--border:rgba(46,204,113,.5);--text:#ffffff;--text-dim:#cccccc;--primary:#2ecc71;--primary-soft:rgba(46,204,113,.25);--yellow:#f1c40f;--yellow-soft:rgba(241,196,15,.25);--accent:#3498db;--now-glow:rgba(46,204,113,.7);--shadow:rgba(0,0,0,.7);--bismillah-bg:rgba(46,204,113,.15);--bismillah-border:rgba(46,204,113,.5);--bismillah-color:#2ecc71}
 body.theme-sepia{--bg:#f4ecd8;--card:#faf3e0;--card-hover:#f0e6d0;--border:rgba(139,90,43,.25);--text:#3e2c1c;--text-dim:#7a6045;--primary:#8b5a2b;--primary-soft:rgba(139,90,43,.14);--yellow:#a67c00;--yellow-soft:rgba(166,124,0,.14);--accent:#5d4e8e;--now-glow:rgba(139,90,43,.5);--shadow:rgba(0,0,0,.18);--bismillah-bg:rgba(139,90,43,.10);--bismillah-border:rgba(139,90,43,.35);--bismillah-color:#8b5a2b--primary-text:#faf3e0;}
 body.theme-royal{--bg:#0d1b2a;--card:rgba(255,255,255,.05);--card-hover:rgba(255,255,255,.10);--border:rgba(212,175,55,.30);--text:#f5f0e0;--text-dim:#a89e7e;--primary:#d4af37;--primary-soft:rgba(212,175,55,.15);--yellow:#e8c547;--yellow-soft:rgba(232,197,71,.15);--accent:#c0a96e;--now-glow:rgba(212,175,55,.55);--shadow:rgba(0,0,0,.5);--bismillah-bg:rgba(212,175,55,.10);--bismillah-border:rgba(212,175,55,.40);--bismillah-color:#d4af37}
 body{background:var(--bg);color:var(--text);transition:background .3s ease,color .3s ease;margin:0;padding:0;overflow-x:hidden}
@@ -360,18 +352,19 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
   /* FIX (v30): font-size 22px → 24px (+2px as user requested). */
   font-size: 24px;
   line-height: 1.9;
-  text-align: right;  /* FIX (v33): Use right-align so ALL lines
-     overflow to the LEFT consistently. The visible left edge
-     of every line becomes the container's left edge (clipped
-     by overflow:hidden). This is the only way to get all
-     left edges aligned when line content widths vary.
-     Previous v32 used flex + space-between, but that only
-     works when content fits — short lines have their last
-     word in the middle of the container, not at the left
-     edge. With text-align:right + nowrap + overflow:hidden,
-     the text is right-aligned (natural RTL) and content
-     always overflows to the left, so all visible left edges
-     are at the container's left edge. */
+  /* FIX (v35): text-align: justify + ::after trick. Forces BOTH
+     edges of every line to align with the container by
+     distributing the content across the full width. The
+     ::after is an invisible 100%-width inline-block that
+     makes the browser treat the line as having a "second
+     visual row", which activates justify on the first row.
+     - Short lines: spaces are stretched to fill the width
+     - Long lines: content overflows to the left and is
+       clipped by overflow:hidden
+     Result: every line spans the full container width with
+     both edges aligned. */
+  text-align: justify;
+  text-align-last: justify;
   direction: rtl;
   margin: 1px 0;
   padding: 0 8px;
@@ -385,6 +378,20 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
   overflow: hidden;
   white-space: nowrap;
   text-overflow: clip;
+}
+/* FIX (v35): Invisible 100%-width ::after spacer that forces
+   text-align:justify to activate on every line. Without this,
+   the browser only justifies wrapped lines. With it, the
+   browser distributes content across the full container
+   width, making both edges of every line align. */
+.mushaf-line::after {
+  content: "";
+  display: inline-block;
+  width: 100%;
+  height: 0;
+  line-height: 0;
+  overflow: hidden;
+  vertical-align: top;
 }
 /* FIX (v20): Invisible spacer that forces text-align:justify to
    activate on every line, even short ones. Without this, lines
@@ -629,7 +636,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 <header>
   <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
   <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
-  <div class="version-badge" id="versionBadge" title="Current build version">v34</div>
+  <div class="version-badge" id="versionBadge" title="Current build version">v35</div>
 </header>
 
 <p class="lede">
