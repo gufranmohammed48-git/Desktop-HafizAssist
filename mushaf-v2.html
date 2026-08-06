@@ -347,8 +347,18 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
   /* FIX (v30): font-size 22px → 24px (+2px as user requested). */
   font-size: 24px;
   line-height: 1.9;
-  text-align: justify;
-  text-align-last: justify;
+  text-align: right;  /* FIX (v33): Use right-align so ALL lines
+     overflow to the LEFT consistently. The visible left edge
+     of every line becomes the container's left edge (clipped
+     by overflow:hidden). This is the only way to get all
+     left edges aligned when line content widths vary.
+     Previous v32 used flex + space-between, but that only
+     works when content fits — short lines have their last
+     word in the middle of the container, not at the left
+     edge. With text-align:right + nowrap + overflow:hidden,
+     the text is right-aligned (natural RTL) and content
+     always overflows to the left, so all visible left edges
+     are at the container's left edge. */
   direction: rtl;
   margin: 1px 0;
   padding: 0 8px;
@@ -362,17 +372,6 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
   overflow: hidden;
   white-space: nowrap;
   text-overflow: clip;
-  /* FIX (v32): Add back the flex + space-between from v26 so the
-     LEFT side of every line aligns with the container. The
-     first word sits at the right edge, the last word at the
-     left edge, middle words distribute evenly. Combined with
-     the v30 nowrap + overflow:hidden, the line is one row
-     and both edges align with the container. Content that
-     doesn't fit is clipped (overflow:hidden). */
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: baseline;
 }
 /* FIX (v20): Invisible spacer that forces text-align:justify to
    activate on every line, even short ones. Without this, lines
@@ -617,7 +616,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 <header>
   <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
   <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
-  <div class="version-badge" id="versionBadge" title="Current build version">v32</div>
+  <div class="version-badge" id="versionBadge" title="Current build version">v33</div>
 </header>
 
 <p class="lede">
