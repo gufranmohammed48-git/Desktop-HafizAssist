@@ -1465,67 +1465,32 @@
    See https://fonts.google.com/specimen/Amiri+Quran */
     .mushaf-line {
       font-family: 'Amiri Quran', 'Amiri', 'Scheherazade New', serif;
-      font-size: 24px;
-      line-height: 1.9;
-      /* FIX (v36): text-align: justify + ::after trick with !important
-     to make BOTH edges align regardless of any conflicting rules. */
-      text-align: justify !important;
-      text-align-last: justify !important;
+      font-size: 32px;
+      line-height: 2.0;
       direction: rtl;
-      margin: 1px 0;
-      padding: 0 8px;
+      margin: 4px 0;
+      padding: 0 12px;
       font-weight: 400;
-      /* FIX (v36): !important on text color so it ALWAYS uses the
-     theme's --text variable (pure white on theme-dark). The user
-     said 'font color is not white still the same' — the previous
-     color: var(--text) was being overridden by a higher-specificity
-     rule. !important forces it to apply. */
       color: var(--text) !important;
       width: 100%;
       box-sizing: border-box;
+      display: flex !important;
+      justify-content: space-between !important;
+      align-items: center;
       word-spacing: 0;
       hyphens: none;
-      height: 1.9em;
+      height: 2.0em;
       overflow: hidden;
-      white-space: nowrap;
-      text-overflow: clip;
     }
 
-    /* FIX (v35): Invisible 100%-width ::after spacer that forces
-   text-align:justify to activate on every line. Without this,
-   the browser only justifies wrapped lines. With it, the
-   browser distributes content across the full container
-   width, making both edges of every line align. */
+    /* Disable old ::after trick since flex space-between handles alignment */
     .mushaf-line::after {
-      content: "";
-      display: inline-block;
-      width: 100%;
-      height: 0;
-      line-height: 0;
-      overflow: hidden;
-      vertical-align: top;
+      display: none !important;
     }
 
-    /* FIX (v20): Invisible spacer that forces text-align:justify to
-   activate on every line, even short ones. Without this, lines
-   that don't wrap stay right-aligned (the natural Arabic flow).
-   The ::after is a 100%-width inline-block, so the browser sees
-   the line as having a second visual row and stretches the spaces
-   on the first row to fill the width. NO kashida is used — only
-   normal whitespace stretching. */
-    .mushaf-line::after {
-      content: "";
-      display: inline-block;
-      width: 100%;
-      height: 0;
-      line-height: 0;
-      overflow: hidden;
-      vertical-align: top;
-    }
-
-    /* FIX (v19): Words are inline again (not flex items). */
     .mushaf-line .word {
-      display: inline;
+      display: inline-block !important;
+      white-space: nowrap;
       padding: 0;
       margin: 0;
       border: none;
@@ -1538,29 +1503,16 @@
       cursor: default;
     }
 
-    /* FIX (v16): Kashida (Arabic tatweel) gap between every pair of words.
-   Traditional Arabic justification technique used in printed mushafs.
-   The span contains Arabic tatweel characters (ـ) which render as
-   horizontal-line bridges between the words. flex-grow: 1 makes the
-   gap absorb the natural space-between distribution. */
-    /* FIX (v19): kashida-gap is no longer inserted. Hide the rule. */
     .mushaf-line .kashida-gap {
       display: none;
     }
 
     .mushaf-line.bismillah-line {
-      font-size: 24px;
-      /* FIX (v10): Match the surah-header Arabic name size so bismillah
-     and chapter title look balanced. Was 30px.
-     FIX (v11): bumped to 23px with the rest of the page.
-     FIX (v14): use flex space-between to justify bismillah.
-     FIX (v15): bumped to 24px with the rest of the page. */
-      font-size: 24px;
-      color: #ffd700;
-      margin: 16px 0;
-      /* FIX (v11): removed bold (was 700 in v10). Bismillah stays
-     gold-colored but normal weight — only chapter title is bold. */
+      font-size: 32px;
+      color: #ffd700 !important;
+      margin: 20px 0;
       font-weight: 400;
+      justify-content: center !important;
     }
 
     /* Current word (now) — gold accent, theme-aware.
