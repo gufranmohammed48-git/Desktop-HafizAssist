@@ -349,27 +349,22 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
    See https://fonts.google.com/specimen/Amiri+Quran */
 .mushaf-line {
   font-family: 'Amiri Quran', 'Amiri', 'Scheherazade New', serif;
-  /* FIX (v30): font-size 22px → 24px (+2px as user requested). */
   font-size: 24px;
   line-height: 1.9;
-  /* FIX (v35): text-align: justify + ::after trick. Forces BOTH
-     edges of every line to align with the container by
-     distributing the content across the full width. The
-     ::after is an invisible 100%-width inline-block that
-     makes the browser treat the line as having a "second
-     visual row", which activates justify on the first row.
-     - Short lines: spaces are stretched to fill the width
-     - Long lines: content overflows to the left and is
-       clipped by overflow:hidden
-     Result: every line spans the full container width with
-     both edges aligned. */
-  text-align: justify;
-  text-align-last: justify;
+  /* FIX (v36): text-align: justify + ::after trick with !important
+     to make BOTH edges align regardless of any conflicting rules. */
+  text-align: justify !important;
+  text-align-last: justify !important;
   direction: rtl;
   margin: 1px 0;
   padding: 0 8px;
   font-weight: 400;
-  color: var(--text);
+  /* FIX (v36): !important on text color so it ALWAYS uses the
+     theme's --text variable (pure white on theme-dark). The user
+     said 'font color is not white still the same' — the previous
+     color: var(--text) was being overridden by a higher-specificity
+     rule. !important forces it to apply. */
+  color: var(--text) !important;
   width: 100%;
   box-sizing: border-box;
   word-spacing: 0;
@@ -592,19 +587,17 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 /* Page container — uses theme variables so it changes with the active
    theme. FIX (v9): was hardcoded to background: #0a1220 (always dark)
    which made the mushaf page look identical across all 4 themes. */
-/* FIX (v30): Page container — 550px (was 500px in v22-v29).
-   With the 24px font (v30) the 500px container clipped a lot
-   of words on the longer mushaf lines. 550px gives ~50px more
-   room so 1-2 extra words fit per line. Still no orphan single-
-   word lines because the orphan-words are absorbed into the
-   previous line (clipped along with it). */
+/* FIX (v36): Page container — 1100px (was 550px). Wider so
+   most 8-word mushaf lines fit at 24px and text-align:justify
+   can stretch spaces for both-edges alignment. On small
+   screens (mobile), falls back to 100% of the screen width. */
 #page-inner {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 32px 28px;
   min-height: 600px;
-  max-width: 550px;
+  max-width: 1100px;
   margin: 0 auto;
   width: 100%;
   box-sizing: border-box;
@@ -636,7 +629,7 @@ body{background:var(--bg);color:var(--text);transition:background .3s ease,color
 <header>
   <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
   <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
-  <div class="version-badge" id="versionBadge" title="Current build version">v35</div>
+  <div class="version-badge" id="versionBadge" title="Current build version">v36</div>
 </header>
 
 <p class="lede">
