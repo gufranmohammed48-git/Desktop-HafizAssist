@@ -1150,24 +1150,36 @@
             vertical-align: middle
         }
 
-        #page.script-hidden .word.future {
-            visibility: hidden
+        /* Hide Script mode — hides Quran text for memory testing */
+        #page.script-hidden .word {
+            visibility: hidden;
         }
 
         #page.script-hidden .word.past {
-            visibility: hidden
-        }
-
-        #page.script-hidden .verse-marker {
-            visibility: hidden
+            visibility: visible;
+            opacity: 0.5;
         }
 
         #page.script-hidden .word.now {
             visibility: visible !important;
-            background: var(--primary) !important;
-            color: #0a1f12 !important;
-            border: 3px solid #fff !important;
-            box-shadow: 0 0 16px var(--now-glow) !important
+            color: transparent !important;
+            background: #ffd700 !important;
+            border-radius: 4px;
+            box-shadow: 0 0 16px rgba(255, 215, 0, 0.6) !important;
+        }
+
+        #page.script-hidden .word[data-status="correct"],
+        #page.script-hidden .word[data-status="mistake"],
+        #page.script-hidden .word[data-status="unclear"] {
+            visibility: visible !important;
+        }
+
+        #page.script-hidden .ayah-marker {
+            visibility: hidden;
+        }
+
+        #page.script-hidden .bismillah-line {
+            visibility: hidden;
         }
 
 
@@ -1375,7 +1387,7 @@
 
         /* Theme picker */
         .settings-picker {
-            position: fixed;
+            position: absolute;
             top: 8px;
             left: 8px;
             z-index: 9999
