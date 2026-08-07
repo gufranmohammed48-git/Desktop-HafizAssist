@@ -1515,6 +1515,11 @@
       justify-content: center !important;
     }
 
+    /* Page 1 (Surah Al-Fatihah) — center align lines only on page 1 */
+    #page-inner.page-fatihah .mushaf-line {
+      justify-content: center !important;
+    }
+
     /* Current word (now) — gold accent, theme-aware.
    FIX (v23): REMOVED padding and margin to prevent line width
    changes when a word is highlighted. The user reported that
@@ -2804,6 +2809,7 @@
       const inner = document.getElementById('page-inner');
       if (!inner) return;
       inner.innerHTML = '';
+      inner.classList.toggle('page-fatihah', _currentMushafPage === 1);
       const frag = document.createDocumentFragment();
 
       // Find ALL surahs on this page and their starting line indices
@@ -2902,6 +2908,7 @@
       const inner = document.getElementById('page-inner');
       if (!inner) return;
       inner.innerHTML = '';
+      inner.classList.toggle('page-fatihah', activeSurah === 1);
       const frag = document.createDocumentFragment();
       let lastSurah = -1;
       // Group words by line_number to make real mushaf lines
