@@ -3414,19 +3414,25 @@
 
             recognition.onresult = (event) => {
                 let interim = '';
-                for (let i = event.resultIndex; i < event.results.length; i++) {
+                for (let i = 0; i < event.results.length; i++) {
                     const res = event.results[i];
                     if (res.isFinal) {
-                        finalizedText += res[0].transcript + ' ';
-                        if (res[0].confidence > 0) {
-                            confidences.push(res[0].confidence);
-                            if (confidences.length > 100) confidences.shift();  // cap to 100
+                        if (i >= event.resultIndex) {
+                            finalizedText += res[0].transcript + ' ';
+                            if (res[0].confidence > 0) {
+                                confidences.push(res[0].confidence);
+                                if (confidences.length > 100) confidences.shift();  // cap to 100
+                            }
                         }
                     } else {
-                        interim += res[0].transcript + ' ';
+                        // FIX FOR ANDROID CHROME: Android Web Speech API appends growing
+                        // phrase snapshots as separate interim items in event.results.
+                        // Overwrite interim with the latest non-final transcript instead
+                        // of concatenating every interim slot!
+                        interim = res[0].transcript;
                     }
                 }
-                const fullText = (finalizedText + interim).trim();
+                const fullText = (finalizedText + ' ' + interim).trim();
                 if (fullText) {
                     transcriptBox.classList.remove('hidden');
                     transcriptText.textContent = fullText;
@@ -3534,7 +3540,15 @@
                     return;
                 }
 
-                const words = _pendingWords;
+                let words = _pendingWords;
+                // Deduplicate consecutive identical speech tokens (prevents Android Chrome interim duplication)
+                const deduped = [];
+                for (let i = 0; i < words.length; i++) {
+                    if (i === 0 || words[i] !== words[i - 1]) {
+                        deduped.push(words[i]);
+                    }
+                }
+                words = deduped;
 
                 // Reset dataset.status ONLY for words we haven't reached yet
                 // (_maxPointerReached and beyond). For words below _maxPointerReached,
