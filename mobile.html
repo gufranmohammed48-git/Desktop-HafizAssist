@@ -4,13 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Recitation Tracker v2.0</title>
+    <title>Live Recitation Tracker (Mobile Edition)</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="icon"
-        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📖</text></svg>">
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📱</text></svg>">
     <link
         href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
@@ -1789,7 +1789,7 @@
         <header>
             <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
             <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
-            <div class="version-badge" id="versionBadge" title="Current build version">v30</div>
+            <div class="version-badge" id="versionBadge" title="Current mobile build version">vMobile-1.0</div>
         </header>
 
         <p class="lede">
@@ -3414,19 +3414,24 @@
 
             recognition.onresult = (event) => {
                 let interim = '';
-                for (let i = event.resultIndex; i < event.results.length; i++) {
+                for (let i = 0; i < event.results.length; i++) {
                     const res = event.results[i];
                     if (res.isFinal) {
-                        finalizedText += res[0].transcript + ' ';
-                        if (res[0].confidence > 0) {
-                            confidences.push(res[0].confidence);
-                            if (confidences.length > 100) confidences.shift();  // cap to 100
+                        if (i >= event.resultIndex) {
+                            finalizedText += res[0].transcript + ' ';
+                            if (res[0].confidence > 0) {
+                                confidences.push(res[0].confidence);
+                                if (confidences.length > 100) confidences.shift();  // cap to 100
+                            }
                         }
                     } else {
-                        interim += res[0].transcript + ' ';
+                        // MOBILE SPECIFIC: Android Web Speech API appends growing
+                        // phrase snapshots as separate interim items in event.results.
+                        // Overwrite interim with the latest non-final transcript!
+                        interim = res[0].transcript;
                     }
                 }
-                const fullText = (finalizedText + interim).trim();
+                const fullText = (finalizedText + ' ' + interim).trim();
                 if (fullText) {
                     transcriptBox.classList.remove('hidden');
                     transcriptText.textContent = fullText;
@@ -3534,7 +3539,15 @@
                     return;
                 }
 
-                const words = _pendingWords;
+                let words = _pendingWords;
+                // Deduplicate consecutive identical speech tokens (prevents Android Chrome interim duplication)
+                const deduped = [];
+                for (let i = 0; i < words.length; i++) {
+                    if (i === 0 || words[i] !== words[i - 1]) {
+                        deduped.push(words[i]);
+                    }
+                }
+                words = deduped;
 
                 // Reset dataset.status ONLY for words we haven't reached yet
                 // (_maxPointerReached and beyond). For words below _maxPointerReached,
