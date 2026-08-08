@@ -419,7 +419,7 @@
             background: var(--red-soft);
             color: var(--red);
             border-color: rgba(231, 76, 60, .3);
-            text-decoration: line wavy var(--red)
+            text-decoration: none
         }
 
         .word[data-status="unclear"] {
@@ -1587,15 +1587,14 @@
             box-shadow: 0 0 0 1px rgba(184, 134, 11, 0.3);
         }
 
-        /* Mistake words — red background, wavy strikethrough.
-   FIX (v23): removed padding (was 0 3px) — same reason. */
+        /* Mistake words — clean red background tile (no strikethrough) */
         .mushaf-line .word[data-status="mistake"] {
-            background: rgba(231, 76, 60, 0.2) !important;
-            color: #c0392b !important;
-            text-decoration: line-through wavy #c0392b !important;
+            background: rgba(231, 76, 60, 0.25) !important;
+            color: #e74c3c !important;
+            text-decoration: none !important;
             border-radius: 3px;
             padding: 0 !important;
-            box-shadow: 0 0 0 1px rgba(192, 57, 43, 0.3);
+            box-shadow: 0 0 0 1px rgba(231, 76, 60, 0.4);
         }
 
         /* Correct words — subtle green background.
@@ -1774,10 +1773,6 @@
                 <div class="stat">
                     <div class="stat-label">Mistakes</div>
                     <div class="stat-val red" id="statMistake">0</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-label">Unclear</div>
-                    <div class="stat-val yellow" id="statUnclear">0</div>
                 </div>
                 <div class="stat">
                     <div class="stat-label">Accuracy</div>
@@ -1966,7 +1961,7 @@
         const NEAR_WINDOW = 8;     // normal lookahead
         const FAR_WINDOW = 8;     // limited lookahead for resync (was 40 — too aggressive, jumped 4 lines on a single mispronunciation)
         const RESYNC_THRESHOLD = 6;     // misses in a row before we trust a jump (was 4 — too eager)
-        const LEVENSHTEIN_RATIO = 0.30;  // ≤30% edit distance is a match (was absolute 0.34)
+        let LEVENSHTEIN_RATIO = 0.30;  // ≤30% edit distance is a match (dynamically updated by Lenient/Strict slider)
         // Phoneme-similarity threshold (used as fallback when text is borderline)
         const PHONEME_LEVENSHTEIN_RATIO = 0.30;
 
@@ -2169,21 +2164,17 @@
         // as correct, advance pointer.
         // =========================================================================
         function applyMatch(matchAt, matchInfo, heardWord) {
-            // Mark everything between pointer and matchAt as "skipped" (user may have
-            // skipped these intentionally OR the matcher just got confused). We don't
-            // know which — so UNCLEAR, not MISTAKE. The skip is logged with the
-            // heard word that triggered it so the user can see what caused the jump.
+            // Mark everything between pointer and matchAt as "skipped" (count as MISTAKE/RED)
             for (let i = pointer; i < matchAt; i++) {
                 const w = refWords[i];
                 if (!w) continue;  // skip undefined entries
-                // Mark skipped words as 'unclear' (yellow). With FAR_WINDOW now
-                // capped at 8 (was 40), a resync paints at most ~1 line of yellow
-                // tiles instead of 4, so the visual is informative without
-                // becoming a wall. stats.unclear++ still counts the skip.
-                if (w.el) w.el.dataset.status = 'unclear';
-                stats.unclear++;
+                if (w.el) w.el.dataset.status = 'mistake';
+                if (!w.hasMistake) {
+                    w.hasMistake = true;
+                    stats.mistake++;
+                }
                 _pushDebug({
-                    kind: 'unclear',
+                    kind: 'mistake',
                     heard: heardWord || '', heardNorm: heardWord ? normalize(heardWord) : '',
                     expected: w.text, expectedNorm: w.norm,
                     expectedPhoneme: w.phoneme,
@@ -2195,8 +2186,13 @@
                 });
             }
             if (refWords[matchAt] && refWords[matchAt].el) {
-                refWords[matchAt].el.dataset.status = 'correct';
-                stats.correct++;
+                // If this word had a mistake when first attempted, keep it RED so the reciter knows it was an error
+                if (refWords[matchAt].hasMistake) {
+                    refWords[matchAt].el.dataset.status = 'mistake';
+                } else {
+                    refWords[matchAt].el.dataset.status = 'correct';
+                    stats.correct++;
+                }
             }
             pointer = matchAt + 1;
             consecutiveMisses = 0;
@@ -2319,13 +2315,6 @@
             }
 
             // 1) near-window search (normal lookahead, prefer the EARLIEST match)
-            // DEBUG: show what the next expected word is
-            if (pointer < refWords.length) {
-                const w = refWords[pointer];
-
-            } else {
-
-            }
             const near = findMatch(norm, pointer, pointer + NEAR_WINDOW);
             if (near.idx !== -1 && (near.idx - pointer) <= 3) {
                 applyMatch(near.idx, near.match, rawWord);
@@ -2344,29 +2333,30 @@
                 }
             }
 
-            // 3) no match → log to debug panel so the user can see what happened.
-            //    IMPORTANT: do NOT advance pointer, do NOT mark anything as mistake.
-            //    Just record the miss and wait for more input.
+            // 3) no match → mark current expected word as MISTAKE (RED) after 2+ misses.
+            //    This prevents interim speech recognition fragments (50ms partial ticks)
+            //    from briefly flashing red on words that are actually recited correctly.
             const expected = refWords[pointer];
-            const expectedPhoneme = expected.phoneme;
+            if (expected && consecutiveMisses >= 2) {
+                if (expected.el) expected.el.dataset.status = 'mistake';
+                if (!expected.hasMistake) {
+                    expected.hasMistake = true;
+                    stats.mistake++;
+                    updateStats();
+                }
+            }
+            const expectedPhoneme = expected ? expected.phoneme : '';
             const heardPh = phonemizeArabic(norm);
             let phRatio = null;
             if (expectedPhoneme && heardPh && heardPh.length >= 3 && expectedPhoneme.length >= 3) {
                 phRatio = levRatio(heardPh, expectedPhoneme);
             }
-            const textRatio = levRatio(norm, expected.norm);
+            const textRatio = expected ? levRatio(norm, expected.norm) : 0;
             _pushDebug({
                 kind: 'miss',
                 heard: rawWord, heardNorm: norm, heardPhoneme: heardPh,
-                expected: expected.text, expectedNorm: expected.norm, expectedPhoneme,
-                textRatio, phRatio,
-                surah: activeSurah, ayah: expected.ayah, position: expected.position,
-                reason: phRatio != null
-                    ? `Heard "${norm}" doesn't match expected "${expected.norm}" at pointer=${pointer}. ` +
-                    `Text ratio=${textRatio.toFixed(2)}, phoneme ratio=${phRatio.toFixed(2)} ` +
-                    `(need ≥${(1 - PHONEME_LEVENSHTEIN_RATIO).toFixed(2)}). ` +
-                    `Miss #${consecutiveMisses}/${RESYNC_THRESHOLD} before resync. Pointer stays put.`
-                    : `Heard "${norm}" doesn't match expected "${expected.norm}" at pointer=${pointer}. ` +
+                expected: expected ? expected.text : '', expectedNorm: expected ? expected.norm : '', expectedPhoneme,
+                reason: `Heard "${norm}" doesn't match expected "${expected ? expected.norm : ''}" at pointer=${pointer}. ` +
                     `Text ratio=${textRatio.toFixed(2)} (need ≥${(1 - LEVENSHTEIN_RATIO).toFixed(2)}). ` +
                     `Miss #${consecutiveMisses}/${RESYNC_THRESHOLD} before resync. Pointer stays put.`,
                 ts: Date.now(),
@@ -3172,9 +3162,10 @@
         function updateStats() {
             document.getElementById('statCorrect').textContent = stats.correct;
             document.getElementById('statMistake').textContent = stats.mistake;
-            document.getElementById('statUnclear').textContent = stats.unclear;
-            // Accuracy = correct / (correct + mistakes + unclear) — includes unclear
-            const _total = stats.correct + stats.mistake + stats.unclear;
+            const _statUnclear = document.getElementById('statUnclear');
+            if (_statUnclear) _statUnclear.textContent = stats.unclear || 0;
+            // Accuracy = correct / (correct + mistakes)
+            const _total = stats.correct + stats.mistake;
             const _statAccuracy = document.getElementById('statAccuracy');
             if (_statAccuracy) _statAccuracy.textContent = _total > 0 ? Math.round((stats.correct / _total) * 100) + '%' : '—';
         }
@@ -3437,9 +3428,12 @@
                 // transition would animate that toggle, making the highlighted
                 // recited words visibly blink while the user is actively speaking.
                 // (When the user pauses, no new ticks fire, no toggle, no blink.)
-                for (let i = _maxPointerReached; i < refWords.length; i++) {
-                    if (refWords[i] && refWords[i].el) {
-                        refWords[i].el.dataset.status = '';
+                for (let i = 0; i < refWords.length; i++) {
+                    if (refWords[i]) {
+                        refWords[i].hasMistake = false;
+                        if (i >= _maxPointerReached && refWords[i].el) {
+                            refWords[i].el.dataset.status = '';
+                        }
                     }
                 }
                 // Reset to 0 (relative to refWords, which is the current surah's words).
@@ -3722,10 +3716,13 @@
         const sensitivityValue = document.getElementById('sensitivityValue');
         function updateSensitivity() {
             const v = parseInt(sensitivitySlider.value);
-            // Map 0-100 to 0.05-0.50
-            const ratio = 0.05 + (v / 100) * 0.45;
+            // Map slider 0-100:
+            //   0 (Lenient) -> LEVENSHTEIN_RATIO = 0.45 (forgiving, higher error tolerance)
+            //  50 (Medium)  -> LEVENSHTEIN_RATIO = 0.27 (balanced)
+            // 100 (Strict)  -> LEVENSHTEIN_RATIO = 0.10 (strict, low error tolerance)
+            const ratio = 0.45 - (v / 100) * 0.35;
             if (sensitivityValue) sensitivityValue.textContent = ratio.toFixed(2);
-            window.LEVENSHTEIN_RATIO = ratio;
+            LEVENSHTEIN_RATIO = ratio;
             // Save to localStorage
             try { localStorage.setItem('hifzapp-sensitivity', v); } catch (e) { }
         }
