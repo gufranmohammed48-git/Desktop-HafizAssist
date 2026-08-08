@@ -572,36 +572,37 @@
             flex-wrap: wrap
         }
 
-        .sensitivity-control {
-            display: flex;
+        .mode-toggle-group {
+            display: inline-flex;
             align-items: center;
-            gap: 6px;
             background: var(--card);
             border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 4px 8px;
-            flex-wrap: nowrap;
-            min-width: 0
+            border-radius: 20px;
+            padding: 3px;
+            gap: 2px;
         }
 
-        .sensitivity-control .difficulty-end {
-            font-size: 10px;
+        .mode-btn {
+            background: transparent;
+            border: none;
             color: var(--text-dim);
-            font-weight: 500;
-            letter-spacing: .2px;
-            text-transform: uppercase;
-            min-width: 50px;
-            flex-shrink: 0;
-            white-space: nowrap
+            padding: 6px 14px;
+            border-radius: 16px;
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .15s ease;
         }
 
-        .sensitivity-control .difficulty-end:first-child {
-            text-align: right
+        .mode-btn:hover {
+            color: var(--text);
         }
 
-        .sensitivity-control input[type=range] {
-            accent-color: var(--primary);
-            height: 4px
+        .mode-btn.active {
+            background: var(--primary);
+            color: #0a1f12;
+            box-shadow: 0 2px 8px var(--primary-soft);
         }
 
         .mic-btn {
@@ -1787,11 +1788,10 @@
                 </button>
                 <button class="toggle-script-btn" id="toggleScriptBtn" title="Toggle the visible mushaf text">Hide
                     Script</button>
-                <div class="sensitivity-control">
-                    <span class="difficulty-end">Lenient</span>
-                    <input type="range" id="sensitivitySlider" min="0" max="100" value="50"
-                        style="width:100px;min-width:60px;flex-shrink:1;flex:1 1 60px" title="Match difficulty">
-                    <span class="difficulty-end">Strict</span>
+                <div class="mode-toggle-group" id="sensitivityToggle" title="Set recitation match difficulty">
+                    <button class="mode-btn" data-mode="easy">Easy</button>
+                    <button class="mode-btn active" data-mode="balanced">Balanced</button>
+                    <button class="mode-btn" data-mode="strict">Strict</button>
                 </div>
                 <span class="status" id="status">Pick a surah from the above list and track your recitation</span>
             </div>
@@ -2112,35 +2112,34 @@
         function isFuzzyMatch(heardNorm, expectedNorm, expectedPhonemes) {
             if (!heardNorm || !expectedNorm) return { matched: false, kind: 'none' };
 
-            // 1) exact match
+            // 1) Exact match — always passes
             if (heardNorm === expectedNorm) return { matched: true, kind: 'text', ratio: 1 };
 
-            // 2) substring — Chrome often merges "ال" + next word, or drops the prefix الـ
-            //    if heard contains expected, or vice versa, count it as a match.
-            const minLen = Math.min(heardNorm.length, expectedNorm.length);
-            const maxLen = Math.max(heardNorm.length, expectedNorm.length);
-            if (minLen >= 3) {
-                if (heardNorm.includes(expectedNorm) || expectedNorm.includes(heardNorm)) {
-                    return { matched: true, kind: 'substring', ratio: minLen / maxLen };
+            // 2) Substring match — allowed in Lenient/Medium mode, DISABLED in Strict mode (LEVENSHTEIN_RATIO <= 0.15)
+            if (LEVENSHTEIN_RATIO > 0.15) {
+                const minLen = Math.min(heardNorm.length, expectedNorm.length);
+                const maxLen = Math.max(heardNorm.length, expectedNorm.length);
+                if (minLen >= 3 && (minLen / maxLen) >= 0.65) {
+                    if (heardNorm.includes(expectedNorm) || expectedNorm.includes(heardNorm)) {
+                        return { matched: true, kind: 'substring', ratio: minLen / maxLen };
+                    }
                 }
             }
 
-            // 3) text Levenshtein ratio
+            // 3) Text Levenshtein ratio
             const r = levRatio(heardNorm, expectedNorm);
             if (r >= (1 - LEVENSHTEIN_RATIO)) {
                 return { matched: true, kind: 'text', ratio: r };
             }
 
-            // 4) phonetic fallback — only if text was borderline (within 2x of threshold)
-            if (expectedPhonemes && r >= (1 - 2 * LEVENSHTEIN_RATIO)) {
+            // 4) Phonetic fallback — only in Lenient/Medium modes
+            if (expectedPhonemes && LEVENSHTEIN_RATIO > 0.15 && r >= (1 - 2 * LEVENSHTEIN_RATIO)) {
                 const heardPh = phonemizeArabic(heardNorm);
                 if (heardPh && heardPh.length >= 3 && expectedPhonemes.length >= 3) {
                     const phRatio = levRatio(heardPh, expectedPhonemes);
-                    if (phRatio >= (1 - PHONEME_LEVENSHTEIN_RATIO)) {
+                    if (phRatio >= (1 - LEVENSHTEIN_RATIO)) {
                         return { matched: true, kind: 'phoneme', ratio: phRatio, heardPh, expectedPhonemes };
                     }
-                    // Record what we tried so the debug panel can show the phoneme mismatch.
-                    return { matched: false, kind: 'phoneme', ratio: phRatio, heardPh, expectedPhonemes, textRatio: r };
                 }
             }
 
@@ -3709,33 +3708,38 @@
         // (Quran Font picker removed — we now use Amiri Quran only, the
         //  mushaf-style Google Font. See https://fonts.google.com/specimen/Amiri+Quran)
 
-        // ==== SENSITIVITY SLIDER ====
-        // Range: 0 = easy (0.05 = very lenient), 100 = strict (0.50 = very strict)
-        // Maps slider value 0-100 to LEVENSHTEIN_RATIO 0.05-0.50
-        const sensitivitySlider = document.getElementById('sensitivitySlider');
-        const sensitivityValue = document.getElementById('sensitivityValue');
-        function updateSensitivity() {
-            const v = parseInt(sensitivitySlider.value);
-            // Map slider 0-100:
-            //   0 (Lenient) -> LEVENSHTEIN_RATIO = 0.45 (forgiving, higher error tolerance)
-            //  50 (Medium)  -> LEVENSHTEIN_RATIO = 0.27 (balanced)
-            // 100 (Strict)  -> LEVENSHTEIN_RATIO = 0.10 (strict, low error tolerance)
-            const ratio = 0.45 - (v / 100) * 0.35;
-            if (sensitivityValue) sensitivityValue.textContent = ratio.toFixed(2);
+        // ==== RECITING DIFFICULTY (Easy / Balanced / Strict) ====
+        const SENSITIVITY_MODES = {
+            easy: 0.45,       // Forgiving tolerance for speech variations
+            balanced: 0.27,   // Balanced default
+            strict: 0.10      // Strict exact pronunciation matching
+        };
+
+        function setSensitivityMode(mode) {
+            const ratio = SENSITIVITY_MODES[mode] !== undefined ? SENSITIVITY_MODES[mode] : 0.27;
             LEVENSHTEIN_RATIO = ratio;
-            // Save to localStorage
-            try { localStorage.setItem('hifzapp-sensitivity', v); } catch (e) { }
+            document.querySelectorAll('#sensitivityToggle .mode-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.mode === mode);
+            });
+            try { localStorage.setItem('hifzapp-sensitivity-mode', mode); } catch (e) { }
         }
-        if (sensitivitySlider) {
-            sensitivitySlider.addEventListener('input', updateSensitivity);
-            // Load saved sensitivity
-            let _savedSens = null;
-            try { _savedSens = localStorage.getItem('hifzapp-sensitivity'); } catch (e) { }
-            if (_savedSens !== null) {
-                sensitivitySlider.value = _savedSens;
-            }
-            updateSensitivity();
-        }
+
+        document.querySelectorAll('#sensitivityToggle .mode-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const mode = btn.dataset.mode;
+                if (mode) setSensitivityMode(mode);
+            });
+        });
+
+        // Load saved mode or default to Balanced (with legacy mapping support)
+        let _savedMode = 'balanced';
+        try {
+            let s = localStorage.getItem('hifzapp-sensitivity-mode');
+            if (s === 'lenient') s = 'easy';
+            if (s === 'medium') s = 'balanced';
+            if (s && SENSITIVITY_MODES[s] !== undefined) _savedMode = s;
+        } catch (e) { }
+        setSensitivityMode(_savedMode);
 
         // ==== COLLAPSIBLE MISTAKE STATISTICS ====
         // Direct approach: attach handlers by ID at the right time
