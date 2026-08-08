@@ -1711,9 +1711,49 @@
             margin: 0 auto;
             width: 100%;
             box-sizing: border-box;
-        }
 
-        /* End of page-outer wrapper: add subtle border like a book page */
+            /* Mobile Responsiveness for Android and Small Screens */
+            @media (max-width: 650px) {
+                .app {
+                    padding: 4px 6px;
+                }
+
+                #page-inner {
+                    padding: 16px 8px !important;
+                    max-width: 100% !important;
+                    min-height: auto !important;
+                    border-radius: 6px;
+                    box-sizing: border-box;
+                }
+
+                .mushaf-line {
+                    font-size: clamp(20px, 5.5vw, 26px) !important;
+                    line-height: 2.1 !important;
+                    height: auto !important;
+                    overflow: visible !important;
+                    padding: 0 2px !important;
+                }
+
+                .mushaf-surah-header {
+                    font-size: 11px !important;
+                    padding: 4px 0 !important;
+                    white-space: normal !important;
+                    flex-wrap: wrap !important;
+                }
+
+                .mushaf-surah-header .ar-name {
+                    font-size: 18px !important;
+                }
+
+                .page-controls {
+                    padding: 6px 0;
+                }
+
+                .page-controls button {
+                    padding: 6px 10px;
+                    font-size: 12px;
+                }
+            }
     </style>
 </head>
 
@@ -2318,9 +2358,10 @@
                 }
             }
 
-            // 1) near-window search (normal lookahead, prefer the EARLIEST match)
-            const near = findMatch(norm, pointer, pointer + NEAR_WINDOW);
-            if (near.idx !== -1 && (near.idx - pointer) <= 3) {
+            // 1) near-window search (normal lookahead max 2 words ahead to prevent jumping
+            //    to repeated Quran words like Allah, Ar-Rahman, Ar-Raheem in later verses).
+            const near = findMatch(norm, pointer, pointer + 3);
+            if (near.idx !== -1 && (near.idx - pointer) <= 2) {
                 applyMatch(near.idx, near.match, rawWord);
                 return;
             }
