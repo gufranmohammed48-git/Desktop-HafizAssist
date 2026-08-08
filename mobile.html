@@ -3394,6 +3394,27 @@
             return window.SpeechRecognition || window.webkitSpeechRecognition || null;
         }
 
+        function mergeSpeechTokens(finalStr, interimStr) {
+            const fWords = (finalStr || '').trim().split(/\s+/).filter(Boolean);
+            const iWords = (interimStr || '').trim().split(/\s+/).filter(Boolean);
+            if (!fWords.length) return iWords;
+            if (!iWords.length) return fWords;
+
+            // Find longest suffix of fWords matching prefix of iWords
+            let maxOverlap = 0;
+            const maxCheck = Math.min(fWords.length, iWords.length);
+            for (let len = maxCheck; len >= 1; len--) {
+                const fSuffix = fWords.slice(fWords.length - len).join(' ');
+                const iPrefix = iWords.slice(0, len).join(' ');
+                if (fSuffix === iPrefix) {
+                    maxOverlap = len;
+                    break;
+                }
+            }
+
+            return [...fWords, ...iWords.slice(maxOverlap)];
+        }
+
         async function startListening() {
             const Ctor = getRecognitionCtor();
             if (!Ctor) {
@@ -3413,7 +3434,7 @@
             recognition.interimResults = true;
 
             recognition.onresult = (event) => {
-                let interim = '';
+                let latestInterim = '';
                 for (let i = 0; i < event.results.length; i++) {
                     const res = event.results[i];
                     if (res.isFinal) {
@@ -3427,11 +3448,14 @@
                     } else {
                         // MOBILE SPECIFIC: Android Web Speech API appends growing
                         // phrase snapshots as separate interim items in event.results.
-                        // Overwrite interim with the latest non-final transcript!
-                        interim = res[0].transcript;
+                        latestInterim = res[0].transcript;
                     }
                 }
-                const fullText = (finalizedText + ' ' + interim).trim();
+
+                // Deduplicate overlap between finalizedText and latestInterim
+                const mergedTokens = mergeSpeechTokens(finalizedText, latestInterim);
+                const fullText = mergedTokens.join(' ');
+
                 if (fullText) {
                     transcriptBox.classList.remove('hidden');
                     transcriptText.textContent = fullText;
@@ -3441,31 +3465,9 @@
                     }
                 }
 
-                // === RE-PROCESS ALL WORDS FROM SCRATCH ON EVERY TICK ===
-                // Why: Chrome's interim results grow left→right, and the same word slot
-                // can change content as recognition refines ("يس" → "يسالونك"). Tracking
-                // committedWordCount is wrong — it doesn't notice when a previously-
-                // processed word has been updated, so the matcher falls behind and marks
-                // correct words as 'unclear' on the next interim tick.
-                //
-                // PERFORMANCE: Chrome can fire onresult 10-30 times/sec. By line 8
-                // the transcript is ~80 words, so the full re-processing is O(80
-                // words × 8-window fuzzy matches) per tick = ~640 matches per tick.
-                // At 30 ticks/sec that is ~20k matches/sec just for the matcher,
-                // and the dataset.status reset loop also touches ~2400 unreached
-                // DOM elements per tick. The main thread gets swamped and the
-                // highlight visibly trails the user.
-                //
-                // Fix: throttle the re-processing to once per animation frame via
-                // requestAnimationFrame. We keep the latest fullText/words in module
-                // scope and the next animation frame picks them up. This caps the
-                // re-processing at the browser's refresh rate (typically 60fps) no
-                // matter how fast Chrome fires interim results.
-                const words = fullText.length ? fullText.split(/\s+/) : [];
                 _pendingFullText = fullText;
-                _pendingWords = words;
+                _pendingWords = mergedTokens;
                 _scheduleReProcess();
-
             };
 
             // === rAF-throttled re-processing ===
