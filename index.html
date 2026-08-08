@@ -1179,6 +1179,11 @@
             visibility: hidden;
         }
 
+        #page.script-hidden .ayah-marker.past {
+            visibility: visible;
+            opacity: 0.8;
+        }
+
         #page.script-hidden .bismillah-line {
             visibility: hidden;
         }
@@ -2865,6 +2870,8 @@
                         lineDiv.appendChild(document.createTextNode(' '));
                         const marker = document.createElement('span');
                         marker.className = 'ayah-marker';
+                        const precedingRefIdx = wi > 0 ? line.words[wi - 1].refIdx : undefined;
+                        if (precedingRefIdx !== undefined) marker.dataset.refIdx = precedingRefIdx;
                         marker.textContent = w.text;
                         lineDiv.appendChild(marker);
                         continue;
@@ -3226,6 +3233,16 @@
                 w.classList.add("now");
                 w.classList.remove("future");  // .now has its own (hidden) style under script-hidden
             }
+
+            // Update completed verse markers (for Hide Script mode)
+            document.querySelectorAll('.ayah-marker').forEach(m => {
+                const rIdx = parseInt(m.dataset.refIdx);
+                if (!isNaN(rIdx) && pointer > rIdx) {
+                    m.classList.add('past');
+                } else {
+                    m.classList.remove('past');
+                }
+            });
 
             if (pointer > _maxPointerReached) _maxPointerReached = pointer;
             _prevPastEnd = _maxPointerReached;
