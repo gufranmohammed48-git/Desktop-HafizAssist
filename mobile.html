@@ -1789,7 +1789,7 @@
         <header>
             <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
             <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
-            <div class="version-badge" id="versionBadge" title="Current mobile build version">vMobile-2</div>
+            <div class="version-badge" id="versionBadge" title="Current mobile build version">vMobile-4</div>
         </header>
 
         <p class="lede">
@@ -3434,27 +3434,34 @@
             recognition.interimResults = true;
 
             recognition.onresult = (event) => {
-                let latestInterim = '';
+                let fullTextParts = [];
                 for (let i = 0; i < event.results.length; i++) {
-                    const res = event.results[i];
-                    if (res.isFinal) {
-                        if (i >= event.resultIndex) {
-                            finalizedText += res[0].transcript + ' ';
-                            if (res[0].confidence > 0) {
-                                confidences.push(res[0].confidence);
-                                if (confidences.length > 100) confidences.shift();  // cap to 100
-                            }
-                        }
+                    const phrase = event.results[i][0].transcript.trim();
+                    if (!phrase) continue;
+
+                    if (event.results[i].isFinal && event.results[i][0].confidence > 0) {
+                        confidences.push(event.results[i][0].confidence);
+                        if (confidences.length > 100) confidences.shift();
+                    }
+
+                    if (fullTextParts.length === 0) {
+                        fullTextParts.push(phrase);
                     } else {
-                        // MOBILE SPECIFIC: Android Web Speech API appends growing
-                        // phrase snapshots as separate interim items in event.results.
-                        latestInterim = res[0].transcript;
+                        const lastPhrase = fullTextParts[fullTextParts.length - 1];
+                        // On Android Mobile, each new result slot is often a growing phrase snapshot of the previous slot.
+                        // If phrase starts with lastPhrase (or matches >80%), replace lastPhrase with phrase!
+                        if (phrase.startsWith(lastPhrase) || levRatio(phrase.slice(0, lastPhrase.length), lastPhrase) > 0.8) {
+                            fullTextParts[fullTextParts.length - 1] = phrase;
+                        } else {
+                            // Merge overlapping tokens between consecutive speech slots
+                            const merged = mergeSpeechTokens(lastPhrase, phrase).join(' ');
+                            fullTextParts[fullTextParts.length - 1] = merged;
+                        }
                     }
                 }
 
-                // Deduplicate overlap between finalizedText and latestInterim
-                const mergedTokens = mergeSpeechTokens(finalizedText, latestInterim);
-                const fullText = mergedTokens.join(' ');
+                const fullText = fullTextParts.join(' ');
+                const words = fullText.length ? fullText.split(/\s+/).filter(Boolean) : [];
 
                 if (fullText) {
                     transcriptBox.classList.remove('hidden');
@@ -3466,7 +3473,7 @@
                 }
 
                 _pendingFullText = fullText;
-                _pendingWords = mergedTokens;
+                _pendingWords = words;
                 _scheduleReProcess();
             };
 
