@@ -2974,7 +2974,7 @@
                 }
 
                 highlightCurrent();  // update .now class for the target surah word
-                statusEl.textContent = `Page ${pageNum} of 604 loaded. (Amiri Quran)`;
+                statusEl.textContent = '';//`Page ${pageNum} of 604 loaded. (Amiri Quran)`;
             } catch (e) {
                 console.error('[mushaf] Failed to load page', pageNum, e);
                 statusEl.textContent = `Failed to load page ${pageNum}.`;
@@ -3972,15 +3972,19 @@
         } catch (e) { }
         setSensitivityMode(_savedMode);
 
-        // ==== BEEP ALERT BANNER FOR ANDROID MOBILE ====
+        // ==== BEEP ALERT BANNER FOR ANDROID MOBILE ONLY ====
         const beepBanner = document.getElementById('beepBanner');
         const closeBeepBanner = document.getElementById('closeBeepBanner');
         if (beepBanner && closeBeepBanner) {
+            const isAndroid = /Android/i.test(navigator.userAgent);
+            let dismissed = false;
             try {
-                if (localStorage.getItem('hifzapp-beep-banner-dismissed') === '1') {
-                    beepBanner.classList.add('hidden');
-                }
+                dismissed = localStorage.getItem('hifzapp-beep-banner-dismissed') === '1';
             } catch (e) { }
+            // Only show on Android devices — iOS (iPhone/iPad Chrome) does not emit WebKit audio chimes
+            if (!isAndroid || dismissed) {
+                beepBanner.classList.add('hidden');
+            }
             closeBeepBanner.addEventListener('click', () => {
                 beepBanner.classList.add('hidden');
                 try { localStorage.setItem('hifzapp-beep-banner-dismissed', '1'); } catch (e) { }
