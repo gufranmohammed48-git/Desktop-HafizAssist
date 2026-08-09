@@ -1716,49 +1716,50 @@
             margin: 0 auto;
             width: 100%;
             box-sizing: border-box;
+        }
 
-            /* Mobile Responsiveness for Android and Small Screens */
-            @media (max-width: 650px) {
-                .app {
-                    padding: 4px 6px;
-                }
-
-                #page-inner {
-                    padding: 16px 8px !important;
-                    max-width: 100% !important;
-                    min-height: auto !important;
-                    border-radius: 6px;
-                    box-sizing: border-box;
-                }
-
-                .mushaf-line {
-                    font-size: clamp(20px, 5.5vw, 26px) !important;
-                    line-height: 2.1 !important;
-                    height: auto !important;
-                    overflow: visible !important;
-                    padding: 0 2px !important;
-                }
-
-                .mushaf-surah-header {
-                    font-size: 11px !important;
-                    padding: 4px 0 !important;
-                    white-space: normal !important;
-                    flex-wrap: wrap !important;
-                }
-
-                .mushaf-surah-header .ar-name {
-                    font-size: 18px !important;
-                }
-
-                .page-controls {
-                    padding: 6px 0;
-                }
-
-                .page-controls button {
-                    padding: 6px 10px;
-                    font-size: 12px;
-                }
+        /* Mobile Responsiveness for Android and Small Screens */
+        @media (max-width: 650px) {
+            .app {
+                padding: 4px 4px;
             }
+
+            #page-inner {
+                padding: 12px 4px !important;
+                max-width: 100% !important;
+                min-height: auto !important;
+                border-radius: 6px;
+                box-sizing: border-box;
+            }
+
+            .mushaf-line {
+                font-size: clamp(16px, 4.6vw, 22px) !important;
+                line-height: 2.1 !important;
+                height: auto !important;
+                overflow: visible !important;
+                padding: 0 1px !important;
+            }
+
+            .mushaf-surah-header {
+                font-size: 11px !important;
+                padding: 4px 0 !important;
+                white-space: normal !important;
+                flex-wrap: wrap !important;
+            }
+
+            .mushaf-surah-header .ar-name {
+                font-size: 18px !important;
+            }
+
+            .page-controls {
+                padding: 6px 0;
+            }
+
+            .page-controls button {
+                padding: 6px 10px;
+                font-size: 12px;
+            }
+        }
     </style>
 </head>
 
@@ -1789,7 +1790,7 @@
         <header>
             <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
             <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
-            <div class="version-badge" id="versionBadge" title="Current mobile build version">vMobile-6</div>
+            <div class="version-badge" id="versionBadge" title="Current mobile build version">vMobile-7</div>
         </header>
 
         <p class="lede">
