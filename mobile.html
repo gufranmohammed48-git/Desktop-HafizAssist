@@ -1789,7 +1789,7 @@
         <header>
             <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
             <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
-            <div class="version-badge" id="versionBadge" title="Current mobile build version">vMobile-5</div>
+            <div class="version-badge" id="versionBadge" title="Current mobile build version">vMobile-6</div>
         </header>
 
         <p class="lede">
@@ -3636,21 +3636,19 @@
                 }
             };
 
-            // DEBOUNCED auto-restart (prevents tight loop on Chrome)
-            let _lastRestartTime = 0;
+            // INSTANT AUTO-RESTART FOR MOBILE CHROME (0ms gap between verses)
             recognition.onend = () => {
                 if (!listening) return;
-                const now = Date.now();
-                // Don't restart more than once per 1500ms
-                if (now - _lastRestartTime < 1500) return;
-                _lastRestartTime = now;
-                setTimeout(() => {
-                    if (!listening) return;
-                    try { recognition.start(); }
-                    catch (e) {
-                        setTimeout(() => { if (listening) { try { recognition.start(); } catch (_) { } } }, 500);
-                    }
-                }, 500);
+                lastFinalizedIndex = -1;  // reset session index for new SpeechRecognition turn
+                try {
+                    recognition.start();
+                } catch (e) {
+                    setTimeout(() => {
+                        if (listening) {
+                            try { recognition.start(); } catch (_) { }
+                        }
+                    }, 100);
+                }
             };
 
             // Diagnostic: surface context info so the user knows if mobile is blocking us.
