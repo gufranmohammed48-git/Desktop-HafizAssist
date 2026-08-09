@@ -4,6 +4,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        // Automatic Android / Mobile Redirect to mobile.html
+        (function () {
+            const isAndroid = /Android/i.test(navigator.userAgent);
+            const isMobile = isAndroid || /iPhone|iPad|iPod|Mobile|Opera Mini|IEMobile/i.test(navigator.userAgent);
+            const urlParams = new URLSearchParams(window.location.search);
+            if (isMobile && !urlParams.has('desktop')) {
+                window.location.replace('mobile.html' + window.location.search + window.location.hash);
+            }
+        })();
+    </script>
     <title>Live Recitation Tracker v2.0</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
