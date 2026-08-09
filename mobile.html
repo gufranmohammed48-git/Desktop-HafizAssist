@@ -1588,34 +1588,36 @@
    FIX (v23): removed padding (was 0 3px) to prevent line width
    changes when a word becomes unclear. Use box-shadow for the
    rounded background effect without layout impact. */
+        /* Unclear words — seamless yellow background bar */
         .mushaf-line .word[data-status="unclear"] {
             background: rgba(241, 196, 15, 0.25) !important;
             color: #b8860b !important;
             text-decoration: underline dotted #b8860b !important;
-            border-radius: 3px;
-            /* No padding — use box-shadow for the visual frame */
-            padding: 0 !important;
-            box-shadow: 0 0 0 1px rgba(184, 134, 11, 0.3);
+            border-radius: 0 !important;
+            padding: 1px 4px !important;
+            margin: 0 -4px !important;
+            box-shadow: none !important;
         }
 
-        /* Mistake words — clean red background tile (no strikethrough) */
+        /* Mistake words — seamless red background bar */
         .mushaf-line .word[data-status="mistake"] {
             background: rgba(231, 76, 60, 0.25) !important;
             color: #e74c3c !important;
             text-decoration: none !important;
-            border-radius: 3px;
-            padding: 0 !important;
-            box-shadow: 0 0 0 1px rgba(231, 76, 60, 0.4);
+            border-radius: 0 !important;
+            padding: 1px 4px !important;
+            margin: 0 -4px !important;
+            box-shadow: none !important;
         }
 
-        /* Correct words — subtle green background.
-   FIX (v23): removed padding (was 0 3px) — same reason. */
+        /* Correct words — seamless green background bar (no gaps between words) */
         .mushaf-line .word[data-status="correct"] {
-            background: rgba(46, 204, 113, 0.2) !important;
+            background: rgba(46, 204, 113, 0.22) !important;
             color: #1e8449 !important;
-            border-radius: 3px;
-            padding: 0 !important;
-            box-shadow: 0 0 0 1px rgba(30, 132, 73, 0.3);
+            border-radius: 0 !important;
+            padding: 1px 4px !important;
+            margin: 0 -4px !important;
+            box-shadow: none !important;
         }
 
         /* Ayat marker (verse end) - ornate circular frame like quran.com */
@@ -1721,15 +1723,15 @@
         /* Mobile Responsiveness for Android and Small Screens */
         @media (max-width: 650px) {
             .app {
-                padding: 2px 2px !important;
+                padding: 1px 0px !important;
             }
 
             #page {
-                padding: 4px 2px !important;
+                padding: 2px 0px !important;
             }
 
             #page-inner {
-                padding: 8px 3px !important;
+                padding: 8px 1px !important;
                 max-width: 100% !important;
                 min-height: auto !important;
                 border-radius: 6px;
@@ -1737,11 +1739,11 @@
             }
 
             .mushaf-line {
-                font-size: clamp(12px, 3.6vw, 17px) !important;
+                font-size: clamp(11px, 3.4vw, 16px) !important;
                 line-height: 2.2 !important;
                 height: auto !important;
                 overflow: visible !important;
-                padding: 0 1px !important;
+                padding: 0 !important;
                 width: 100% !important;
                 box-sizing: border-box !important;
             }
@@ -1776,6 +1778,91 @@
                 font-size: 12px;
             }
         }
+
+        /* Mobile Android Beep Alert Banner */
+        .mobile-beep-banner {
+            background: linear-gradient(135deg, rgba(241, 196, 15, 0.18), rgba(241, 196, 15, 0.08));
+            border: 1px solid rgba(241, 196, 15, 0.4);
+            border-radius: 10px;
+            padding: 10px 14px;
+            margin: 8px 0 16px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            font-size: 12px;
+            line-height: 1.4;
+            color: var(--text);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .mobile-beep-banner.hidden {
+            display: none !important;
+        }
+
+        .mobile-beep-banner .banner-content {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .mobile-beep-banner .banner-content .icon {
+            font-size: 18px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .mobile-beep-banner .text-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .mobile-beep-banner .banner-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 2px;
+        }
+
+        .mobile-beep-banner .banner-settings-btn {
+            background: rgba(255, 255, 255, 0.12);
+            color: var(--text);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 6px;
+            padding: 5px 10px;
+            font-size: 11px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: background 0.15s ease;
+        }
+
+        .mobile-beep-banner .banner-settings-btn:hover {
+            background: rgba(255, 255, 255, 0.22);
+        }
+
+        .mobile-beep-banner .banner-close {
+            background: var(--yellow);
+            color: #0a1410;
+            border: none;
+            border-radius: 6px;
+            padding: 5px 10px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: opacity 0.15s ease;
+        }
+
+        .mobile-beep-banner .banner-close:hover {
+            opacity: 0.9;
+        }
     </style>
 </head>
 
@@ -1806,7 +1893,7 @@
         <header>
             <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
             <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
-            <div class="version-badge" id="versionBadge" title="Current mobile build version">vMobile-8</div>
+            <div class="version-badge" id="versionBadge" title="Current mobile build version">vMobile-11</div>
         </header>
 
         <p class="lede">
@@ -1815,6 +1902,19 @@
             <b style="color:var(--yellow)">unclear</b>. Tap any word to see its phoneme breakdown and
             Tajweed rules.
         </p>
+
+        <div class="mobile-beep-banner" id="beepBanner">
+            <div class="banner-content">
+                <span class="icon">🔇</span>
+                <div class="text-wrap">
+                    <span class="text"><b>Mute Android Beep Chime:</b> To turn off the mic start/stop beep sound, turn down your phone's <b>System / Notification Volume</b> or switch to <b>Silent Mode</b>.</span>
+                    <div class="banner-actions">
+                        <a class="banner-settings-btn" href="intent:#Intent;action=android.settings.SOUND_SETTINGS;end">Open Sound Settings ⚙</a>
+                        <button class="banner-close" id="closeBeepBanner">Got it ✓</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <section class="panel">
             <div class="section-header">
@@ -3904,6 +4004,20 @@
         } catch (e) { }
         setSensitivityMode(_savedMode);
 
+        // ==== BEEP ALERT BANNER FOR ANDROID MOBILE ====
+        const beepBanner = document.getElementById('beepBanner');
+        const closeBeepBanner = document.getElementById('closeBeepBanner');
+        if (beepBanner && closeBeepBanner) {
+            try {
+                if (localStorage.getItem('hifzapp-beep-banner-dismissed') === '1') {
+                    beepBanner.classList.add('hidden');
+                }
+            } catch (e) { }
+            closeBeepBanner.addEventListener('click', () => {
+                beepBanner.classList.add('hidden');
+                try { localStorage.setItem('hifzapp-beep-banner-dismissed', '1'); } catch (e) { }
+            });
+        }
         // ==== COLLAPSIBLE MISTAKE STATISTICS ====
         // Direct approach: attach handlers by ID at the right time
         function _setupCollapsibleMistakePanel() {
