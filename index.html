@@ -1595,36 +1595,47 @@
             color: var(--text);
         }
 
+        /* Seamless background extension for highlighted words (bridges flex gaps) */
+        .mushaf-line .word[data-status="correct"],
+        .mushaf-line .word[data-status="mistake"],
+        .mushaf-line .word[data-status="unclear"] {
+            position: relative;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+        }
+
+        .mushaf-line .word[data-status="correct"]::after,
+        .mushaf-line .word[data-status="mistake"]::after,
+        .mushaf-line .word[data-status="unclear"]::after {
+            content: "";
+            position: absolute;
+            top: -2px;
+            bottom: -2px;
+            left: -14px;
+            right: -14px;
+            background: inherit;
+            z-index: -1;
+            pointer-events: none;
+        }
+
         /* Unclear words — seamless yellow background bar */
         .mushaf-line .word[data-status="unclear"] {
-            background: rgba(241, 196, 15, 0.25) !important;
+            background: rgba(241, 196, 15, 0.28) !important;
             color: #b8860b !important;
             text-decoration: underline dotted #b8860b !important;
-            border-radius: 0 !important;
-            padding: 1px 4px !important;
-            margin: 0 -4px !important;
-            box-shadow: none !important;
         }
 
         /* Mistake words — seamless red background bar */
         .mushaf-line .word[data-status="mistake"] {
-            background: rgba(231, 76, 60, 0.25) !important;
+            background: rgba(231, 76, 60, 0.28) !important;
             color: #e74c3c !important;
             text-decoration: none !important;
-            border-radius: 0 !important;
-            padding: 1px 4px !important;
-            margin: 0 -4px !important;
-            box-shadow: none !important;
         }
 
         /* Correct words — seamless green background bar (no gaps between words) */
         .mushaf-line .word[data-status="correct"] {
-            background: rgba(46, 204, 113, 0.22) !important;
+            background: rgba(46, 204, 113, 0.25) !important;
             color: #1e8449 !important;
-            border-radius: 0 !important;
-            padding: 1px 4px !important;
-            margin: 0 -4px !important;
-            box-shadow: none !important;
         }
 
         /* Ayat marker (verse end) - ornate circular frame like quran.com */
