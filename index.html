@@ -95,6 +95,10 @@
             margin-right: 1px
         }
 
+        .version-badge:empty {
+            display: none !important;
+        }
+
         /* CONTACT SUPPORT — inline pill, lives inside the section header so it
      scrolls naturally with the page (not a fixed overlay). */
         .contact-btn {
@@ -1702,7 +1706,7 @@
             border-radius: 8px;
             padding: 28px 20px;
             min-height: 600px;
-            max-width: 600px;
+            max-width: 625px;
             margin: 0 auto;
             width: 100%;
             box-sizing: border-box;
@@ -1779,7 +1783,7 @@
         <header>
             <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
             <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
-            <div class="version-badge" id="versionBadge" title="Current build version">v30</div>
+            <div class="version-badge" id="versionBadge" title="Current build version"></div>
         </header>
 
         <p class="lede">
@@ -2545,6 +2549,7 @@
             refWords = [];
             ayahEndIndex = [];
             pointer = 0;
+            _pageInitialPointer = 0;
             consecutiveMisses = 0;
             stats = { correct: 0, mistake: 0, unclear: 0 };
             pageStartStats = { correct: 0, mistake: 0, unclear: 0 };
@@ -2767,8 +2772,9 @@
         let _pagePUACodes = {};  // verse_key -> space-separated PUA codes (QPC HAFS glyphs)
         let _puaMode = false;     // true when PUA codes are loaded — render with QPC HAFS
         let _pageFontFamily = null;  // e.g. "QPC_P100" — page-specific QPC HAFS font
+        let _pageInitialPointer = 0;  // initial pointer position for targetSurah on page load
 
-        async function loadMushafPage(pageNum) {
+        async function loadMushafPage(pageNum, targetSurah = null) {
             if (!window.QuranAPI) return;
             try {
                 statusEl.textContent = `Loading page ${pageNum}...`;
@@ -2817,13 +2823,24 @@
                     currentLine.words.push({ w, i, refIdx: pageIdxToRefIdx.get(i) });
                 }
                 _currentMushafPage = pageNum;
-                // Reset pointer and stats
-                pointer = 0;
-                _maxPointerReached = 0;
+
+                // === TARGET SURAH POSITIONING ===
+                // If targetSurah is specified, position pointer at the FIRST word of targetSurah on this page
+                let startPointer = 0;
+                if (targetSurah) {
+                    const sIdx = refWords.findIndex(w => w.surah === targetSurah);
+                    if (sIdx !== -1) {
+                        startPointer = sIdx;
+                    }
+                }
+
+                _pageInitialPointer = startPointer;
+                pointer = startPointer;
+                _maxPointerReached = startPointer;
                 _lastHighlightedPointer = -1;
-                _prevPastEnd = 0;
+                _prevPastEnd = startPointer;
                 consecutiveMisses = 0;
-                activeSurah = refWords[0]?.surah || null;
+                activeSurah = targetSurah || refWords[startPointer]?.surah || refWords[0]?.surah || null;
                 // Set pageStart/pageEnd to refWords range
                 pageStart = 0;
                 pageEnd = refWords.length;
@@ -2836,12 +2853,18 @@
                 confidences = [];
                 updateStats();
                 // FIX (v4): Tell _runReProcess to skip one tick after a page flip.
-                // Without this, the next onresult (which Chrome always sends) would
-                // re-populate finalizedText with the OLD words from event.results
-                // and the matcher would mark 4 random words on the new page as .past.
                 _pageFlipGuard = true;
                 renderMushafPage();
-                highlightCurrent();  // update .now class for the new page
+
+                // Mark any words preceding startPointer (from earlier surahs on the same page) as .past
+                for (let i = 0; i < startPointer; i++) {
+                    if (refWords[i] && refWords[i].el) {
+                        refWords[i].el.classList.add('past');
+                        refWords[i].el.classList.remove('future');
+                    }
+                }
+
+                highlightCurrent();  // update .now class for the target surah word
                 statusEl.textContent = `Page ${pageNum} of 604 loaded. (Amiri Quran)`;
             } catch (e) {
                 console.error('[mushaf] Failed to load page', pageNum, e);
@@ -3167,50 +3190,24 @@
             for (let i = startIdx; i < allRefWords.length; i++) {
                 if (allRefWords[i].surah !== num) { endIdx = i; break; }
             }
-            // Set refWords to just this surah's words (so production matcher works)
-            refWords = allRefWords.slice(startIdx, endIdx);
             // === REAL MUSHAF PAGINATION: Use ACTUAL API page boundaries ===
-            // The chapter metadata has pages: [startPage, endPage]
-            // Jump to the first page of this surah in the API
             const surahInfo = SURAH_META.find(s => s.num === num);
             if (surahInfo && surahInfo.pages && surahInfo.pages.length === 2) {
-                // First page of this surah in the API
                 _currentMushafPage = surahInfo.pages[0];
             } else {
-                // Fallback: find the page that contains the surah start
-                _currentMushafPage = Math.floor(startIdx / 80) + 1;  // rough estimate
+                _currentMushafPage = Math.floor(startIdx / 80) + 1;
             }
-            // Find page bounds based on the surah's first page
             pageStart = startIdx;
             pageEnd = Math.min(endIdx, pageStart + 100);
             _currentPageLineStart = 0;
-            // Load the actual API page (1-604) for the real mushaf layout
-            loadMushafPage(_currentMushafPage);
-            // Set pointer to the first word of the surah (relative to refWords)
-            pointer = 0;  // start at the beginning of this surah
-            _maxPointerReached = 0;
-            _lastHighlightedPointer = -1;
-            _prevPastEnd = 0;
-            consecutiveMisses = 0;
             activeSurah = num;
-            // CRITICAL: clear stale transcript state from previous surah.
-            // Otherwise the old transcript words will be re-matched against
-            // the new surah's refWords, giving wrong results.
             _pendingFullText = '';
             _pendingWords = [];
             finalizedText = '';
             stats = { correct: 0, mistake: 0, unclear: 0 };
             pageStartStats = { correct: 0, mistake: 0, unclear: 0 };
-            // Also clear the status of the OLD refWords (in case the user is
-            // switching back and forth)
-            for (let i = 0; i < refWords.length; i++) {
-                if (refWords[i] && refWords[i].el) {
-                    refWords[i].el.dataset.status = '';
-                }
-            }
-            renderPage();
-            updateStats();
-            highlightCurrent();
+            // Load the actual API page (1-604) and position pointer at the first word of target surah (num)
+            loadMushafPage(_currentMushafPage, num);
             // Update active state in surah grid
             document.querySelectorAll('.surah-card').forEach(c => {
                 c.classList.toggle('active', parseInt(c.dataset.num) === num);
@@ -3220,15 +3217,6 @@
             if (meta && statusEl) {
                 statusEl.textContent = `Ready to recite ${meta.translit} (${meta.meaning}). Click Start to begin.`;
             }
-            // DEBUG: detailed state after switching
-            const first5 = [];
-            for (let i = 0; i < Math.min(5, refWords.length); i++) {
-                const elOk = refWords[i] && refWords[i].el ? 'YES' : 'NO';
-                first5.push(`${i}:${refWords[i].text}(el:${elOk})`);
-            }
-
-
-
         }
 
         function nextPage() {
@@ -3542,9 +3530,8 @@
                         }
                     }
                 }
-                // Reset to 0 (relative to refWords, which is the current surah's words).
-                // This is what production does — refWords is always the current surah.
-                pointer = 0;
+                // Reset to _pageInitialPointer (relative to current page refWords).
+                pointer = _pageInitialPointer || 0;
                 _lastHighlightedPointer = -1;
                 _maxPointerReached = pointer;
                 _prevPastEnd = pointer;
