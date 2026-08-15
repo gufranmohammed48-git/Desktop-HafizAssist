@@ -14,6 +14,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
+    <link href="https://fonts.cdnfonts.com/css/kfgqpc-uthman-taha-naskh" rel="stylesheet">
     <style>
         /* QPC HAFS no longer needed — Amiri Quran (Google Font) handles mushaf rendering
    using standard Arabic characters. qpc-hafs.woff2 can be removed from assets. */
@@ -1299,23 +1300,23 @@
         }
 
         body.theme-sepia {
-            --bg: #fbf7ee;
-            --card: #fffdf7;
-            --card-hover: #f5eedb;
-            --border: #e2d5b5;
-            --text: #2d1e12;
-            --text-dim: #6e543c;
-            --primary: #85371c;
+            --bg: #F4EFE6;
+            --card: #FAF6ED;
+            --card-hover: #F2ECE0;
+            --border: #C59B27;
+            --text: #1B1811;
+            --text-dim: #5C5243;
+            --primary: #1B4D3E;
             --primary-text: #ffffff;
-            --primary-soft: rgba(133, 55, 28, 0.12);
-            --yellow: #b45309;
-            --yellow-soft: rgba(180, 83, 9, 0.12);
-            --accent: #7c2d12;
-            --now-glow: rgba(133, 55, 28, 0.35);
-            --shadow: rgba(45, 30, 18, 0.10);
-            --bismillah-bg: rgba(133, 55, 28, 0.08);
-            --bismillah-border: rgba(133, 55, 28, 0.30);
-            --bismillah-color: #85371c;
+            --primary-soft: rgba(27, 77, 62, 0.14);
+            --yellow: #B45309;
+            --yellow-soft: rgba(180, 83, 9, 0.14);
+            --accent: #C59B27;
+            --now-glow: rgba(197, 155, 39, 0.45);
+            --shadow: rgba(27, 24, 17, 0.15);
+            --bismillah-bg: rgba(197, 155, 39, 0.12);
+            --bismillah-border: #C59B27;
+            --bismillah-color: #1B4D3E;
         }
 
         body.theme-royal {
@@ -1491,14 +1492,14 @@
    No CORS issues, no font loading games — works everywhere.
    See https://fonts.google.com/specimen/Amiri+Quran */
         .mushaf-line {
-            font-family: 'Amiri Quran', 'Amiri', 'Scheherazade New', serif;
-            font-size: clamp(20px, 3.6vw, 28px);
-            line-height: 2.1;
+            font-family: 'KFGQPC Uthman Taha Naskh', 'Amiri Quran', 'Scheherazade New', 'Amiri', serif;
+            font-size: clamp(17px, 4.2vw, 24px);
+            line-height: 2.0;
             direction: rtl;
-            margin: 4px 0;
-            padding: 0 4px;
+            margin: 2px 0;
+            padding: 0 2px;
             font-weight: 400;
-            color: var(--text);
+            color: var(--text, #E8EDF4);
             width: 100%;
             box-sizing: border-box;
             display: flex;
@@ -1518,7 +1519,7 @@
         .mushaf-line .word {
             display: inline-block;
             white-space: nowrap;
-            padding: 1px 3px;
+            padding: 1px 2px;
             margin: 0;
             border: none;
             background: transparent;
@@ -1538,11 +1539,12 @@
         }
 
         .mushaf-line.bismillah-line {
-            font-size: 28px;
-            color: var(--bismillah-color);
-            margin: 20px 0;
+            font-size: 24px;
+            color: #F7E7B4;
+            margin: 14px 0;
             font-weight: 400;
             justify-content: center;
+            font-family: 'KFGQPC Uthman Taha Naskh', 'Amiri Quran', serif;
         }
 
         /* Page 1 (Surah Al-Fatihah) — center align lines only on page 1 */
@@ -1550,21 +1552,22 @@
             justify-content: center !important;
         }
 
-        /* Current word (now) — dynamic theme-aware pointer (no hardcoded yellow) */
+        /* Current word (now) — dynamic theme-aware pointer */
         .mushaf-line .word.now {
-            color: #ffffff !important;
-            background: var(--primary) !important;
+            color: #0A1220 !important;
+            background: #2ECC71 !important;
             border: none !important;
             border-radius: 4px;
             padding: 1px 3px !important;
             margin: 0 !important;
             text-shadow: none !important;
-            box-shadow: 0 0 0 2px var(--primary), 0 2px 10px var(--now-glow) !important;
+            box-shadow: 0 0 0 2px #2ECC71, 0 2px 12px rgba(46, 204, 113, 0.5) !important;
             transform: none !important;
+            font-weight: 700 !important;
         }
 
         body.theme-dark .mushaf-line .word.now {
-            color: #0a1f12 !important;
+            color: #0A1220 !important;
         }
 
         body.theme-royal .mushaf-line .word.now {
@@ -1573,163 +1576,188 @@
 
         /* Past words — dimmed */
         .mushaf-line .word.past {
-            opacity: 0.5;
+            opacity: 0.55;
         }
 
-        /* Future words — use the theme text color */
+        /* Future words — crisp light text for dark theme */
         .mushaf-line .word.future {
-            color: var(--text);
+            color: var(--text, #E8EDF4);
         }
 
-        /* Unclear words — clean yellow highlight tile (constant 1px 3px padding) */
+        /* Unclear words — clean yellow highlight tile */
         .mushaf-line .word[data-status="unclear"] {
-            background: rgba(241, 196, 15, 0.22) !important;
-            color: #f1c40f !important;
-            text-decoration: underline dotted #f1c40f !important;
+            background: rgba(241, 196, 15, 0.28) !important;
+            color: #F1C40F !important;
+            text-decoration: underline dotted #F1C40F !important;
             border-radius: 4px !important;
             padding: 1px 3px !important;
             margin: 0 !important;
         }
 
-        /* Mistake words — clean red highlight tile (constant 1px 3px padding) */
+        /* Mistake words — clean red highlight tile */
         .mushaf-line .word[data-status="mistake"] {
-            background: rgba(231, 76, 60, 0.22) !important;
-            color: #e74c3c !important;
+            background: rgba(231, 76, 60, 0.28) !important;
+            color: #E74C3C !important;
             border-radius: 4px !important;
             padding: 1px 3px !important;
             margin: 0 !important;
         }
 
-        /* Correct words — clean green highlight tile (constant 1px 3px padding) */
+        /* Correct words — clean green highlight tile */
         .mushaf-line .word[data-status="correct"] {
-            background: rgba(46, 204, 113, 0.22) !important;
-            color: #2ecc71 !important;
+            background: rgba(46, 204, 113, 0.25) !important;
+            color: #2ECC71 !important;
             border-radius: 4px !important;
             padding: 1px 3px !important;
             margin: 0 !important;
         }
 
-        /* Ayat marker (verse end) - ornate circular frame like quran.com */
+        /* Authentic Quranic Ayah Rosette Marker (Dark Theme) */
         .ayah-marker {
-            display: inline-block;
-            font-family: 'Amiri', serif;
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--bismillah-color);
-            margin: 0 3px;
-            padding: 1px 5px;
-            border: 1.5px solid var(--bismillah-color);
-            border-radius: 50%;
-            min-width: 22px;
-            min-height: 22px;
-            line-height: 20px;
-            text-align: center;
-            vertical-align: middle;
-            background: transparent;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            font-family: 'KFGQPC Uthman Taha Naskh', 'Amiri Quran', 'Amiri', serif !important;
+            font-size: 13px !important;
+            font-weight: 700 !important;
+            color: #F7E7B4 !important;
+            margin: 0 3px !important;
+            padding: 2px 6px !important;
+            border: 1.8px solid #C59B27 !important;
+            outline: 1px solid #1A4D2E !important;
+            outline-offset: 1px !important;
+            border-radius: 50% !important;
+            min-width: 24px !important;
+            min-height: 24px !important;
+            line-height: 1 !important;
+            text-align: center !important;
+            vertical-align: middle !important;
+            background: radial-gradient(circle, #131F33 40%, rgba(197, 155, 39, 0.25) 100%) !important;
+            background: radial-gradient(circle, #FFFDF8 40%, rgba(197, 155, 39, 0.15) 100%) !important;
+            box-shadow: 0 1px 4px rgba(15, 45, 74, 0.12), inset 0 0 4px rgba(197, 155, 39, 0.25) !important;
         }
 
-        /* Bismillah word - theme color */
-        .mushaf-line.bismillah-line .word {
-            color: var(--bismillah-color);
-        }
-
-        /* Surah header (ONE LINE: number + transliteration + meaning + Arabic) */
+        /* Surah Header Banner (Illuminated Emerald & Gold Frame) */
         .mushaf-surah-header {
-            text-align: center;
-            margin: 20px auto 12px;
-            padding: 8px 0;
-            font-family: 'Inter', sans-serif;
-            font-size: 14px;
-            /* FIX (v12): was hardcoded rgba(255,255,255,.7) which made the
-     English transliteration (e.g. "Surah Al-Fatihah") invisible on
-     light/sepia themes because the text was 70% white on a near-white
-     card background. Now uses the theme's dim text color so the
-     English title is visible on every theme. The .num, .meaning, and
-     .ar-name spans override with their own colors below. */
-            color: var(--text-dim);
-            letter-spacing: 0.3px;
-            direction: ltr;
-            white-space: nowrap;
-            border-top: 1px solid rgba(255, 215, 0, 0.15);
-            border-bottom: 1px solid rgba(255, 215, 0, 0.15);
-            /* Compensate for LTR dir so the gold accent is centered */
+            margin: 16px auto 12px;
+            padding: 10px 14px;
+            font-family: 'KFGQPC Uthman Taha Naskh', 'Amiri Quran', 'Amiri', serif;
+            background: linear-gradient(135deg, #1A4D2E 0%, #27623C 50%, #1A4D2E 100%);
+            border: 2px solid #C59B27;
+            outline: 1px solid #C59B27;
+            outline-offset: 2px;
+            border-radius: 6px;
+            position: relative;
+            box-shadow: inset 0 0 14px rgba(197, 155, 39, 0.4), 0 4px 12px rgba(26, 77, 46, 0.25);
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
-            gap: 4px;
-            /* FIX (v10): bold all the surah header text to match the
-     mushaf line weight. */
-            font-weight: 700;
-        }
-
-        .mushaf-surah-header .num {
-            color: #d4af37;
-            font-weight: 700;
-        }
-
-        .mushaf-surah-header .meaning {
-            /* FIX (v12): was rgba(255,215,0,.7) — gold 70% which is invisible
-     on cream/sepia backgrounds. Now use --text-dim so the meaning
-     (e.g. "The Opener") is readable on any theme. */
-            color: var(--text-dim);
-        }
-
-        .mushaf-surah-header .ar-name {
-            font-family: 'Amiri', 'Scheherazade New', serif;
-            /* FIX (v11): bumped to 23px. FIX (v15): bumped to 24px. */
-            font-size: 24px;
-            color: #d4af37;
-            margin-left: 12px;
             direction: rtl;
-            display: inline-block;
-            line-height: 1;
-            /* FIX (v11): explicit bold so the chapter title is the only bold
-     thing on the page (mushaf text + bismillah reverted to 400). */
+            color: #FFFDF8;
+        }
+
+        .mushaf-surah-header .surah-title {
+            font-size: 22px;
             font-weight: 700;
+            color: #F7E7B4;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
         }
 
-        /* Page container — uses theme variables so it changes with the active
-   theme. FIX (v9): was hardcoded to background: #0a1220 (always dark)
-   which made the mushaf page look identical across all 4 themes. */
-        /* FIX (v30): Page container — 550px (was 500px in v22-v29).
-   With the 24px font (v30) the 500px container clipped a lot
-   of words on the longer mushaf lines. 550px gives ~50px more
-   room so 1-2 extra words fit per line. Still no orphan single-
-   word lines because the orphan-words are absorbed into the
-   previous line (clipped along with it). */
-        #page-inner {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 28px 20px;
-            min-height: 600px;
-            max-width: 650px;
-            margin: 0 auto;
-            width: 100%;
-            box-sizing: border-box;
+        .mushaf-surah-header .surah-meta-badge {
+            font-size: 12px;
+            font-family: 'KFGQPC Uthman Taha Naskh', 'Amiri Quran', 'Amiri', sans-serif;
+            color: #D4AF37;
+            font-weight: 600;
+            background: rgba(26, 77, 46, 0.85);
+            padding: 3px 10px;
+            border-radius: 12px;
+            border: 1px solid #C59B27;
         }
 
-        /* Mobile Responsiveness for Android and Small Screens */
-        @media (max-width: 650px) {
-            .app {
-                padding: 1px 0px !important;
-            }
+        /* =========================================================================
+           DARK THEMES OVERRIDES (Dark Green & Royal Blue / Dark Themes Only)
+           ========================================================================= */
+        body.theme-dark .mushaf-page-container,
+        body.theme-royal .mushaf-page-container,
+        body.theme-night .mushaf-page-container,
+        body.dark .mushaf-page-container,
+        body.dark-mode .mushaf-page-container {
+            background: #131F33 !important;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45) !important;
+        }
 
-            #page {
-                padding: 2px 0px !important;
-            }
+        body.theme-dark .mushaf-frame-border,
+        body.theme-royal .mushaf-frame-border,
+        body.theme-night .mushaf-frame-border,
+        body.dark .mushaf-frame-border,
+        body.dark-mode .mushaf-frame-border {
+            background: #0F1826 !important;
+            box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.4) !important;
+        }
 
-            #page-inner {
-                padding: 8px 1px !important;
-                max-width: 100% !important;
-                min-height: auto !important;
-                border-radius: 6px;
-                box-sizing: border-box;
-            }
+        body.theme-dark .mushaf-line,
+        body.theme-royal .mushaf-line,
+        body.theme-night .mushaf-line,
+        body.dark .mushaf-line,
+        body.dark-mode .mushaf-line,
+        body.theme-dark .mushaf-line .word.future,
+        body.theme-royal .mushaf-line .word.future,
+        body.theme-night .mushaf-line .word.future,
+        body.dark .mushaf-line .word.future,
+        body.dark-mode .mushaf-line .word.future {
+            color: #E8EDF4 !important;
+        }
 
+        body.theme-dark .mushaf-line.bismillah-line,
+        body.theme-royal .mushaf-line.bismillah-line,
+        body.theme-night .mushaf-line.bismillah-line,
+        body.dark .mushaf-line.bismillah-line,
+        body.dark-mode .mushaf-line.bismillah-line,
+        body.theme-dark .bismillah-line .word,
+        body.theme-royal .bismillah-line .word,
+        body.theme-night .bismillah-line .word,
+        body.dark .bismillah-line .word,
+        body.dark-mode .bismillah-line .word {
+            color: #F7E7B4 !important;
+        }
+
+        body.theme-dark .mushaf-top-header,
+        body.theme-royal .mushaf-top-header,
+        body.theme-night .mushaf-top-header,
+        body.dark .mushaf-top-header,
+        body.dark-mode .mushaf-top-header {
+            color: #D4AF37 !important;
+        }
+
+        body.theme-dark .mushaf-header-page,
+        body.theme-royal .mushaf-header-page,
+        body.theme-night .mushaf-header-page,
+        body.dark .mushaf-header-page,
+        body.dark-mode .mushaf-header-page {
+            background: #0F1826 !important;
+            color: #D4AF37 !important;
+        }
+
+        body.theme-dark .ayah-marker,
+        body.theme-royal .ayah-marker,
+        body.theme-night .ayah-marker,
+        body.dark .ayah-marker,
+        body.dark-mode .ayah-marker {
+            color: #F7E7B4 !important;
+            background: radial-gradient(circle, #131F33 40%, rgba(197, 155, 39, 0.25) 100%) !important;
+        }
+
+        body.theme-dark .mushaf-surah-header,
+        body.theme-royal .mushaf-surah-header,
+        body.theme-night .mushaf-surah-header,
+        body.dark .mushaf-surah-header,
+        body.dark-mode .mushaf-surah-header {
+            background: linear-gradient(135deg, #133822 0%, #1A5235 50%, #133822 100%) !important;
+            color: #F7E7B4 !important;
+        }
+
+        @media (max-width: 600px) {
             .mushaf-line {
-                font-size: clamp(11px, 3.4vw, 16px) !important;
-                line-height: 2.2 !important;
                 height: auto !important;
                 overflow: visible !important;
                 padding: 0 !important;
@@ -1855,7 +1883,7 @@
     </style>
 </head>
 
-<body class="theme-light">
+<body class="theme-sepia">
     <div class="settings-picker" id="settingsPicker">
         <button id="settingsBtn" title="Settings">⚙ Settings</button>
         <div class="dropdown">
@@ -1968,8 +1996,19 @@
                 <span id="pageInfo">Page 1 of 1</span>
                 <button id="nextPageBtn">Next page →</button>
             </div>
-            <div id="page" class="page">
-                <div id="page-inner"></div>
+            <div id="page" class="page mushaf-page-container">
+                <div class="mushaf-top-header">
+                    <span class="mushaf-header-juz" id="mushafHeaderJuz">الجزء ١</span>
+                    <span class="mushaf-header-page" id="mushafHeaderPage">صفحة 1</span>
+                    <span class="mushaf-header-surah" id="mushafHeaderSurah">سُورَةُ الفَاتِحَةِ</span>
+                </div>
+                <div class="mushaf-frame-border">
+                    <div class="mushaf-corner corner-tr"></div>
+                    <div class="mushaf-corner corner-tl"></div>
+                    <div class="mushaf-corner corner-br"></div>
+                    <div class="mushaf-corner corner-bl"></div>
+                    <div id="page-inner"></div>
+                </div>
             </div>
 
             <div class="transcript-box hidden" id="transcriptBox">
@@ -2989,6 +3028,25 @@
             }
         }
 
+        const JUZ_NAMES_AR = [
+            "الأول", "الثاني", "الثالث", "الرابع", "الخامس", "السادس", "السابع", "الثامن", "التاسع", "العاشر",
+            "الحادي عشر", "الثاني عشر", "الثالث عشر", "الرابع عشر", "الخامس عشر", "السادس عشر", "السابع عشر", "الثامن عشر", "التاسع عشر", "العشرون",
+            "الحادي والعشرون", "الثاني والعشرون", "الثالث والعشرون", "الرابع والعشرون", "الخامس والعشرون", "السادس والعشرون", "السابع والعشرون", "الثامن والعشرون", "التاسع والعشرون", "الثلاثون"
+        ];
+
+        function toArabicNumerals(num) {
+            return String(num).replace(/[0-9]/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+        }
+
+        function getJuzForPage(pageNum) {
+            if (!pageNum || pageNum < 1) return 1;
+            const JUZ_STARTS = [1, 22, 42, 62, 82, 102, 122, 142, 162, 182, 202, 222, 242, 262, 282, 302, 322, 342, 362, 382, 402, 422, 442, 462, 482, 502, 522, 542, 562, 582];
+            for (let i = JUZ_STARTS.length - 1; i >= 0; i--) {
+                if (pageNum >= JUZ_STARTS[i]) return i + 1;
+            }
+            return 1;
+        }
+
         function renderMushafPage() {
             const inner = document.getElementById('page-inner');
             if (!inner) return;
@@ -2996,8 +3054,31 @@
             inner.classList.toggle('page-fatihah', _currentMushafPage === 1);
             const frag = document.createDocumentFragment();
 
+            // Update top header bar (Juz, Page # Medallion, Surah Name)
+            const juzNum = getJuzForPage(_currentMushafPage);
+            const juzArName = JUZ_NAMES_AR[juzNum - 1] || toArabicNumerals(juzNum);
+            const juzEl = document.getElementById('mushafHeaderJuz');
+            const pageEl = document.getElementById('mushafHeaderPage');
+            const surahEl = document.getElementById('mushafHeaderSurah');
+            if (juzEl) juzEl.textContent = `الجزء ${juzArName}`;
+            if (pageEl) pageEl.textContent = toArabicNumerals(_currentMushafPage);
+            const firstSurah = _pageLines[0]?.surah;
+            const metaFirst = SURAH_META.find(s => s.num === firstSurah);
+            if (surahEl && metaFirst) surahEl.textContent = `سُورَةُ ${metaFirst.name}`;
+
+            // === Tarteel Top Header Pill Update (Surah | Page | Juz | Hizb) ===
+            const firstWord = _pageWords[0];
+            const activeSurahNum = firstWord ? firstWord.surah : (activeSurah || 1);
+            const surahMeta = SURAH_META.find(s => s.num === activeSurahNum) || {};
+            const hizbNum = firstWord?.hizbNumber || ((juzNum - 1) * 2 + 1);
+
+            const titleEl = document.getElementById('tarteelSurahTitle');
+            if (titleEl) titleEl.textContent = surahMeta.translit || `Surah ${activeSurahNum}`;
+
+            const subEl = document.getElementById('tarteelSubInfo');
+            if (subEl) subEl.textContent = `Page ${_currentMushafPage} | Juz ${juzNum} | Hizb ${hizbNum}`;
+
             // Find ALL surahs on this page and their starting line indices
-            // surahStartLineIdx[surah] = index in _pageLines where this surah starts
             const surahStartLineIdx = {};
             let prevSurah = -1;
             for (let i = 0; i < _pageLines.length; i++) {
@@ -3008,28 +3089,25 @@
                 }
             }
 
-            // Render each line, inserting a surah header ONLY on the first
-            // page of each surah (where the surah actually starts in the API).
-            // We use meta.pages[0] === _currentMushafPage to check, not just
-            // "first line of page" (which would be true for every page of a
-            // multi-page surah, causing the title to repeat).
             for (let i = 0; i < _pageLines.length; i++) {
                 const line = _pageLines[i];
-                // Check if this is the first line of a new surah on this page
                 if (surahStartLineIdx[line.surah] === i) {
                     const meta = SURAH_META.find(s => s.num === line.surah);
                     if (meta && meta.pages && meta.pages[0] === _currentMushafPage) {
-                        // === Surah header (ONE LINE: number + transliteration + meaning + Arabic) ===
-                        // ONLY emit on the FIRST page of this surah in the API
+                        // === Surah header (Illuminated Navy/Gold Frame) ===
                         const header = document.createElement('div');
                         header.className = 'mushaf-surah-header';
-                        header.innerHTML = `<span class="num">${line.surah}.</span> Surah ${meta.translit} <span class="meaning">· ${meta.meaning}</span> <span class="ar-name">${meta.name}</span>`;
+                        const typeStr = meta.revelationType === 'Meccan' ? 'مَكِّيَّةٌ' : 'مَدَنِيَّةٌ';
+                        header.innerHTML = `
+                            <span class="surah-meta-badge">${typeStr}</span>
+                            <span class="surah-title">سُورَةُ ${meta.name}</span>
+                            <span class="surah-meta-badge">آيَاتُهَا ${toArabicNumerals(meta.verses)}</span>
+                        `;
                         frag.appendChild(header);
                         // === Bismillah for surahs 2-114 (except 9) ===
                         if (line.surah !== 1 && line.surah !== 9) {
                             const bisLine = document.createElement('div');
                             bisLine.className = 'mushaf-line bismillah-line';
-                            // Use the standard Arabic Bismillah text — Amiri Quran will render it in mushaf style
                             bisLine.textContent = 'بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ';
                             frag.appendChild(bisLine);
                         }
@@ -3755,25 +3833,17 @@
                 recognition.start();
                 listening = true;
                 micBtn.classList.add('listening');
+                document.getElementById('tarteelMicFab')?.classList.add('listening');
                 micLabel.textContent = 'Listening… tap to stop';
                 statusEl.classList.remove('warn');
                 statusEl.textContent = 'Listening (Arabic) — recite naturally. The tracker follows along.';
                 noSpeechStreak = 0;
-                // Show a clear visual hint that the app is live even if Android's beep
-                // is hard to hear. The pulsing red dot in the mic button does this.
             } catch (e) {
                 statusEl.textContent = "Couldn't start microphone: " + (e.message || e.name) +
                     '. On Android Chrome, ensure microphone is allowed and Arabic voice input is enabled.';
                 statusEl.classList.add('warn');
                 return;
             }
-
-            // MediaRecorder removed from auto-start.
-            // It was running on every mic start and accumulating audio chunks
-            // for the ENTIRE recitation — hundreds of MB for long surahs.
-            // The playback feature was a nice-to-have but caused severe
-            // memory bloat. Disabled to keep things fast on long surahs.
-
         }
 
         function stopListening() {
@@ -3781,6 +3851,7 @@
             if (recognition) { try { recognition.stop(); } catch (_) { } }
             if (mediaRecorder && mediaRecorder.state !== 'inactive') { try { mediaRecorder.stop(); } catch (_) { } }
             micBtn.classList.remove('listening');
+            document.getElementById('tarteelMicFab')?.classList.remove('listening');
             micLabel.textContent = 'Start reciting';
         }
 
@@ -3858,10 +3929,52 @@
         if (prevPageBtn) prevPageBtn.addEventListener('click', prevPage);
         if (nextPageBtn) nextPageBtn.addEventListener('click', nextPage);
         // Debug panel removed for production; nothing to clear.
-        document.getElementById('clearDebugBtn')?.addEventListener('click', () => {
-            debugLog = [];
-            renderDebugPanel();
-        });
+        // === Tarteel Bar Controls Event Listeners ===
+        const tarteelMenuBtn = document.getElementById('tarteelMenuBtn');
+        if (tarteelMenuBtn) {
+            tarteelMenuBtn.addEventListener('click', () => {
+                document.getElementById('resetBtn')?.click();
+            });
+        }
+
+        const tarteelMicFab = document.getElementById('tarteelMicFab');
+        if (tarteelMicFab) {
+            tarteelMicFab.addEventListener('click', () => {
+                micBtn.click();
+            });
+        }
+
+        const tarteelScriptBtn = document.getElementById('tarteelScriptBtn');
+        if (tarteelScriptBtn) {
+            tarteelScriptBtn.addEventListener('click', () => {
+                toggleScriptBtn.click();
+                tarteelScriptBtn.classList.toggle('active', scriptHidden);
+            });
+        }
+
+        const tarteelEyeBtn = document.getElementById('tarteelEyeBtn');
+        if (tarteelEyeBtn) {
+            tarteelEyeBtn.addEventListener('click', () => {
+                toggleScriptBtn.click();
+                tarteelEyeBtn.classList.toggle('active', scriptHidden);
+            });
+        }
+
+        const tarteelMistakesBtn = document.getElementById('tarteelMistakesBtn');
+        if (tarteelMistakesBtn) {
+            tarteelMistakesBtn.addEventListener('click', () => {
+                transcriptBox.classList.toggle('hidden');
+            });
+        }
+
+        // Sync mistake badge on updateStats
+        const _origUpdateStats = updateStats;
+        updateStats = function() {
+            if (typeof _origUpdateStats === 'function') _origUpdateStats();
+            const badge = document.getElementById('tarteelMistakeBadge');
+            if (badge) badge.textContent = stats.mistake;
+        };
+
         searchInput.addEventListener('input', () => renderSurahGrid(searchInput.value));
 
         // =========================================================================
