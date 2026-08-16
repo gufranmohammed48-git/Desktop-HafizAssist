@@ -2416,21 +2416,36 @@
             if (!word) return '';
             return word
                 .normalize('NFKC')
-                // Convert superscript alef (U+0670) to standard alef FIRST so Uthmani words like ٱلسَّمَٰوَٰتِ -> ٱلسَّمَاوَاتِ
+                // 1. Convert standalone hamza + alef/dagger-alif (e.g. ءَالِهَةً, ءَاخَرُونَ, ءَامَنُوا۟) -> ا
+                .replace(/ء[َاٰ]/g, 'ا')
+                .replace(/ء/g, '')
+                // 2. Convert Uthmani dagger-alif + waw (e.g. حَيَٰوةً, ٱلصَّلَٰوةَ, ٱلزَّكَٰوةَ) -> حياة, الصلاة, الزكاة
+                .replace(/َٰو/g, 'ا')
+                .replace(/ٰو/g, 'ا')
+                // 3. Convert Uthmani dagger-alif + ya (e.g. ٱفْتَرَىٰهُ, عَلَىٰ) -> افتراه, على
+                .replace(/َىٰ/g, 'ا')
+                .replace(/ىٰ/g, 'ا')
+                // 4. Convert superscript alef (U+0670) to standard alef 'ا'
                 .replace(/\u0670/g, 'ا')
-                // strip every Arabic combining mark (Mn) plus all small high marks,
-                // tatweel, madda, etc.
-                .replace(/[\u0610-\u061A\u064B-\u065F\u06D6-\u06ED\u0640]/g, '')
-                // unify alef variants (incl. alef wasla ٱ)
+                // 5. Strip all Arabic combining marks (harakat, tanween, small high marks, tatweel, etc.)
+                .replace(/[\u0610-\u061A\u064B-\u065F\u06D6-\u06ED\u0640\u06E5\u06E6]/g, '')
+                // 6. Unify alef variants (incl. alef wasla ٱ, alef hamza إأآ)
                 .replace(/[إأآاٱ]/g, 'ا')
-                // ya / alef maqsura / farsi ya → unified ya
+                // 7. Fix common Uthmani vs Imla'i demonstratives that differ in standard spelling:
+                .replace(/\bهاذا\b/g, 'هذا')
+                .replace(/\bهاذه\b/g, 'هذه')
+                .replace(/\bهاولاء\b/g, 'هولاء')
+                .replace(/\bذالك\b/g, 'ذلك')
+                .replace(/\bلاكن\b/g, 'لكن')
+                .replace(/\bالرحمان\b/g, 'الرحمن')
+                // 8. Ya / alef maqsura / farsi ya → unified ya
                 .replace(/[يىی]/g, 'ي')
-                // farsi/persian variants → arabic
+                // 9. Farsi/persian variants → arabic
                 .replace(/[كک]/g, 'ك')
                 .replace(/[هھ]/g, 'ه')
-                // taa marbuta → ha (as in classical Arabic phonology)
+                // 10. Taa marbuta → ha
                 .replace(/ة/g, 'ه')
-                // strip any non-Arabic (Latin digits, punctuation, etc.)
+                // Strip non-Arabic
                 .replace(/[^\u0600-\u06FF]/g, '')
                 .trim();
         }
@@ -3657,7 +3672,7 @@
                     w.classList.remove("future");  // no longer a candidate for hide-script blur
                 }
             }
-            if (listening && (pointer > 0 || _pendingWords.length > 0) && pointer < refWords.length && refWords[pointer] && refWords[pointer].el) {
+            if (pointer < refWords.length && refWords[pointer] && refWords[pointer].el) {
                 const w = refWords[pointer].el;
                 w.classList.add("now");
                 w.classList.remove("future");  // .now has its own (hidden) style under script-hidden
