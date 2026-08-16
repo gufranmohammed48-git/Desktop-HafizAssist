@@ -544,33 +544,29 @@
 
         .word .phoneme-tooltip {
             position: absolute;
-            bottom: 110%;
+            bottom: 100%;
             left: 50%;
             transform: translateX(-50%);
-            background: var(--card);
+            background: var(--bg);
             border: 1px solid var(--border);
             border-radius: 8px;
-            padding: 8px 12px;
-            font-size: 13px;
+            padding: 10px 12px;
+            font-size: 12px;
             color: var(--text);
-            font-family: system-ui, -apple-system, sans-serif;
-            line-height: 1.4;
-            white-space: nowrap;
+            font-family: 'Inter', sans-serif;
+            line-height: 1.5;
+            white-space: normal;
+            max-width: 90vw;
             opacity: 0;
-            visibility: hidden;
             pointer-events: none;
-            transition: opacity .15s ease, visibility .15s ease;
-            z-index: 999;
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
-            text-align: center;
+            transition: opacity .15s;
+            z-index: 100;
+            min-width: 200px;
+            box-shadow: 0 4px 12px var(--shadow)
         }
 
-        .word:hover .phoneme-tooltip,
-        .word:focus .phoneme-tooltip,
-        .word.show-tooltip .phoneme-tooltip {
-            opacity: 1;
-            visibility: visible;
-            pointer-events: auto;
+        .word:hover .phoneme-tooltip {
+            opacity: 1
         }
 
         .word .phoneme-tooltip .ipa {
@@ -1516,8 +1512,8 @@
             align-items: center;
             word-spacing: 0;
             hyphens: none;
-            height: auto;
-            overflow: visible;
+            height: 2.0em;
+            overflow: hidden;
         }
 
         /* Disable old ::after trick since flex space-between handles alignment */
@@ -1537,10 +1533,14 @@
             font-size: inherit;
             font-family: inherit;
             transition: color 0.2s ease, background 0.2s ease;
+<<<<<<< HEAD
             cursor: pointer;
             position: relative;
             box-sizing: border-box;
             border-radius: 4px;
+=======
+            cursor: default;
+>>>>>>> parent of 1b36d28 (phenome tooltip)
         }
 
         .mushaf-line .kashida-gap {
@@ -2939,66 +2939,12 @@
                     lineDiv.appendChild(document.createTextNode(' '));
                     const span = document.createElement('span');
                     span.className = 'word';
-                    span.setAttribute('tabindex', '0');
-                    let phText = '';
-                    let tajweedStr = '';
-                    let sNum = w.surah;
-                    let aNum = w.ayah;
-                    let pNum = w.position;
-
                     // CRITICAL: link the DOM element to the refWord for the matcher
                     if (refIdx !== undefined && refWords[refIdx]) {
                         refWords[refIdx].el = span;
-                        phText = refWords[refIdx].phoneme || '';
-                        sNum = sNum || refWords[refIdx].surah;
-                        aNum = aNum || refWords[refIdx].ayah;
-                        pNum = pNum || refWords[refIdx].position;
                     }
+                    // Use the standard Arabic text from the API — Amiri Quran handles mushaf ligatures
                     span.textContent = w.text;
-
-                    // Look up letter-by-letter Tajweed rules from SURAH_PHONEMES
-                    if (window.SURAH_PHONEMES && sNum && aNum && pNum) {
-                        const entry = window.SURAH_PHONEMES[sNum]?.[aNum]?.[pNum];
-                        if (entry) {
-                            if (entry[1]) phText = entry[1];
-                            if (entry[2]) tajweedStr = entry[2];
-                        }
-                    }
-
-                    // Parse Tajweed rules and format letter-level annotations (e.g., ل → IDGHAM_LAM)
-                    const rulesArr = (tajweedStr || '').split(',').filter(Boolean);
-                    const ruleNames = rulesArr.map(r => {
-                        const [ch, rule] = r.split(':');
-                        return `<span style="color:var(--accent);font-weight:600">${ch}</span> → ${rule}`;
-                    }).join('<br>');
-
-                    // Apply Tajweed border-color classes to span for visual underlines
-                    const ruleSet = new Set(rulesArr.map(r => r.split(':')[1]));
-                    if (ruleSet.has('TAFKHEEM')) span.classList.add('tajweed-tafkheem');
-                    if (ruleSet.has('QALQALA_KUBRA') || ruleSet.has('QALQALA_SUGHRA')) span.classList.add('tajweed-qalqala');
-                    if (/MADD/.test([...ruleSet].join(' '))) span.classList.add('tajweed-madd');
-                    if (ruleSet.has('IDGHAM') || ruleSet.has('IDGHAM_SHAMSIYAH') || ruleSet.has('IDGHAM_QAMARIYAH') || ruleSet.has('IDGHAM_WAW') || ruleSet.has('IDGHAM_YAA') || ruleSet.has('IDGHAM_MEEM') || ruleSet.has('IDGHAM_LAM') || ruleSet.has('IDGHAM_NOON')) span.classList.add('tajweed-idgham');
-                    if (ruleSet.has('IKHFAA') || ruleSet.has('IKHFAA_SHAFAWI')) span.classList.add('tajweed-ikhfaa');
-                    if (ruleSet.has('IQLAB')) span.classList.add('tajweed-iqlab');
-                    if (ruleSet.has('GHUNNA')) span.classList.add('tajweed-ghunna');
-
-                    // Tooltip element with IPA phonemes + detailed Tajweed letter breakdown
-                    const tt = document.createElement('span');
-                    tt.className = 'phoneme-tooltip';
-                    const ipaPart = phText ? `<div class="ipa">/${phText}/</div>` : `<div class="ipa">/${phonemizeArabic(w.text)}/</div>`;
-                    const rulesPart = `<div class="rules">${ruleNames || '<span style="color:var(--text-dim)">no Tajweed annotations</span>'}</div>`;
-                    tt.innerHTML = ipaPart + rulesPart;
-                    span.appendChild(tt);
-
-                    // Touch/click toggle handler for mobile screens
-                    span.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        document.querySelectorAll('.word.show-tooltip').forEach(el => {
-                            if (el !== span) el.classList.remove('show-tooltip');
-                        });
-                        span.classList.toggle('show-tooltip');
-                    });
-
                     lineDiv.appendChild(span);
                     // FIX (v19): NO kashida insertion. The user wants the quran.com
                     // look — clean text with no visible kashida dashes between every
@@ -3751,13 +3697,10 @@
                         console.warn('[boot] API load failed:', e);
                     }
                 }
-                // Always load phonemes-data.js so letter-by-letter Tajweed rules are populated
-                if (!window.SURAH_PHONEMES) {
-                    try { phonemeData = await loadPhonemeData(); } catch (e) { }
-                }
                 // Fallback to local
                 if (!loaded) {
-                    if (phonemeData || window.SURAH_PHONEMES) {
+                    phonemeData = await loadPhonemeData();
+                    if (phonemeData) {
                         buildGlobalRefWords();
                         loaded = true;
                     } else {
@@ -3774,11 +3717,6 @@
                 statusEl.textContent = 'Failed to load phoneme data: ' + e.message;
             }
         })();
-
-        // Dismiss active word tooltips when clicking anywhere else on page
-        document.addEventListener('click', () => {
-            document.querySelectorAll('.word.show-tooltip').forEach(el => el.classList.remove('show-tooltip'));
-        });
 
         // ==== THEME PICKER ====
         const settingsPicker = document.getElementById('settingsPicker');
