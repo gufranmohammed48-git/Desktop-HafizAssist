@@ -2233,9 +2233,11 @@
             if (!word) return '';
             return word
                 .normalize('NFKC')
+                // Convert superscript alef (U+0670) to standard alef FIRST so Uthmani words like ٱلسَّمَٰوَٰتِ -> ٱلسَّمَاوَاتِ
+                .replace(/\u0670/g, 'ا')
                 // strip every Arabic combining mark (Mn) plus all small high marks,
-                // tatweel, madda, superscript alef, etc.
-                .replace(/[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED\u0640]/g, '')
+                // tatweel, madda, etc.
+                .replace(/[\u0610-\u061A\u064B-\u065F\u06D6-\u06ED\u0640]/g, '')
                 // unify alef variants (incl. alef wasla ٱ)
                 .replace(/[إأآاٱ]/g, 'ا')
                 // ya / alef maqsura / farsi ya → unified ya
@@ -2384,13 +2386,8 @@
                 });
             }
             if (refWords[matchAt] && refWords[matchAt].el) {
-                // If this word had a mistake when first attempted, keep it RED so the reciter knows it was an error
-                if (refWords[matchAt].hasMistake) {
-                    refWords[matchAt].el.dataset.status = 'mistake';
-                } else {
-                    refWords[matchAt].el.dataset.status = 'correct';
-                    stats.correct++;
-                }
+                refWords[matchAt].el.dataset.status = 'correct';
+                stats.correct++;
             }
             pointer = matchAt + 1;
             consecutiveMisses = 0;
@@ -2532,18 +2529,8 @@
                 }
             }
 
-            // 3) no match → mark current expected word as MISTAKE (RED) after 2+ misses.
-            //    This prevents interim speech recognition fragments (50ms partial ticks)
-            //    from briefly flashing red on words that are actually recited correctly.
+            // 3) no match → increment misses, wait for valid match or skip
             const expected = refWords[pointer];
-            if (expected && consecutiveMisses >= 2) {
-                if (expected.el) expected.el.dataset.status = 'mistake';
-                if (!expected.hasMistake) {
-                    expected.hasMistake = true;
-                    stats.mistake++;
-                    updateStats();
-                }
-            }
             const expectedPhoneme = expected ? expected.phoneme : '';
             const heardPh = phonemizeArabic(norm);
             let phRatio = null;
@@ -3503,7 +3490,7 @@
                     w.classList.remove("future");  // no longer a candidate for hide-script blur
                 }
             }
-            if (pointer < refWords.length && refWords[pointer] && refWords[pointer].el) {
+            if (listening && (pointer > 0 || _pendingWords.length > 0) && pointer < refWords.length && refWords[pointer] && refWords[pointer].el) {
                 const w = refWords[pointer].el;
                 w.classList.add("now");
                 w.classList.remove("future");  // .now has its own (hidden) style under script-hidden
@@ -3602,6 +3589,13 @@
                 statusEl.classList.add('warn');
                 return;
             }
+
+            finalizedText = '';
+            lastFinalizedIndex = -1;
+            _pendingFullText = '';
+            _pendingWords = [];
+            committedWordCount = 0;
+            confidences = [];
 
             recognition = new Ctor();
             recognition.lang = 'ar-SA';
@@ -3742,7 +3736,7 @@
                 for (let i = 0; i < refWords.length; i++) {
                     if (refWords[i]) {
                         refWords[i].hasMistake = false;
-                        if (i >= _maxPointerReached && refWords[i].el) {
+                        if (refWords[i].el) {
                             refWords[i].el.dataset.status = '';
                         }
                     }
