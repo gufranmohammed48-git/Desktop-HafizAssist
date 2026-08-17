@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2-Page Mushaf Test</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.cdnfonts.com/css/kfgqpc-uthman-taha-naskh" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #1A1A2E;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #F7E7B4;
+            font-size: 22px;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .controls label {
+            color: #ccc;
+            font-size: 14px;
+        }
+
+        .controls input {
+            width: 70px;
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid #555;
+            background: #222;
+            color: #eee;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .controls button {
+            padding: 8px 20px;
+            border-radius: 8px;
+            border: none;
+            background: linear-gradient(135deg, #1A4D2E, #27623C);
+            color: #F7E7B4;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .controls button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(26,77,46,0.4);
+        }
+
+        /* ===================== SPREAD CONTAINER (2 pages side by side) ===================== */
+        .mushaf-spread {
+            display: flex;
+            gap: 0;
+            justify-content: center;
+            align-items: flex-start;
+            max-width: 1320px;
+            width: 100%;
+        }
+
+        /* Each page occupies half the spread */
+        .mushaf-page-container {
+            background: #FFFDF8 !important;
+            border: 2px solid #C59B27 !important;
+            border-radius: 0 !important;
+            padding: 20px 24px !important;
+            box-shadow: 0 12px 40px rgba(15, 45, 74, 0.16) !important;
+            position: relative;
+            flex: 1;
+            max-width: 650px;
+            min-width: 0;
+        }
+
+        /* Right page gets rounded left corners, left page gets rounded right corners */
+        .mushaf-page-container.page-right {
+            border-radius: 12px 0 0 12px !important;
+            border-right: 1px solid #C59B27 !important;
+        }
+
+        .mushaf-page-container.page-left {
+            border-radius: 0 12px 12px 0 !important;
+            border-left: 1px solid #C59B27 !important;
+        }
+
+        /* Spine shadow in the center */
+        .mushaf-page-container.page-right {
+            box-shadow: 12px 0 20px -8px rgba(0,0,0,0.15) inset, 0 12px 40px rgba(15,45,74,0.16) !important;
+        }
+
+        .mushaf-page-container.page-left {
+            box-shadow: -12px 0 20px -8px rgba(0,0,0,0.15) inset, 0 12px 40px rgba(15,45,74,0.16) !important;
+        }
+
+        /* Top Page Header Bar */
+        .mushaf-top-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 16px 10px;
+            margin-bottom: 14px;
+            border-bottom: 2px double #C59B27;
+            font-family: 'KFGQPC Uthman Taha Naskh', 'Amiri Quran', 'Amiri', serif;
+            font-size: 15px;
+            font-weight: 700;
+            color: #1A4D2E;
+            direction: rtl;
+        }
+
+        .mushaf-header-page {
+            font-family: 'KFGQPC Uthman Taha Naskh', 'Amiri Quran', 'Amiri', serif;
+            font-size: 13px;
+            font-weight: 700;
+            color: #1A4D2E;
+            background: #FFFDF8;
+            padding: 2px 10px;
+            border-radius: 50%;
+            border: 2px solid #C59B27;
+            outline: 1px solid #1A4D2E;
+            outline-offset: 1px;
+            box-shadow: inset 0 0 6px rgba(197, 155, 39, 0.25);
+            min-width: 28px;
+            text-align: center;
+        }
+
+        /* Ornate Border Frame */
+        .mushaf-frame-border {
+            position: relative;
+            border: 3px double #C59B27;
+            outline: 3px solid #1A4D2E;
+            outline-offset: 4px;
+            border-radius: 4px;
+            padding: 18px 16px;
+            background: #FFFDF8;
+            box-shadow: inset 0 0 24px rgba(197, 155, 39, 0.08);
+        }
+
+        /* Corner Medallions */
+        .mushaf-corner {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #C59B27;
+            background: #1A4D2E;
+            pointer-events: none;
+            z-index: 2;
+            box-shadow: 0 0 0 1px #C59B27;
+        }
+
+        .mushaf-corner::after {
+            content: '';
+            position: absolute;
+            top: 3px; left: 3px; right: 3px; bottom: 3px;
+            background: #C59B27;
+            border-radius: 1px;
+        }
+
+        .mushaf-corner.corner-tr { top: -5px; right: -5px; border-radius: 0 4px 0 4px; }
+        .mushaf-corner.corner-tl { top: -5px; left: -5px; border-radius: 4px 0 4px 0; }
+        .mushaf-corner.corner-br { bottom: -5px; right: -5px; border-radius: 4px 0 4px 0; }
+        .mushaf-corner.corner-bl { bottom: -5px; left: -5px; border-radius: 0 4px 0 4px; }
+
+        /* Mushaf Line */
+        .mushaf-line {
+            font-family: 'KFGQPC Uthman Taha Naskh', 'Amiri Quran', 'Scheherazade New', 'Amiri', serif;
+            font-size: clamp(16px, 1.8vw, 23px);
+            line-height: 2.0;
+            direction: rtl;
+            margin: 2px 0;
+            padding: 0 2px;
+            font-weight: 400;
+            color: #0F2D4A;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            word-spacing: 0;
+            hyphens: none;
+        }
+
+        .mushaf-line.bismillah-line {
+            font-size: clamp(18px, 2vw, 24px);
+            justify-content: center !important;
+            color: #F7E7B4;
+            line-height: 2.6;
+        }
+
+        .mushaf-line .word {
+            display: inline;
+            cursor: default;
+            white-space: nowrap;
+            color: #0F2D4A;
+        }
+
+        /* Ayah Markers */
+        .ayah-marker {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            font-family: 'KFGQPC Uthman Taha Naskh', 'Amiri Quran', 'Amiri', serif !important;
+            font-size: 12px !important;
+            font-weight: 700 !important;
+            color: #1A4D2E !important;
+            margin: 0 3px !important;
+            padding: 2px 6px !important;
+            border: 2px solid #C59B27 !important;
+            outline: 1px solid #1A4D2E !important;
+            outline-offset: 1px !important;
+            border-radius: 50% !important;
+            min-width: 22px !important;
+            min-height: 22px !important;
+            line-height: 1 !important;
+            text-align: center !important;
+            vertical-align: middle !important;
+            background: radial-gradient(circle, #FFFDF8 40%, rgba(197, 155, 39, 0.15) 100%) !important;
+            box-shadow: 0 1px 4px rgba(15, 45, 74, 0.12), inset 0 0 4px rgba(197, 155, 39, 0.25) !important;
+        }
+
+        /* Surah Header */
+        .mushaf-surah-header {
+            margin: 16px auto 12px;
+            padding: 10px 20px;
+            font-family: 'KFGQPC Uthman Taha Naskh', 'Amiri Quran', 'Amiri', serif;
+            background: linear-gradient(135deg, #1A4D2E 0%, #27623C 50%, #1A4D2E 100%);
+            border: 2px solid #C59B27;
+            outline: 1px solid #C59B27;
+            outline-offset: 2px;
+            border-radius: 6px;
+            box-shadow: inset 0 0 16px rgba(197, 155, 39, 0.4), 0 4px 12px rgba(26, 77, 46, 0.25);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            direction: rtl;
+            color: #FFFDF8;
+        }
+
+        .mushaf-surah-header .surah-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #F7E7B4;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+        }
+
+        .mushaf-surah-header .surah-meta-badge {
+            font-size: 11px;
+            font-family: 'KFGQPC Uthman Taha Naskh', 'Amiri Quran', 'Amiri', sans-serif;
+            color: #D4AF37;
+            font-weight: 600;
+            background: rgba(26, 77, 46, 0.85);
+            padding: 3px 12px;
+            border-radius: 14px;
+            border: 1px solid #C59B27;
+        }
+
+        /* Page 1 (Al-Fatihah) center lines */
+        .page-fatihah .mushaf-line {
+            justify-content: center !important;
+        }
+
+        /* Loading state */
+        .loading {
+            color: #888;
+            text-align: center;
+            padding: 40px;
+            font-size: 16px;
+        }
+
+        /* Status bar */
+        .status-bar {
+            color: #888;
+            font-size: 13px;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        /* Responsive: stack pages vertically on small screens */
+        @media (max-width: 900px) {
+            .mushaf-spread {
+                flex-direction: column-reverse;
+                align-items: center;
+                gap: 16px;
+            }
+
+            .mushaf-page-container {
+                max-width: 600px;
+                width: 100%;
+                border-radius: 12px !important;
+                border: 2px solid #C59B27 !important;
+            }
+
+            .mushaf-page-container.page-right,
+            .mushaf-page-container.page-left {
+                border-radius: 12px !important;
+                border: 2px solid #C59B27 !important;
+                box-shadow: 0 12px 40px rgba(15,45,74,0.16) !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>📖 2-Page Mushaf Spread Test</h1>
+
+    <div class="controls">
+        <label>Right Page #:</label>
+        <input type="number" id="rightPageInput" value="3" min="1" max="604">
+        <label>Left Page #:</label>
+        <input type="number" id="leftPageInput" value="4" min="1" max="604">
+        <button id="loadBtn">Load Spread</button>
+        <button id="prevBtn">◀ Prev</button>
+        <button id="nextBtn">Next ▶</button>
+    </div>
+
+    <div class="mushaf-spread" id="spread">
+        <!-- Right page (odd, displayed on right in mushaf) -->
+        <div class="mushaf-page-container page-right" id="pageRight">
+            <div class="mushaf-top-header">
+                <span class="mushaf-header-juz" id="juzRight">الجزء ١</span>
+                <span class="mushaf-header-page" id="pageNumRight">٣</span>
+                <span class="mushaf-header-surah" id="surahRight">سُورَةُ البَقَرَة</span>
+            </div>
+            <div class="mushaf-frame-border">
+                <div class="mushaf-corner corner-tr"></div>
+                <div class="mushaf-corner corner-tl"></div>
+                <div class="mushaf-corner corner-br"></div>
+                <div class="mushaf-corner corner-bl"></div>
+                <div id="innerRight" class="page-inner"><div class="loading">Loading...</div></div>
+            </div>
+        </div>
+
+        <!-- Left page (even, displayed on left in mushaf) -->
+        <div class="mushaf-page-container page-left" id="pageLeft">
+            <div class="mushaf-top-header">
+                <span class="mushaf-header-juz" id="juzLeft">الجزء ١</span>
+                <span class="mushaf-header-page" id="pageNumLeft">٤</span>
+                <span class="mushaf-header-surah" id="surahLeft">سُورَةُ البَقَرَة</span>
+            </div>
+            <div class="mushaf-frame-border">
+                <div class="mushaf-corner corner-tr"></div>
+                <div class="mushaf-corner corner-tl"></div>
+                <div class="mushaf-corner corner-br"></div>
+                <div class="mushaf-corner corner-bl"></div>
+                <div id="innerLeft" class="page-inner"><div class="loading">Loading...</div></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="status-bar" id="statusBar">Ready</div>
+
+    <script src="quran-api.js"></script>
+    <script>
+        // ===================== SURAH META (needed for headers) =====================
+        const SURAH_META = [
+            {num:1, name:"الفَاتِحَة", en:"Al-Fatihah", verses:7, revelationType:"Meccan", pages:[1]},
+            {num:2, name:"البَقَرَة", en:"Al-Baqarah", verses:286, revelationType:"Medinan", pages:[2]},
+            {num:3, name:"آل عِمرَان", en:"Ali 'Imran", verses:200, revelationType:"Medinan", pages:[50]},
+            {num:4, name:"النِّسَاء", en:"An-Nisa", verses:176, revelationType:"Medinan", pages:[77]},
+            {num:5, name:"المَائِدَة", en:"Al-Ma'idah", verses:120, revelationType:"Medinan", pages:[106]},
+            {num:6, name:"الأَنعَام", en:"Al-An'am", verses:165, revelationType:"Meccan", pages:[128]},
+            {num:7, name:"الأَعرَاف", en:"Al-A'raf", verses:206, revelationType:"Meccan", pages:[151]},
+            {num:8, name:"الأَنفَال", en:"Al-Anfal", verses:75, revelationType:"Medinan", pages:[177]},
+            {num:9, name:"التَّوبَة", en:"At-Tawbah", verses:129, revelationType:"Medinan", pages:[187]},
+            {num:10, name:"يُونُس", en:"Yunus", verses:109, revelationType:"Meccan", pages:[208]},
+            {num:11, name:"هُود", en:"Hud", verses:123, revelationType:"Meccan", pages:[221]},
+            {num:12, name:"يُوسُف", en:"Yusuf", verses:111, revelationType:"Meccan", pages:[235]},
+            {num:13, name:"الرَّعد", en:"Ar-Ra'd", verses:43, revelationType:"Medinan", pages:[249]},
+            {num:14, name:"إِبرَاهِيم", en:"Ibrahim", verses:52, revelationType:"Meccan", pages:[255]},
+            {num:15, name:"الحِجر", en:"Al-Hijr", verses:99, revelationType:"Meccan", pages:[262]},
+            {num:16, name:"النَّحل", en:"An-Nahl", verses:128, revelationType:"Meccan", pages:[267]},
+            {num:17, name:"الإِسرَاء", en:"Al-Isra", verses:111, revelationType:"Meccan", pages:[282]},
+            {num:18, name:"الكَهف", en:"Al-Kahf", verses:110, revelationType:"Meccan", pages:[293]},
+            {num:19, name:"مَريَم", en:"Maryam", verses:98, revelationType:"Meccan", pages:[305]},
+            {num:20, name:"طه", en:"Taha", verses:135, revelationType:"Meccan", pages:[312]},
+            {num:21, name:"الأَنبِيَاء", en:"Al-Anbiya", verses:112, revelationType:"Meccan", pages:[322]},
+            {num:22, name:"الحَج", en:"Al-Hajj", verses:78, revelationType:"Medinan", pages:[332]},
+            {num:23, name:"المُؤمِنُون", en:"Al-Mu'minun", verses:118, revelationType:"Meccan", pages:[342]},
+            {num:24, name:"النُّور", en:"An-Nur", verses:64, revelationType:"Medinan", pages:[350]},
+            {num:25, name:"الفُرقَان", en:"Al-Furqan", verses:77, revelationType:"Meccan", pages:[359]},
+            {num:26, name:"الشُّعَرَاء", en:"Ash-Shu'ara", verses:227, revelationType:"Meccan", pages:[367]},
+            {num:27, name:"النَّمل", en:"An-Naml", verses:93, revelationType:"Meccan", pages:[377]},
+            {num:28, name:"القَصَص", en:"Al-Qasas", verses:88, revelationType:"Meccan", pages:[385]},
+            {num:29, name:"العَنكَبُوت", en:"Al-Ankabut", verses:69, revelationType:"Meccan", pages:[396]},
+            {num:30, name:"الرُّوم", en:"Ar-Rum", verses:60, revelationType:"Meccan", pages:[404]},
+            {num:31, name:"لُقمَان", en:"Luqman", verses:34, revelationType:"Meccan", pages:[411]},
+            {num:32, name:"السَّجدَة", en:"As-Sajdah", verses:30, revelationType:"Meccan", pages:[415]},
+            {num:33, name:"الأَحزَاب", en:"Al-Ahzab", verses:73, revelationType:"Medinan", pages:[418]},
+            {num:34, name:"سَبَأ", en:"Saba", verses:54, revelationType:"Meccan", pages:[428]},
+            {num:35, name:"فَاطِر", en:"Fatir", verses:45, revelationType:"Meccan", pages:[434]},
+            {num:36, name:"يس", en:"Ya-Sin", verses:83, revelationType:"Meccan", pages:[440]},
+            {num:37, name:"الصَّافَّات", en:"As-Saffat", verses:182, revelationType:"Meccan", pages:[446]},
+            {num:38, name:"ص", en:"Sad", verses:88, revelationType:"Meccan", pages:[453]},
+            {num:39, name:"الزُّمَر", en:"Az-Zumar", verses:75, revelationType:"Meccan", pages:[458]},
+            {num:40, name:"غَافِر", en:"Ghafir", verses:85, revelationType:"Meccan", pages:[467]},
+            {num:41, name:"فُصِّلَت", en:"Fussilat", verses:54, revelationType:"Meccan", pages:[477]},
+            {num:42, name:"الشُّورَىٰ", en:"Ash-Shura", verses:53, revelationType:"Meccan", pages:[483]},
+            {num:43, name:"الزُّخرُف", en:"Az-Zukhruf", verses:89, revelationType:"Meccan", pages:[489]},
+            {num:44, name:"الدُّخَان", en:"Ad-Dukhan", verses:59, revelationType:"Meccan", pages:[496]},
+            {num:45, name:"الجَاثِيَة", en:"Al-Jathiyah", verses:37, revelationType:"Meccan", pages:[499]},
+            {num:46, name:"الأَحقَاف", en:"Al-Ahqaf", verses:35, revelationType:"Meccan", pages:[502]},
+            {num:47, name:"مُحَمَّد", en:"Muhammad", verses:38, revelationType:"Medinan", pages:[507]},
+            {num:48, name:"الفَتح", en:"Al-Fath", verses:29, revelationType:"Medinan", pages:[511]},
+            {num:49, name:"الحُجُرَات", en:"Al-Hujurat", verses:18, revelationType:"Medinan", pages:[515]},
+            {num:50, name:"ق", en:"Qaf", verses:45, revelationType:"Meccan", pages:[518]},
+            {num:51, name:"الذَّارِيَات", en:"Adh-Dhariyat", verses:60, revelationType:"Meccan", pages:[520]},
+            {num:52, name:"الطُّور", en:"At-Tur", verses:49, revelationType:"Meccan", pages:[523]},
+            {num:53, name:"النَّجم", en:"An-Najm", verses:62, revelationType:"Meccan", pages:[526]},
+            {num:54, name:"القَمَر", en:"Al-Qamar", verses:55, revelationType:"Meccan", pages:[528]},
+            {num:55, name:"الرَّحمَٰن", en:"Ar-Rahman", verses:78, revelationType:"Medinan", pages:[531]},
+            {num:56, name:"الوَاقِعَة", en:"Al-Waqi'ah", verses:96, revelationType:"Meccan", pages:[534]},
+            {num:57, name:"الحَدِيد", en:"Al-Hadid", verses:29, revelationType:"Medinan", pages:[537]},
+            {num:58, name:"المُجَادِلَة", en:"Al-Mujadilah", verses:22, revelationType:"Medinan", pages:[542]},
+            {num:59, name:"الحَشر", en:"Al-Hashr", verses:24, revelationType:"Medinan", pages:[545]},
+            {num:60, name:"المُمتَحَنَة", en:"Al-Mumtahanah", verses:13, revelationType:"Medinan", pages:[549]},
+            {num:61, name:"الصَّف", en:"As-Saff", verses:14, revelationType:"Medinan", pages:[551]},
+            {num:62, name:"الجُمُعَة", en:"Al-Jumu'ah", verses:11, revelationType:"Medinan", pages:[553]},
+            {num:63, name:"المُنَافِقُون", en:"Al-Munafiqun", verses:11, revelationType:"Medinan", pages:[554]},
+            {num:64, name:"التَّغَابُن", en:"At-Taghabun", verses:18, revelationType:"Medinan", pages:[556]},
+            {num:65, name:"الطَّلَاق", en:"At-Talaq", verses:12, revelationType:"Medinan", pages:[558]},
+            {num:66, name:"التَّحرِيم", en:"At-Tahrim", verses:12, revelationType:"Medinan", pages:[560]},
+            {num:67, name:"المُلك", en:"Al-Mulk", verses:30, revelationType:"Meccan", pages:[562]},
+            {num:68, name:"القَلَم", en:"Al-Qalam", verses:52, revelationType:"Meccan", pages:[564]},
+            {num:69, name:"الحَاقَّة", en:"Al-Haqqah", verses:52, revelationType:"Meccan", pages:[566]},
+            {num:70, name:"المَعَارِج", en:"Al-Ma'arij", verses:44, revelationType:"Meccan", pages:[568]},
+            {num:71, name:"نُوح", en:"Nuh", verses:28, revelationType:"Meccan", pages:[570]},
+            {num:72, name:"الجِن", en:"Al-Jinn", verses:28, revelationType:"Meccan", pages:[572]},
+            {num:73, name:"المُزَّمِّل", en:"Al-Muzzammil", verses:20, revelationType:"Meccan", pages:[574]},
+            {num:74, name:"المُدَّثِّر", en:"Al-Muddathir", verses:56, revelationType:"Meccan", pages:[575]},
+            {num:75, name:"القِيَامَة", en:"Al-Qiyamah", verses:40, revelationType:"Meccan", pages:[577]},
+            {num:76, name:"الإِنسَان", en:"Al-Insan", verses:31, revelationType:"Medinan", pages:[578]},
+            {num:77, name:"المُرسَلَات", en:"Al-Mursalat", verses:50, revelationType:"Meccan", pages:[580]},
+            {num:78, name:"النَّبَأ", en:"An-Naba", verses:40, revelationType:"Meccan", pages:[582]},
+            {num:79, name:"النَّازِعَات", en:"An-Nazi'at", verses:46, revelationType:"Meccan", pages:[583]},
+            {num:80, name:"عَبَسَ", en:"Abasa", verses:42, revelationType:"Meccan", pages:[585]},
+            {num:81, name:"التَّكوِير", en:"At-Takwir", verses:29, revelationType:"Meccan", pages:[586]},
+            {num:82, name:"الانفِطَار", en:"Al-Infitar", verses:19, revelationType:"Meccan", pages:[587]},
+            {num:83, name:"المُطَفِّفِين", en:"Al-Mutaffifin", verses:36, revelationType:"Meccan", pages:[587]},
+            {num:84, name:"الانشِقَاق", en:"Al-Inshiqaq", verses:25, revelationType:"Meccan", pages:[589]},
+            {num:85, name:"البُرُوج", en:"Al-Buruj", verses:22, revelationType:"Meccan", pages:[590]},
+            {num:86, name:"الطَّارِق", en:"At-Tariq", verses:17, revelationType:"Meccan", pages:[591]},
+            {num:87, name:"الأَعلَى", en:"Al-A'la", verses:19, revelationType:"Meccan", pages:[591]},
+            {num:88, name:"الغَاشِيَة", en:"Al-Ghashiyah", verses:26, revelationType:"Meccan", pages:[592]},
+            {num:89, name:"الفَجر", en:"Al-Fajr", verses:30, revelationType:"Meccan", pages:[593]},
+            {num:90, name:"البَلَد", en:"Al-Balad", verses:20, revelationType:"Meccan", pages:[594]},
+            {num:91, name:"الشَّمس", en:"Ash-Shams", verses:15, revelationType:"Meccan", pages:[595]},
+            {num:92, name:"اللَّيل", en:"Al-Layl", verses:21, revelationType:"Meccan", pages:[595]},
+            {num:93, name:"الضُّحَىٰ", en:"Ad-Duha", verses:11, revelationType:"Meccan", pages:[596]},
+            {num:94, name:"الشَّرح", en:"Ash-Sharh", verses:8, revelationType:"Meccan", pages:[596]},
+            {num:95, name:"التِّين", en:"At-Tin", verses:8, revelationType:"Meccan", pages:[597]},
+            {num:96, name:"العَلَق", en:"Al-Alaq", verses:19, revelationType:"Meccan", pages:[597]},
+            {num:97, name:"القَدر", en:"Al-Qadr", verses:5, revelationType:"Meccan", pages:[598]},
+            {num:98, name:"البَيِّنَة", en:"Al-Bayyinah", verses:8, revelationType:"Medinan", pages:[598]},
+            {num:99, name:"الزَّلزَلَة", en:"Az-Zalzalah", verses:8, revelationType:"Medinan", pages:[599]},
+            {num:100, name:"العَادِيَات", en:"Al-Adiyat", verses:11, revelationType:"Meccan", pages:[599]},
+            {num:101, name:"القَارِعَة", en:"Al-Qari'ah", verses:11, revelationType:"Meccan", pages:[600]},
+            {num:102, name:"التَّكَاثُر", en:"At-Takathur", verses:8, revelationType:"Meccan", pages:[600]},
+            {num:103, name:"العَصر", en:"Al-Asr", verses:3, revelationType:"Meccan", pages:[601]},
+            {num:104, name:"الهُمَزَة", en:"Al-Humazah", verses:9, revelationType:"Meccan", pages:[601]},
+            {num:105, name:"الفِيل", en:"Al-Fil", verses:5, revelationType:"Meccan", pages:[601]},
+            {num:106, name:"قُرَيش", en:"Quraysh", verses:4, revelationType:"Meccan", pages:[602]},
+            {num:107, name:"المَاعُون", en:"Al-Ma'un", verses:7, revelationType:"Meccan", pages:[602]},
+            {num:108, name:"الكَوثَر", en:"Al-Kawthar", verses:3, revelationType:"Meccan", pages:[602]},
+            {num:109, name:"الكَافِرُون", en:"Al-Kafirun", verses:6, revelationType:"Meccan", pages:[603]},
+            {num:110, name:"النَّصر", en:"An-Nasr", verses:3, revelationType:"Medinan", pages:[603]},
+            {num:111, name:"المَسَد", en:"Al-Masad", verses:5, revelationType:"Meccan", pages:[603]},
+            {num:112, name:"الإِخلَاص", en:"Al-Ikhlas", verses:4, revelationType:"Meccan", pages:[604]},
+            {num:113, name:"الفَلَق", en:"Al-Falaq", verses:5, revelationType:"Meccan", pages:[604]},
+            {num:114, name:"النَّاس", en:"An-Nas", verses:6, revelationType:"Medinan", pages:[604]}
+        ];
+
+        const JUZ_NAMES_AR = [
+            "الأول", "الثاني", "الثالث", "الرابع", "الخامس", "السادس", "السابع", "الثامن", "التاسع", "العاشر",
+            "الحادي عشر", "الثاني عشر", "الثالث عشر", "الرابع عشر", "الخامس عشر", "السادس عشر", "السابع عشر", "الثامن عشر", "التاسع عشر", "العشرون",
+            "الحادي والعشرون", "الثاني والعشرون", "الثالث والعشرون", "الرابع والعشرون", "الخامس والعشرون", "السادس والعشرون", "السابع والعشرون", "الثامن والعشرون", "التاسع والعشرون", "الثلاثون"
+        ];
+
+        const JUZ_STARTS = [1, 22, 42, 62, 82, 102, 122, 142, 162, 182, 202, 222, 242, 262, 282, 302, 322, 342, 362, 382, 402, 422, 442, 462, 482, 502, 522, 542, 562, 582];
+
+        function toArabicNumerals(num) {
+            return String(num).replace(/[0-9]/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
+        }
+
+        function getJuzForPage(pageNum) {
+            for (let i = JUZ_STARTS.length - 1; i >= 0; i--) {
+                if (pageNum >= JUZ_STARTS[i]) return i + 1;
+            }
+            return 1;
+        }
+
+        // ===================== RENDER A SINGLE PAGE INTO A CONTAINER =====================
+        async function renderPageInto(pageNum, innerEl, juzEl, pageNumEl, surahNameEl) {
+            try {
+                const data = await window.QuranAPI.fetchPage(pageNum, true);
+                const words = window.QuranAPI.flattenPageWords(data);
+
+                // Update header
+                const juzNum = getJuzForPage(pageNum);
+                const juzArName = JUZ_NAMES_AR[juzNum - 1] || toArabicNumerals(juzNum);
+                if (juzEl) juzEl.textContent = `الجزء ${juzArName}`;
+                if (pageNumEl) pageNumEl.textContent = toArabicNumerals(pageNum);
+
+                // Group words by line
+                const lines = [];
+                let currentLine = null;
+                for (let i = 0; i < words.length; i++) {
+                    const w = words[i];
+                    const ln = w.lineNumber || 0;
+                    if (!currentLine || currentLine.lineNumber !== ln) {
+                        currentLine = { lineNumber: ln, surah: w.surah, firstAyah: w.ayah, words: [] };
+                        lines.push(currentLine);
+                    }
+                    currentLine.words.push(w);
+                }
+
+                // Find first surah on page for header
+                const firstSurah = lines[0]?.surah;
+                const metaFirst = SURAH_META.find(s => s.num === firstSurah);
+                if (surahNameEl && metaFirst) surahNameEl.textContent = `سُورَةُ ${metaFirst.name}`;
+
+                // Find surah boundaries
+                const surahStartLineIdx = {};
+                let prevSurah = -1;
+                for (let i = 0; i < lines.length; i++) {
+                    if (lines[i].surah !== prevSurah) {
+                        surahStartLineIdx[lines[i].surah] = i;
+                        prevSurah = lines[i].surah;
+                    }
+                }
+
+                // Render
+                innerEl.innerHTML = '';
+                if (pageNum === 1) innerEl.classList.add('page-fatihah');
+                else innerEl.classList.remove('page-fatihah');
+
+                const frag = document.createDocumentFragment();
+
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i];
+
+                    // Surah header if this is the first line of a surah on this page
+                    if (surahStartLineIdx[line.surah] === i) {
+                        const meta = SURAH_META.find(s => s.num === line.surah);
+                        if (meta && meta.pages && meta.pages[0] === pageNum) {
+                            const header = document.createElement('div');
+                            header.className = 'mushaf-surah-header';
+                            const typeStr = meta.revelationType === 'Meccan' ? 'مَكِّيَّةٌ' : 'مَدَنِيَّةٌ';
+                            header.innerHTML = `
+                                <span class="surah-meta-badge">${typeStr}</span>
+                                <span class="surah-title">سُورَةُ ${meta.name}</span>
+                                <span class="surah-meta-badge">آيَاتُهَا ${toArabicNumerals(meta.verses)}</span>
+                            `;
+                            frag.appendChild(header);
+
+                            // Bismillah
+                            if (line.surah !== 1 && line.surah !== 9) {
+                                const bisLine = document.createElement('div');
+                                bisLine.className = 'mushaf-line bismillah-line';
+                                bisLine.textContent = 'بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ';
+                                frag.appendChild(bisLine);
+                            }
+                        }
+                    }
+
+                    // Render the line
+                    const lineDiv = document.createElement('div');
+                    lineDiv.className = 'mushaf-line';
+
+                    for (const w of line.words) {
+                        if (w.isEndMarker) {
+                            lineDiv.appendChild(document.createTextNode(' '));
+                            const marker = document.createElement('span');
+                            marker.className = 'ayah-marker';
+                            marker.textContent = w.text;
+                            lineDiv.appendChild(marker);
+                            continue;
+                        }
+                        lineDiv.appendChild(document.createTextNode(' '));
+                        const span = document.createElement('span');
+                        span.className = 'word';
+                        span.textContent = w.text;
+                        lineDiv.appendChild(span);
+                    }
+
+                    frag.appendChild(lineDiv);
+                }
+
+                innerEl.appendChild(frag);
+                return true;
+            } catch (e) {
+                innerEl.innerHTML = `<div class="loading" style="color:#E74C3C">Failed to load page ${pageNum}: ${e.message}</div>`;
+                return false;
+            }
+        }
+
+        // ===================== LOAD SPREAD (2 PAGES) =====================
+        async function loadSpread(rightPage, leftPage) {
+            const statusBar = document.getElementById('statusBar');
+            statusBar.textContent = `Loading pages ${rightPage} & ${leftPage}...`;
+
+            document.getElementById('rightPageInput').value = rightPage;
+            document.getElementById('leftPageInput').value = leftPage;
+
+            await Promise.all([
+                renderPageInto(rightPage,
+                    document.getElementById('innerRight'),
+                    document.getElementById('juzRight'),
+                    document.getElementById('pageNumRight'),
+                    document.getElementById('surahRight')
+                ),
+                renderPageInto(leftPage,
+                    document.getElementById('innerLeft'),
+                    document.getElementById('juzLeft'),
+                    document.getElementById('pageNumLeft'),
+                    document.getElementById('surahLeft')
+                )
+            ]);
+
+            statusBar.textContent = `Pages ${rightPage} & ${leftPage} loaded.`;
+        }
+
+        // ===================== CONTROLS =====================
+        document.getElementById('loadBtn').addEventListener('click', () => {
+            const r = parseInt(document.getElementById('rightPageInput').value) || 3;
+            const l = parseInt(document.getElementById('leftPageInput').value) || 4;
+            loadSpread(r, l);
+        });
+
+        document.getElementById('prevBtn').addEventListener('click', () => {
+            let r = parseInt(document.getElementById('rightPageInput').value) || 3;
+            r = Math.max(1, r - 2);
+            loadSpread(r, r + 1);
+        });
+
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            let r = parseInt(document.getElementById('rightPageInput').value) || 3;
+            r = Math.min(603, r + 2);
+            loadSpread(r, r + 1);
+        });
+
+        // ===================== INITIAL LOAD =====================
+        loadSpread(3, 4);
+    </script>
+</body>
+</html>
