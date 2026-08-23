@@ -1216,25 +1216,55 @@
             color: var(--primary);
             font-weight: 600;
             font-size: 1.1em;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin: 0 2px;
+            transition: all 0.2s ease;
+        }
+
+        .bismillah-line .word.bismillah-word.past {
+            color: var(--primary) !important;
             background: transparent !important;
-            opacity: 1 !important
+            opacity: 0.7;
         }
 
-        .word.bismillah-word.past {
-            color: var(--primary);
-            background: var(--primary-soft) !important
+        .bismillah-line .word.bismillah-word.now {
+            background: #2ECC71 !important;
+            color: #0A1220 !important;
+            font-weight: 700 !important;
+            border-radius: 4px;
+            box-shadow: 0 0 0 2px #2ECC71, 0 2px 12px rgba(46, 204, 113, 0.5) !important;
+            opacity: 1 !important;
         }
 
-        .word.bismillah-word.now {
-            background: var(--primary) !important;
-            color: #0a1f12 !important
+        .bismillah-line .word.bismillah-word[data-status="correct"] {
+            background: rgba(46, 204, 113, 0.28) !important;
+            color: #2ECC71 !important;
+            border-radius: 4px !important;
+            padding: 2px 6px !important;
+        }
+
+        .bismillah-line .word.bismillah-word[data-status="mistake"] {
+            background: rgba(231, 76, 60, 0.28) !important;
+            color: #E74C3C !important;
+            border-radius: 4px !important;
+            padding: 2px 6px !important;
+        }
+
+        .bismillah-line .word.bismillah-word[data-status="unclear"] {
+            background: rgba(241, 196, 15, 0.28) !important;
+            color: #F1C40F !important;
+            border-radius: 4px !important;
+            padding: 2px 6px !important;
         }
 
 
         #page-inner {
             width: 100%;
             max-width: 100%;
-            overflow-x: hidden;
+            overflow-x: visible;
+            padding: 0 4px;
+            box-sizing: border-box;
             min-width: 0
         }
 
@@ -1497,7 +1527,7 @@
             line-height: 2.0;
             direction: rtl;
             margin: 2px 0;
-            padding: 0 2px;
+            padding: 0 16px;
             font-weight: 400;
             color: var(--text, #E8EDF4);
             width: 100%;
@@ -1622,13 +1652,13 @@
             font-weight: 700 !important;
             color: #F7E7B4 !important;
             margin: 0 3px !important;
-            padding: 2px 6px !important;
+            padding: 0 5px 5px 5px !important;
             border: 1.8px solid #C59B27 !important;
             outline: 1px solid #1A4D2E !important;
             outline-offset: 1px !important;
             border-radius: 50% !important;
-            min-width: 24px !important;
-            min-height: 24px !important;
+            min-width: 28px !important;
+            min-height: 28px !important;
             line-height: 1 !important;
             text-align: center !important;
             vertical-align: middle !important;
@@ -2253,6 +2283,7 @@
                 .replace(/\bذالك\b/g, 'ذلك')
                 .replace(/\bلاكن\b/g, 'لكن')
                 .replace(/\bالرحمان\b/g, 'الرحمن')
+                .replace(/\bباسم\b/g, 'بسم')
                 // 8. Ya / alef maqsura / farsi ya → unified ya
                 .replace(/[يىی]/g, 'ي')
                 // 9. Farsi/persian variants → arabic
@@ -2486,6 +2517,9 @@
         // and any new words get processed here.
         // =========================================================================
         function processNewWord(rawWord) {
+            if (!rawWord) return;
+            // Ignore non-Arabic words (e.g. English WebSpeech fallback tokens)
+            if (!/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(rawWord)) return;
             const norm = normalize(rawWord);
             if (!norm) {
                 _pushDebug({
@@ -2941,9 +2975,33 @@
                 // but refWord indices map to _pageWords positions for highlighting
                 refWords = [];
                 const pageIdxToRefIdx = new Map();  // maps _pageWords idx -> refWords idx
+                let prevSurahOnPage = -1;
                 for (let i = 0; i < words.length; i++) {
                     const w = words[i];
                     if (w.isEndMarker) continue;
+                    // If starting a new surah on this page (and not Surah 1 or 9), insert Bismillah into refWords!
+                    if (w.surah !== prevSurahOnPage) {
+                        if (w.surah !== 1 && w.surah !== 9 && w.ayah === 1 && w.position === 1) {
+                            for (let bi = 0; bi < BISMILLAH_WORDS.length; bi++) {
+                                const bw = BISMILLAH_WORDS[bi];
+                                refWords.push({
+                                    text: bw.text,
+                                    norm: bw.norm,
+                                    phoneme: bw.phoneme,
+                                    rules: [],
+                                    surah: w.surah,
+                                    ayah: 'bismillah',
+                                    position: bi + 1,
+                                    verseKey: `${w.surah}:bismillah`,
+                                    pageNumber: w.pageNumber,
+                                    lineNumber: w.lineNumber,
+                                    isBismillah: true,
+                                    el: null
+                                });
+                            }
+                        }
+                        prevSurahOnPage = w.surah;
+                    }
                     const refIdx = refWords.length;
                     refWords.push({
                         text: w.text,
@@ -3108,7 +3166,32 @@
                         if (line.surah !== 1 && line.surah !== 9) {
                             const bisLine = document.createElement('div');
                             bisLine.className = 'mushaf-line bismillah-line';
-                            bisLine.textContent = 'بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ';
+                            const bismRefWords = refWords.filter(r => r.surah === line.surah && (r.ayah === 'bismillah' || r.isBismillah));
+                            if (bismRefWords.length > 0) {
+                                for (let bi = 0; bi < bismRefWords.length; bi++) {
+                                    const bw = bismRefWords[bi];
+                                    const rIdx = refWords.indexOf(bw);
+                                    if (bi > 0) bisLine.appendChild(document.createTextNode(' '));
+                                    const span = document.createElement('span');
+                                    span.className = 'word bismillah-word';
+                                    if (rIdx !== -1 && rIdx < pointer) span.classList.add('past');
+                                    else if (rIdx !== -1 && rIdx === pointer) span.classList.add('now');
+                                    else span.classList.add('future');
+                                    span.textContent = bw.text;
+                                    bw.el = span;
+                                    if (rIdx !== -1 && refWords[rIdx]) refWords[rIdx].el = span;
+                                    bisLine.appendChild(span);
+                                }
+                            } else {
+                                for (let bi = 0; bi < BISMILLAH_WORDS.length; bi++) {
+                                    const bw = BISMILLAH_WORDS[bi];
+                                    if (bi > 0) bisLine.appendChild(document.createTextNode(' '));
+                                    const span = document.createElement('span');
+                                    span.className = 'word bismillah-word future';
+                                    span.textContent = bw.text;
+                                    bisLine.appendChild(span);
+                                }
+                            }
                             frag.appendChild(bisLine);
                         }
                     }
@@ -3231,27 +3314,19 @@
             let lastSurah = -1;
             // Group words by line_number to make real mushaf lines
             // Each line is one div, centered, with words in order
-            const lines = [];  // [{lineNumber, surah, words: [...]}]
-            let currentLine = null;
-            for (let i = pageStart; i < pageEnd; i++) {
-                const w = allRefWords[i];
-                if (!w) continue;
-                // If surah changes, emit a surah header div (not part of any line)
-                if (w.surah !== lastSurah && lastSurah !== -1) {
-                    // (Header is emitted after the loop below as a separate flow)
+            const lines = (_pageLines && _pageLines.length) ? _pageLines : [];
+            if (!lines.length) {
+                let lastSurah = -1;
+                let currentLine = null;
+                for (let i = pageStart; i < pageEnd; i++) {
+                    const w = allRefWords[i];
+                    if (!w) continue;
+                    if (!currentLine || currentLine.lineNumber !== w.lineNumber) {
+                        currentLine = { lineNumber: w.lineNumber, surah: w.surah, firstAyah: w.ayah, words: [] };
+                        lines.push(currentLine);
+                    }
+                    currentLine.words.push({ w, i, refIdx: i });
                 }
-                // Start a new line if lineNumber changes (or first word)
-                if (!currentLine || currentLine.lineNumber !== w.lineNumber) {
-                    currentLine = {
-                        lineNumber: w.lineNumber,
-                        surah: w.surah,
-                        firstAyah: w.ayah,
-                        words: []
-                    };
-                    lines.push(currentLine);
-                }
-                currentLine.words.push({ w, i });
-                lastSurah = w.surah;
             }
             // === Now render ===
             // Track which words have been rendered (for Bismillah deduplication)
@@ -3283,20 +3358,28 @@
                             if (line.surah !== 1 && line.surah !== 9) {
                                 const bisLine = document.createElement('div');
                                 bisLine.className = 'mushaf-line bismillah-line';
-                                for (let bi = 0; bi < BISMILLAH_WORDS.length; bi++) {
-                                    const idx = surahGlobalStart + bi;
-                                    if (idx >= pageEnd) break;
-                                    const bw = allRefWords[idx];
-                                    if (!bw || bw.ayah !== 'bismillah') break;
-                                    const span = document.createElement('span');
-                                    span.className = 'word bismillah-word';
-                                    if (idx < pointer) span.classList.add('past');
-                                    else if (idx === pointer) span.classList.add('now');
-                                    else span.classList.add('future');
-                                    span.textContent = bw.text;
-                                    bw.el = span;
-                                    bisLine.appendChild(span);
-                                    rendered.add(idx);  // Mark as rendered so main loop skips
+                                const bismRefWords = refWords.filter(r => r.surah === line.surah && (r.ayah === 'bismillah' || r.isBismillah));
+                                if (bismRefWords.length > 0) {
+                                    for (let bi = 0; bi < bismRefWords.length; bi++) {
+                                        const bw = bismRefWords[bi];
+                                        const rIdx = refWords.indexOf(bw);
+                                        const span = document.createElement('span');
+                                        span.className = 'word bismillah-word';
+                                        if (rIdx !== -1 && rIdx < pointer) span.classList.add('past');
+                                        else if (rIdx !== -1 && rIdx === pointer) span.classList.add('now');
+                                        else span.classList.add('future');
+                                        span.textContent = bw.text;
+                                        bw.el = span;
+                                        bisLine.appendChild(span);
+                                    }
+                                } else {
+                                    for (let bi = 0; bi < BISMILLAH_WORDS.length; bi++) {
+                                        const bw = BISMILLAH_WORDS[bi];
+                                        const span = document.createElement('span');
+                                        span.className = 'word bismillah-word future';
+                                        span.textContent = bw.text;
+                                        bisLine.appendChild(span);
+                                    }
                                 }
                                 frag.appendChild(bisLine);
                             }
@@ -3309,7 +3392,7 @@
                 lineDiv.className = 'mushaf-line';
                 let lineHasContent = false;
                 for (let wi = 0; wi < line.words.length; wi++) {
-                    const { w, i } = line.words[wi];
+                    const { w, i, refIdx } = line.words[wi];
                     // Skip already-rendered words (Bismillah)
                     if (rendered.has(i)) continue;
                     lineHasContent = true;
@@ -3317,6 +3400,8 @@
                     if (w.isEndMarker) {
                         const marker = document.createElement('span');
                         marker.className = 'ayah-marker';
+                        const precedingRefIdx = wi > 0 ? line.words[wi - 1].refIdx : undefined;
+                        if (precedingRefIdx !== undefined) marker.dataset.refIdx = precedingRefIdx;
                         marker.textContent = w.text;
                         lineDiv.appendChild(marker);
                         continue;
@@ -3324,11 +3409,13 @@
                     // Regular word
                     const span = document.createElement('span');
                     span.className = 'word';
-                    if (i < pointer) span.classList.add('past');
-                    else if (i === pointer) span.classList.add('now');
+                    const rIdx = (refIdx !== undefined) ? refIdx : -1;
+                    if (rIdx >= 0 && rIdx < pointer) span.classList.add('past');
+                    else if (rIdx >= 0 && rIdx === pointer) span.classList.add('now');
                     else span.classList.add('future');
                     span.textContent = w.text;
-                    w.el = span;
+                    if (rIdx >= 0 && refWords[rIdx]) refWords[rIdx].el = span;
+                    else w.el = span;
                     lineDiv.appendChild(span);
                     // FIX (v19): NO kashida insertion (see main render path).
                 }
@@ -3619,7 +3706,8 @@
                 let latestInterim = '';
                 for (let i = 0; i < event.results.length; i++) {
                     const res = event.results[i];
-                    const phrase = res[0].transcript.trim();
+                    const rawPhrase = res[0].transcript || '';
+                    const phrase = rawPhrase.replace(/[a-zA-Z]+/g, '').replace(/\s+/g, ' ').trim();
                     if (!phrase) continue;
 
                     if (res.isFinal) {
