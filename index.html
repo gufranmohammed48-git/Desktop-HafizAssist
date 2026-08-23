@@ -14,6 +14,119 @@
                 window.location.replace('mobile.html' + window.location.search + window.location.hash);
             }
         })();
+    <!-- Domain Migration Notice (Only active when visited on netlify.app) -->
+    <script>
+        (function () {
+            if (window.location.hostname.includes('netlify.app')) {
+                document.addEventListener('DOMContentLoaded', function () {
+                    var targetDomain = 'hafizassist.com';
+                    var targetURL = 'https://' + targetDomain + window.location.pathname + window.location.search + window.location.hash;
+                    var secondsLeft = 15;
+
+                    var modalHTML = `
+                        <div id="domainMigrationOverlay" style="
+                            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+                            background: rgba(10, 18, 32, 0.92);
+                            backdrop-filter: blur(10px);
+                            -webkit-backdrop-filter: blur(10px);
+                            z-index: 999999;
+                            display: flex; align-items: center; justify-content: center;
+                            padding: 20px; box-sizing: border-box;
+                            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                        ">
+                            <div style="
+                                background: #132238;
+                                border: 1.5px solid #047857;
+                                border-radius: 16px;
+                                max-width: 480px; width: 100%;
+                                padding: 32px 24px;
+                                box-shadow: 0 20px 50px rgba(0,0,0,0.6), 0 0 30px rgba(4, 120, 87, 0.3);
+                                text-align: center;
+                                color: #E8EDF4;
+                            ">
+                                <div style="
+                                    width: 64px; height: 64px; margin: 0 auto 16px auto;
+                                    background: rgba(4, 120, 87, 0.2);
+                                    border: 2px solid #2ECC71;
+                                    border-radius: 50%;
+                                    display: flex; align-items: center; justify-content: center;
+                                    font-size: 32px;
+                                ">✨</div>
+                                
+                                <h2 style="margin: 0 0 8px 0; font-size: 24px; font-weight: 700; color: #FFFFFF;">
+                                    HafizAssist Has Moved!
+                                </h2>
+                                
+                                <p style="margin: 0 0 16px 0; font-size: 15px; line-height: 1.5; color: #94A3B8;">
+                                    We have updated our web address to our official custom domain:
+                                </p>
+                                
+                                <div style="
+                                    background: rgba(4, 120, 87, 0.15);
+                                    border: 1px dashed #2ECC71;
+                                    border-radius: 8px;
+                                    padding: 12px;
+                                    margin-bottom: 20px;
+                                    font-size: 20px;
+                                    font-weight: 700;
+                                    color: #2ECC71;
+                                    letter-spacing: 0.5px;
+                                ">
+                                    hafizassist.com
+                                </div>
+                                
+                                <p style="margin: 0 0 20px 0; font-size: 13.5px; color: #CBD5E1;">
+                                    Please update your browser bookmarks for direct access!
+                                </p>
+                                
+                                <div style="margin-bottom: 24px;">
+                                    <div style="font-size: 14px; font-weight: 600; color: #F7E7B4; margin-bottom: 8px;">
+                                        Auto-redirecting in <span id="migrationCountdown" style="color: #2ECC71; font-size: 16px; font-weight: 700;">15</span> seconds...
+                                    </div>
+                                    <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
+                                        <div id="migrationProgressBar" style="width: 100%; height: 100%; background: linear-gradient(90deg, #047857, #2ECC71); transition: width 1s linear;"></div>
+                                    </div>
+                                </div>
+                                
+                                <a id="migrationRedirectBtn" href="${targetURL}" style="
+                                    display: inline-flex; align-items: center; justify-content: center;
+                                    gap: 8px;
+                                    width: 100%;
+                                    padding: 14px 20px;
+                                    background: linear-gradient(135deg, #047857, #10B981);
+                                    color: #FFFFFF;
+                                    font-size: 16px;
+                                    font-weight: 700;
+                                    text-decoration: none;
+                                    border-radius: 10px;
+                                    box-shadow: 0 4px 14px rgba(4, 120, 87, 0.4);
+                                    transition: transform 0.15s ease, box-shadow 0.15s ease;
+                                    box-sizing: border-box;
+                                ">
+                                    Go to hafizassist.com Now &rarr;
+                                </a>
+                            </div>
+                        </div>
+                    `;
+
+                    document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+                    var countdownEl = document.getElementById('migrationCountdown');
+                    var progressEl = document.getElementById('migrationProgressBar');
+
+                    var timer = setInterval(function () {
+                        secondsLeft--;
+                        if (countdownEl) countdownEl.textContent = secondsLeft;
+                        if (progressEl) progressEl.style.width = (secondsLeft / 15 * 100) + '%';
+
+                        if (secondsLeft <= 0) {
+                            clearInterval(timer);
+                            window.location.href = targetURL;
+                        }
+                    }, 1000);
+                });
+            }
+        })();
     </script>
     <title>Live Recitation Tracker v2.0</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
