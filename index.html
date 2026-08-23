@@ -14,21 +14,25 @@
                 window.location.replace('mobile.html' + window.location.search + window.location.hash);
             }
         })();
-    <!-- Domain Migration Notice (Only active when visited on netlify.app) -->
+    </script>
+    <!-- Domain Migration Notice (Active on netlify.app OR with ?test_redirect=true) -->
     <script>
         (function () {
-            if (window.location.hostname.includes('netlify.app')) {
-                document.addEventListener('DOMContentLoaded', function () {
+            var isNetlify = window.location.hostname.includes('netlify.app');
+            var isTestMode = window.location.search.includes('test_redirect');
+            if (isNetlify || isTestMode) {
+                function initMigrationNotice() {
+                    if (document.getElementById('domainMigrationOverlay')) return;
                     var targetDomain = 'hafizassist.com';
-                    var targetURL = 'https://' + targetDomain + window.location.pathname + window.location.search + window.location.hash;
+                    var targetURL = 'https://' + targetDomain + window.location.pathname + window.location.search.replace(/[\?&]test_redirect=[^&]*/, '') + window.location.hash;
                     var secondsLeft = 15;
 
                     var modalHTML = `
                         <div id="domainMigrationOverlay" style="
                             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-                            background: rgba(10, 18, 32, 0.92);
-                            backdrop-filter: blur(10px);
-                            -webkit-backdrop-filter: blur(10px);
+                            background: rgba(10, 18, 32, 0.94);
+                            backdrop-filter: blur(12px);
+                            -webkit-backdrop-filter: blur(12px);
                             z-index: 999999;
                             display: flex; align-items: center; justify-content: center;
                             padding: 20px; box-sizing: border-box;
@@ -109,7 +113,11 @@
                         </div>
                     `;
 
-                    document.body.insertAdjacentHTML('beforeend', modalHTML);
+                    if (document.body) {
+                        document.body.insertAdjacentHTML('beforeend', modalHTML);
+                    } else {
+                        document.write(modalHTML);
+                    }
 
                     var countdownEl = document.getElementById('migrationCountdown');
                     var progressEl = document.getElementById('migrationProgressBar');
@@ -121,10 +129,16 @@
 
                         if (secondsLeft <= 0) {
                             clearInterval(timer);
-                            window.location.href = targetURL;
+                            if (!isTestMode) window.location.href = targetURL;
                         }
                     }, 1000);
-                });
+                }
+
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', initMigrationNotice);
+                } else {
+                    initMigrationNotice();
+                }
             }
         })();
     </script>
