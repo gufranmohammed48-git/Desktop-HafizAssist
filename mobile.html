@@ -2479,35 +2479,65 @@
         // isFuzzyMatch returns {matched: bool, kind: 'text'|'phoneme'|'substring'|'none',
         //                        distance, ratio, normalized, phonemes}
         // =========================================================================
+        function getArabicStem(str) {
+            if (!str) return '';
+            let s = str;
+            if (s.startsWith('ال') && s.length > 3) s = s.slice(2);
+            if (/^[وفبلك]/.test(s) && s.length > 3) s = s.slice(1);
+            s = s.replace(/(هم|كم|ها|نا|ين|ون|ات|ان)$/, '');
+            if (/[هك]$/.test(s) && s.length > 3) s = s.slice(0, -1);
+            return s;
+        }
+
         function isFuzzyMatch(heardNorm, expectedNorm, expectedPhonemes) {
             if (!heardNorm || !expectedNorm) return { matched: false, kind: 'none' };
 
-            // 1) Exact match — always passes
+            // 1) Exact match
             if (heardNorm === expectedNorm) return { matched: true, kind: 'text', ratio: 1 };
 
-            // 2) Substring match — allowed in Lenient/Medium mode, DISABLED in Strict mode (LEVENSHTEIN_RATIO <= 0.15)
-            if (LEVENSHTEIN_RATIO > 0.15) {
-                const minLen = Math.min(heardNorm.length, expectedNorm.length);
-                const maxLen = Math.max(heardNorm.length, expectedNorm.length);
-                if (minLen >= 3 && (minLen / maxLen) >= 0.65) {
-                    if (heardNorm.includes(expectedNorm) || expectedNorm.includes(heardNorm)) {
-                        return { matched: true, kind: 'substring', ratio: minLen / maxLen };
-                    }
+            // 2) Stem match (prefix/suffix stripped: e.g., كمثل vs مثلهم)
+            const heardStem = getArabicStem(heardNorm);
+            const expStem = getArabicStem(expectedNorm);
+            if (heardStem && expStem && heardStem === expStem) {
+                return { matched: true, kind: 'stem', ratio: 1 };
+            }
+
+            // 3) Short word edit distance tolerance (words <= 3 chars)
+            const maxLen = Math.max(heardNorm.length, expectedNorm.length);
+            const dist = levenshtein(heardNorm, expectedNorm);
+            if (maxLen <= 3 && dist <= 1) {
+                return { matched: true, kind: 'short-lenient', ratio: 1 - (dist / maxLen) };
+            }
+
+            // 4) Stem Levenshtein ratio (>= 0.60)
+            if (heardStem && expStem) {
+                const stemDist = levenshtein(heardStem, expStem);
+                const stemMax = Math.max(heardStem.length, expStem.length);
+                if (stemMax > 0 && (1 - stemDist / stemMax) >= 0.60) {
+                    return { matched: true, kind: 'stem-fuzzy', ratio: 1 - stemDist / stemMax };
                 }
             }
 
-            // 3) Text Levenshtein ratio
-            const r = levRatio(heardNorm, expectedNorm);
-            if (r >= (1 - LEVENSHTEIN_RATIO)) {
+            // 5) Substring match
+            const minLen = Math.min(heardNorm.length, expectedNorm.length);
+            if (minLen >= 3 && (minLen / maxLen) >= 0.60) {
+                if (heardNorm.includes(expectedNorm) || expectedNorm.includes(heardNorm)) {
+                    return { matched: true, kind: 'substring', ratio: minLen / maxLen };
+                }
+            }
+
+            // 6) Overall Levenshtein ratio (>= 0.65)
+            const r = 1 - (dist / maxLen);
+            if (r >= 0.65) {
                 return { matched: true, kind: 'text', ratio: r };
             }
 
-            // 4) Phonetic fallback — only in Lenient/Medium modes
-            if (expectedPhonemes && LEVENSHTEIN_RATIO > 0.15 && r >= (1 - 2 * LEVENSHTEIN_RATIO)) {
+            // 7) Phonetic fallback
+            if (expectedPhonemes) {
                 const heardPh = phonemizeArabic(heardNorm);
-                if (heardPh && heardPh.length >= 3 && expectedPhonemes.length >= 3) {
+                if (heardPh && heardPh.length >= 2 && expectedPhonemes.length >= 2) {
                     const phRatio = levRatio(heardPh, expectedPhonemes);
-                    if (phRatio >= (1 - LEVENSHTEIN_RATIO)) {
+                    if (phRatio >= 0.60) {
                         return { matched: true, kind: 'phoneme', ratio: phRatio, heardPh, expectedPhonemes };
                     }
                 }
@@ -2529,34 +2559,15 @@
         }
 
         // =========================================================================
-        // APPLY MATCH — mark all in-between as mistake/unclear, the matched one
-        // as correct, advance pointer.
+        // APPLY MATCH — mark all in-between as correct, advance pointer smoothly.
         // =========================================================================
         function applyMatch(matchAt, matchInfo, heardWord) {
-            // Mark everything between pointer and matchAt as "skipped" (count as MISTAKE/RED)
-            for (let i = pointer; i < matchAt; i++) {
+            // Mark all recited words up to matchAt as CORRECT (GREEN TILE)
+            for (let i = pointer; i <= matchAt; i++) {
                 const w = refWords[i];
-                if (!w) continue;  // skip undefined entries
-                if (w.el) w.el.dataset.status = 'mistake';
-                if (w.spaceEl) w.spaceEl.dataset.status = 'mistake';
-                if (!w.hasMistake) {
-                    w.hasMistake = true;
-                    stats.mistake++;
-                }
-                _pushDebug({
-                    kind: 'mistake',
-                    heard: heardWord || '', heardNorm: heardWord ? normalize(heardWord) : '',
-                    expected: w.text, expectedNorm: w.norm,
-                    expectedPhoneme: w.phoneme,
-                    surah: activeSurah, ayah: w.ayah, position: w.position,
-                    reason: `Skipped "${w.norm}" (position ${i}). Pointer was at ${pointer}, jumped to ${matchAt} ` +
-                        `because "${heardWord || '?'}" matched refWords[${matchAt}].norm="${refWords[matchAt].norm}" ` +
-                        `(${matchInfo.kind}, ratio=${(matchInfo.ratio || 0).toFixed(2)})`,
-                    ts: Date.now(),
-                });
-            }
-            if (refWords[matchAt] && refWords[matchAt].el) {
-                refWords[matchAt].el.dataset.status = 'correct';
+                if (!w) continue;
+                if (w.el) w.el.dataset.status = 'correct';
+                if (w.spaceEl) w.spaceEl.dataset.status = 'correct';
                 stats.correct++;
             }
             pointer = matchAt + 1;
@@ -2836,11 +2847,6 @@
                 return;
             }
             activeSurah = num;
-            // Scroll DOWN to the recite button so the user can start immediately
-            setTimeout(() => {
-                const micBtn = document.getElementById('micBtn');
-                if (micBtn) micBtn.scrollIntoView({ block: 'center', behavior: 'smooth' });
-            }, 100);
             document.querySelectorAll('.surah-card').forEach(c => c.classList.toggle('active', c === cardEl));
             resetState();
             step2.classList.remove('hidden');
@@ -3665,61 +3671,23 @@
         }
 
         function highlightCurrent() {
-            // PERFORMANCE: bail if pointer has not changed. The onresult handler
-            // calls this on every interim tick but most ticks the pointer is
-            // the same. The old code did an O(all words) re-class even when
-            // nothing changed, which is what made long surahs visibly lag the
-            // user by a line or two.
-            if (pointer === _lastHighlightedPointer) {
-                // Still do the scroll check in case the user scrolled manually.
-                if (pointer < refWords.length) {
-                    const el = refWords[pointer].el;
-                    const _container = document.getElementById('ayahContainer');
-                    if (_container) {
-                        const _cRect = _container.getBoundingClientRect();
-                        const _eRect = el.getBoundingClientRect();
-                        const _padding = 40;
-                        if (_eRect.top < _cRect.top + _padding || _eRect.bottom > _cRect.bottom - _padding) {
-                            // See main path for the strategy + page-scroll guard.
-                            const _blockMode = _container.classList.contains('script-hidden') ? 'end' : 'nearest';
-                            const _pageY = window.scrollY;
-                            el.scrollIntoView({ behavior: 'auto', block: _blockMode });
-                            if (window.scrollY !== _pageY) window.scrollTo(0, _pageY);
-                        }
-                    }
+            // 1. Single-owner DOM purge: Remove .now from ALL word elements on the page
+            document.querySelectorAll('.word.now').forEach(el => el.classList.remove('now'));
+
+            // 2. Mark all words before pointer as .past
+            for (let i = 0; i < pointer && i < refWords.length; i++) {
+                const w = refWords[i];
+                if (w && w.el) {
+                    w.el.classList.remove('now', 'future');
+                    w.el.classList.add('past');
                 }
-                return;
             }
 
-            // INCREMENTAL re-class: only touch the DOM elements that actually
-            // changed. Old approach: querySelectorAll all 3500 .word elements,
-            // remove all .now/.past/.future, then re-add them. That is 7000
-            // DOM operations per pointer change and it was the bottleneck
-            // causing the visible lag.
-            //
-            // With _maxPointerReached the .past class only ever grows
-            // monotonically. With _lastHighlightedPointer we know which word
-            // used to have .now. So:
-            //   1. Remove .now from the old .now word
-            //   2. Add .past to the newly-reached words
-            //   3. Add .now to the new current word
-            // Total: O(changed) DOM ops, typically 1-3 elements.
-            if (_lastHighlightedPointer >= 0 && _lastHighlightedPointer < refWords.length && refWords[_lastHighlightedPointer] && refWords[_lastHighlightedPointer].el) {
-                refWords[_lastHighlightedPointer].el.classList.remove("now");
-            }
-            // FIX: was i<_maxPointerReached which used the OLD value
-            // (before this call's update). Changed to pointer (the new value).
-            for (let i = _prevPastEnd; i < pointer; i++) {
-                if (refWords[i] && refWords[i].el) {
-                    const w = refWords[i].el;
-                    w.classList.add("past");
-                    w.classList.remove("future");  // no longer a candidate for hide-script blur
-                }
-            }
+            // 3. Mark EXACTLY refWords[pointer] as .now
             if (pointer < refWords.length && refWords[pointer] && refWords[pointer].el) {
                 const w = refWords[pointer].el;
-                w.classList.add("now");
-                w.classList.remove("future");  // .now has its own (hidden) style under script-hidden
+                w.classList.remove('past', 'future');
+                w.classList.add('now');
             }
 
             // Update completed verse markers (for Hide Script mode)
@@ -3737,31 +3705,13 @@
             _lastHighlightedPointer = pointer;
             if (pointer < refWords.length && refWords[pointer] && refWords[pointer].el) {
                 const el = refWords[pointer].el;
-                // Only scroll if the current word is OUTSIDE the visible area of
-                // the ayah container. Use instant ('auto') scroll rather than
-                // 'smooth' — smooth scrolling re-triggers on every Chrome interim
-                // tick and visibly shakes the page on long surahs.
                 const _container = document.getElementById('ayahContainer');
                 if (_container) {
                     const _cRect = _container.getBoundingClientRect();
                     const _eRect = el.getBoundingClientRect();
-                    const _padding = 40;  // keep some breathing room around the word
+                    const _padding = 40;
                     if (_eRect.top < _cRect.top + _padding || _eRect.bottom > _cRect.bottom - _padding) {
-                        // SCROLL STRATEGY:
-                        //   - Hide Script ON  -> block: 'end'. Current word sits at
-                        //     the bottom of the container, all past (recited) words
-                        //     stay visible above it, and the first word is never
-                        //     scrolled out of view as soon as the pointer advances.
-                        //   - Hide Script OFF -> block: 'nearest'. Minimum scroll
-                        //     disruption; current word stays in view with context.
-                        // The old block:'center' centered the current word and pushed
-                        // the first word above the visible area as soon as the pointer
-                        // left the first line.
                         const _blockMode = _container.classList.contains('script-hidden') ? 'end' : 'nearest';
-                        // PAGE-SCROLL GUARD: scrollIntoView walks every scrollable
-                        // ancestor including the document, so on the first interim
-                        // tick it can yank the whole page to the top. Snapshot and
-                        // restore window.scrollY so only the container scrolls.
                         const _pageY = window.scrollY;
                         el.scrollIntoView({ behavior: 'auto', block: _blockMode });
                         if (window.scrollY !== _pageY) window.scrollTo(0, _pageY);
