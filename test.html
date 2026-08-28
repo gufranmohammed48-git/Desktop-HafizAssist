@@ -3,6 +3,18 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        // Automatic Android / Mobile Redirect to mobile.html
+        (function () {
+            const isAndroid = /Android/i.test(navigator.userAgent);
+            const isMobile = isAndroid || /iPhone|iPad|iPod|Mobile|Opera Mini|IEMobile/i.test(navigator.userAgent);
+            const urlParams = new URLSearchParams(window.location.search);
+            if (isMobile && !urlParams.has('desktop')) {
+                window.location.replace('mobile.html' + window.location.search + window.location.hash);
+            }
+        })();
+    </script>
     <!-- Domain Migration Notice (Active on netlify.app OR with ?test_redirect=true) -->
     <script>
         (function () {
@@ -130,7 +142,7 @@
             }
         })();
     </script>
-    <title>2-Page Mushaf — Live Recitation Tracker</title>
+    <title>Live Recitation Tracker v2.0</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -181,7 +193,7 @@
         }
 
         .app {
-            max-width: 1440px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 8px 20px
         }
@@ -1287,18 +1299,15 @@
         }
 
         /* Hide Script mode — hides Quran text for memory testing */
-        .mushaf-spread.script-hidden .word,
         #page.script-hidden .word {
             visibility: hidden;
         }
 
-        .mushaf-spread.script-hidden .word.past,
         #page.script-hidden .word.past {
             visibility: visible;
             opacity: 0.5;
         }
 
-        .mushaf-spread.script-hidden .word.now,
         #page.script-hidden .word.now {
             visibility: visible !important;
             color: transparent !important;
@@ -1307,27 +1316,21 @@
             box-shadow: 0 0 0 2px var(--primary), 0 0 14px var(--now-glow) !important;
         }
 
-        .mushaf-spread.script-hidden .word[data-status="correct"],
-        .mushaf-spread.script-hidden .word[data-status="mistake"],
-        .mushaf-spread.script-hidden .word[data-status="unclear"],
         #page.script-hidden .word[data-status="correct"],
         #page.script-hidden .word[data-status="mistake"],
         #page.script-hidden .word[data-status="unclear"] {
             visibility: visible !important;
         }
 
-        .mushaf-spread.script-hidden .ayah-marker,
         #page.script-hidden .ayah-marker {
             visibility: hidden;
         }
 
-        .mushaf-spread.script-hidden .ayah-marker.past,
         #page.script-hidden .ayah-marker.past {
             visibility: visible;
             opacity: 0.8;
         }
 
-        .mushaf-spread.script-hidden .bismillah-line,
         #page.script-hidden .bismillah-line {
             visibility: hidden;
         }
@@ -1806,110 +1809,17 @@
             color: #F7E7B4;
         }
 
-        /* ===================== 2-PAGE BOOK SPREAD & VIEW MODE ===================== */
-        .view-mode-btn {
-            background: var(--card);
-            color: var(--text);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 7px 14px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            transition: all 0.2s ease;
-            user-select: none;
-        }
-
-        .view-mode-btn:hover {
-            background: var(--card-hover);
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-
-        .view-mode-btn.active {
-            background: var(--primary-soft);
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-
-        .mushaf-spread {
-            display: flex;
-            direction: rtl; /* Arabic book: right page = lower number */
-            gap: 0;
-            justify-content: center;
-            align-items: stretch;
-            max-width: 1380px;
-            margin: 0 auto;
-            width: 100%;
-        }
-
         /* Default / Light / Sepia Mushaf Page Container */
         .mushaf-page-container {
             background: #FFFDF8 !important;
             border: 2px solid #C59B27 !important;
-            border-radius: 0 !important;
-            padding: 18px 18px !important;
+            border-radius: 12px !important;
+            padding: 20px 24px !important;
+            box-shadow: 0 12px 40px rgba(15, 45, 74, 0.16) !important;
             position: relative;
-            flex: 1;
-            max-width: 670px;
-            min-width: 0;
+            max-width: 650px;
+            margin: 0 auto;
             box-sizing: border-box;
-        }
-
-        /* Right page (lower page number) — outer right edge rounded */
-        .mushaf-page-container.page-right {
-            border-radius: 0 12px 12px 0 !important;
-            border-left: 1px solid #C59B27 !important;
-            box-shadow: -10px 0 18px -6px rgba(0,0,0,0.12) inset, 0 12px 40px rgba(15, 45, 74, 0.16) !important;
-        }
-
-        /* Left page (higher page number) — outer left edge rounded */
-        .mushaf-page-container.page-left {
-            border-radius: 12px 0 0 12px !important;
-            border-right: 1px solid #C59B27 !important;
-            box-shadow: 10px 0 18px -6px rgba(0,0,0,0.12) inset, 0 12px 40px rgba(15, 45, 74, 0.16) !important;
-        }
-
-        /* When Left page is empty / Page 1 alone on Right */
-        .mushaf-page-container.page-left.hidden-page {
-            display: none !important;
-        }
-        .mushaf-spread:has(.page-left.hidden-page) .page-right {
-            border-radius: 12px !important;
-            border: 2px solid #C59B27 !important;
-            max-width: 680px;
-            box-shadow: 0 12px 40px rgba(15, 45, 74, 0.16) !important;
-        }
-
-        /* Single Page Mode overrides */
-        .mushaf-spread.single-page .page-left {
-            display: none !important;
-        }
-        .mushaf-spread.single-page .page-right {
-            border-radius: 12px !important;
-            border: 2px solid #C59B27 !important;
-            max-width: 680px;
-            box-shadow: 0 12px 40px rgba(15, 45, 74, 0.16) !important;
-        }
-        .mushaf-spread.single-page .mushaf-line {
-            font-size: clamp(19px, 3.2vw, 26px) !important;
-        }
-
-        /* Responsive on smaller screens */
-        @media (max-width: 960px) {
-            .mushaf-spread:not(.single-page) {
-                flex-direction: column-reverse;
-                gap: 16px;
-            }
-            .mushaf-spread:not(.single-page) .mushaf-page-container {
-                max-width: 680px;
-                border-radius: 12px !important;
-                border: 2px solid #C59B27 !important;
-                box-shadow: 0 12px 40px rgba(15, 45, 74, 0.16) !important;
-            }
         }
 
         /* Top Page Header Bar (Juz - Page # Medallion - Surah Name) */
@@ -2368,18 +2278,68 @@
 
         <section class="panel">
             <div class="section-header">
-                <h2>① Choose a Surah</h2>
+                <h2>📖 Quran Navigator</h2>
                 <a class='contact-btn' href='support.html' title='Report a bug, suggest a feature, or send feedback'>
                     <span aria-hidden="true">💬</span> Contact Support
                 </a>
             </div>
-            <div class="searchbar">
-                <input type="text" id="searchInput" placeholder="Search by number, transliteration, or Arabic name…"
-                    autocomplete="off">
-                <button class="mic-btn" id="resetBtn"
-                    style="background:var(--card);color:var(--text);border:1px solid var(--border);font-size:13px;padding:8px 14px">Reset</button>
+
+            <!-- Smart Search Bar with Go Button (From Option 3) -->
+            <div style="background: var(--card); padding: 16px; border-radius: 12px; border: 1.5px solid var(--border); margin-top: 12px; margin-bottom: 16px;">
+                <label style="display: block; font-size: 13px; font-weight: 700; color: var(--muted); margin-bottom: 6px;">🔍 Smart Search & Quick Jump:</label>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <input type="text" id="smartOmnibox" placeholder="Type anything: '4' (Page 4) · '2:255' (Ayat al-Kursi) · 'Yasin' or 'يس'…" autocomplete="off"
+                        style="flex: 1; padding: 12px 16px; background: var(--bg); color: var(--text); border: 2px solid var(--primary); border-radius: 10px; font-size: 15px; font-weight: 600; outline: none; font-family: inherit;">
+                    <button id="omniboxGoBtn" style="padding: 12px 24px; background: var(--primary); color: #fff; border: none; border-radius: 10px; font-weight: 700; font-size: 15px; cursor: pointer; white-space: nowrap;">Go ➔</button>
+                </div>
+                <div id="omniboxHint" style="font-size: 12px; color: var(--muted); margin-top: 6px; margin-left: 4px;">
+                    💡 Try typing: <b>"4"</b> for Page 4 · <b>"2:255"</b> for Surah 2 Ayah 255 · <b>"Yasin"</b> or <b>"يس"</b>
+                </div>
             </div>
-            <div class="surah-grid" id="surahGrid"></div>
+
+            <!-- Navigation Tabs Header -->
+            <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
+                <button class="nav-tab-btn active" data-tab="chapter" style="padding: 10px 18px; background: var(--primary); color: #fff; border: none; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer;">📖 By Chapter (Surah)</button>
+                <button class="nav-tab-btn" data-tab="page" style="padding: 10px 18px; background: var(--card); color: var(--text); border: 1.5px solid var(--border); border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer;">📄 By Page Number (1-604)</button>
+                <button class="nav-tab-btn" data-tab="verse" style="padding: 10px 18px; background: var(--card); color: var(--text); border: 1.5px solid var(--border); border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer;">۝ By Verse (Ayah)</button>
+                <button id="resetBtn" style="background:var(--card);color:var(--text);border:1px solid var(--border);font-size:13px;padding:8px 14px; border-radius: 8px; cursor: pointer; margin-left: auto;">Reset</button>
+            </div>
+
+            <!-- Tab 1 Body: Chapter Selector -->
+            <div id="tabChapter" class="tab-content" style="background: var(--card); padding: 16px; border-radius: 12px; border: 1.5px solid var(--border);">
+                <label style="display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; font-weight: 700;">Select Chapter / Surah:</label>
+                <select id="surahSelectTab" style="width: 100%; padding: 12px; background: var(--bg); color: var(--text); border: 1.5px solid var(--border); border-radius: 8px; font-size: 15px; outline: none; cursor: pointer; font-family: inherit;">
+                    <!-- 114 Surahs -->
+                </select>
+            </div>
+
+            <!-- Tab 2 Body: Page Number Slider & Input -->
+            <div id="tabPage" class="tab-content" style="background: var(--card); padding: 16px; border-radius: 12px; border: 1.5px solid var(--border); display: none;">
+                <label style="display: block; font-size: 13px; color: var(--muted); margin-bottom: 8px; font-weight: 700;">Select Page Number (1 – 604):</label>
+                <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                    <input type="number" id="pageNumberInputTab" min="1" max="604" value="1" style="width: 90px; padding: 10px; background: var(--bg); color: var(--text); border: 1.5px solid var(--border); border-radius: 8px; font-size: 16px; text-align: center; font-weight: 700;">
+                    <input type="range" id="pageSliderTab" min="1" max="604" value="1" style="flex: 1; min-width: 150px; height: 8px; cursor: pointer;">
+                    <button id="jumpPageTabBtn" style="padding: 10px 20px; background: var(--primary); color: #fff; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">Open Page</button>
+                </div>
+            </div>
+
+            <!-- Tab 3 Body: Verse (Ayah) Finder -->
+            <div id="tabVerse" class="tab-content" style="background: var(--card); padding: 16px; border-radius: 12px; border: 1.5px solid var(--border); display: none;">
+                <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end;">
+                    <div style="flex: 2; min-width: 180px;">
+                        <label style="display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; font-weight: 700;">Chapter:</label>
+                        <select id="verseSurahSelectTab" style="width: 100%; padding: 10px; background: var(--bg); color: var(--text); border: 1.5px solid var(--border); border-radius: 8px; font-size: 14px; cursor: pointer; font-family: inherit;">
+                        </select>
+                    </div>
+                    <div style="flex: 1; min-width: 120px;">
+                        <label style="display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; font-weight: 700;">Verse (Ayah) Number:</label>
+                        <input type="number" id="verseNumberInputTab" min="1" placeholder="e.g. 255" style="width: 100%; padding: 10px; background: var(--bg); color: var(--text); border: 1.5px solid var(--border); border-radius: 8px; font-size: 14px;">
+                    </div>
+                    <button id="jumpVerseTabBtn" style="padding: 10px 20px; background: #3B82F6; color: #fff; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">Find Verse</button>
+                </div>
+            </div>
+
+            <div id="surahGrid" style="display:none;"></div>
         </section>
 
         <section class="panel hidden" id="step2">
@@ -2410,10 +2370,6 @@
                     <button class="mode-btn active" data-mode="balanced">Balanced</button>
                     <button class="mode-btn" data-mode="strict">Strict</button>
                 </div>
-                <div class="mode-toggle-group" id="viewModeToggle" title="Choose page layout">
-                    <button class="mode-btn" data-view="single">📄 1 Page</button>
-                    <button class="mode-btn active" data-view="double">📖 2 Pages</button>
-                </div>
                 <span class="status" id="status">Pick a surah from the above list and track your recitation</span>
             </div>
 
@@ -2431,39 +2387,18 @@
                 <span id="pageInfo">Page 1 of 1</span>
                 <button id="nextPageBtn">Next page →</button>
             </div>
-
-            <!-- 2-PAGE MUSHAF BOOK SPREAD (Right page is lower #, Left page is higher #) -->
-            <div class="mushaf-spread" id="mushafSpread">
-                <!-- Right page (Arabic book: lower page # on right) -->
-                <div id="pageRight" class="page mushaf-page-container page-right">
-                    <div class="mushaf-top-header">
-                        <span class="mushaf-header-juz" id="mushafHeaderJuzRight">الجزء ١</span>
-                        <span class="mushaf-header-page" id="mushafHeaderPageRight">صفحة 1</span>
-                        <span class="mushaf-header-surah" id="mushafHeaderSurahRight">سُورَةُ الفَاتِحَةِ</span>
-                    </div>
-                    <div class="mushaf-frame-border">
-                        <div class="mushaf-corner corner-tr"></div>
-                        <div class="mushaf-corner corner-tl"></div>
-                        <div class="mushaf-corner corner-br"></div>
-                        <div class="mushaf-corner corner-bl"></div>
-                        <div id="page-inner-right"></div>
-                    </div>
+            <div id="page" class="page mushaf-page-container">
+                <div class="mushaf-top-header">
+                    <span class="mushaf-header-juz" id="mushafHeaderJuz">الجزء ١</span>
+                    <span class="mushaf-header-page" id="mushafHeaderPage">صفحة 1</span>
+                    <span class="mushaf-header-surah" id="mushafHeaderSurah">سُورَةُ الفَاتِحَةِ</span>
                 </div>
-
-                <!-- Left page (Arabic book: higher page # on left) -->
-                <div id="pageLeft" class="page mushaf-page-container page-left">
-                    <div class="mushaf-top-header">
-                        <span class="mushaf-header-juz" id="mushafHeaderJuzLeft">الجزء ١</span>
-                        <span class="mushaf-header-page" id="mushafHeaderPageLeft">صفحة 2</span>
-                        <span class="mushaf-header-surah" id="mushafHeaderSurahLeft">سُورَةُ البَقَرَةِ</span>
-                    </div>
-                    <div class="mushaf-frame-border">
-                        <div class="mushaf-corner corner-tr"></div>
-                        <div class="mushaf-corner corner-tl"></div>
-                        <div class="mushaf-corner corner-br"></div>
-                        <div class="mushaf-corner corner-bl"></div>
-                        <div id="page-inner-left"></div>
-                    </div>
+                <div class="mushaf-frame-border">
+                    <div class="mushaf-corner corner-tr"></div>
+                    <div class="mushaf-corner corner-tl"></div>
+                    <div class="mushaf-corner corner-br"></div>
+                    <div class="mushaf-corner corner-bl"></div>
+                    <div id="page-inner"></div>
                 </div>
             </div>
 
@@ -2902,27 +2837,32 @@
                     // Too soon since last flip - ignore this one
                     return;
                 }
-                    if (_currentMushafPage < 604) {
-                        _isAutoFlipping = true;
-                        _lastAutoFlipTime = now;
-                        statusEl.textContent = 'Page complete. Loading next mushaf page...';
-                        setTimeout(() => {
-                            finalizedText = '';
-                            _pendingFullText = '';
-                            _pendingWords = [];
-                            committedWordCount = 0;
-                            let nextTarget = _currentMushafPage + 1;
-                            if (_isTwoPageMode) {
-                                nextTarget = (_currentMushafPage === 1) ? 2 : (_currentMushafPage + 2);
-                            }
-                            if (nextTarget <= 604) {
-                                loadMushafPage(nextTarget);
-                            }
-                            _isAutoFlipping = false;  // reset guard AFTER flip completes
-                            statusEl.textContent = 'Listening — keep reciting!';
-                        }, 700);
-                        return;
-                    }
+                if (_currentMushafPage < 604) {
+                    _isAutoFlipping = true;
+                    _lastAutoFlipTime = now;
+                    statusEl.textContent = 'Page complete. Loading next mushaf page...';
+                    setTimeout(() => {
+                        // FIX (v3): Clear the speech transcript so the matcher doesn't
+                        // carry over words from the previous page. Without this, the
+                        // next _runReProcess() tick re-processes the full transcript
+                        // (finalizedText + interim) against the NEW page's refWords,
+                        // and any words that happen to match the new page's first few
+                        // words get marked as .past (user saw "4 highlighted words by
+                        // default" after auto-flip). Clearing the transcript makes the
+                        // new page start fresh — the user just continues reciting.
+                        // We touch ONLY the auto-flip setTimeout here, NOT loadMushafPage
+                        // or setSurahPage or the manual next/prev page, so other paths
+                        // are unchanged.
+                        finalizedText = '';
+                        _pendingFullText = '';
+                        _pendingWords = [];
+                        committedWordCount = 0;
+                        loadMushafPage(_currentMushafPage + 1);
+                        _isAutoFlipping = false;  // reset guard AFTER flip completes
+                        statusEl.textContent = 'Listening — keep reciting!';
+                    }, 700);
+                    return;
+                }
             }
             if (pointer >= refWords.length && !_isAutoFlipping) {
                 // Surah complete — try to auto-advance to the next surah
@@ -3108,33 +3048,191 @@
         }
 
         function renderSurahGrid(filter) {
-            const q = (filter || '').trim().toLowerCase();
-            surahGrid.innerHTML = '';
-            SURAH_META.forEach(s => {
-                if (q) {
-                    const hay = `${s.num} ${s.translit} ${s.meaning} ${s.name}`.toLowerCase();
-                    if (!hay.includes(q)) return;
+            initOption2Controls();
+            setTimeout(() => {
+                selectSurah(1);
+            }, 100);
+        }
+
+        async function jumpToVerse(surahNum, ayahNum) {
+            const sMeta = SURAH_META.find(s => s.num === surahNum);
+            if (!sMeta) {
+                alert('Invalid Surah number.');
+                return;
+            }
+            if (ayahNum < 1 || ayahNum > sMeta.verses) {
+                alert(`Surah ${sMeta.num} (${sMeta.translit}) has ${sMeta.verses} Ayahs. Please enter an Ayah number between 1 and ${sMeta.verses}.`);
+                return;
+            }
+
+            if (!allRefWords.length) {
+                alert('Quran data still loading — please try again in a moment.');
+                return;
+            }
+
+            const globalWord = allRefWords.find(w => w.surah === surahNum && w.ayah === ayahNum);
+            if (!globalWord) {
+                alert(`Could not find Ayah ${ayahNum} in Surah ${surahNum}.`);
+                return;
+            }
+
+            const targetPage = globalWord.pageNumber || globalWord.page || 1;
+            resetState();
+            step2.classList.remove('hidden');
+
+            await loadMushafPage(targetPage);
+
+            setTimeout(() => {
+                const localIdx = refWords.findIndex(w => w.surah === surahNum && w.ayah === ayahNum);
+                if (localIdx !== -1) {
+                    pointer = localIdx;
+                    _pageInitialPointer = localIdx;
+                    _maxPointerReached = localIdx;
+                    _prevPastEnd = localIdx;
+                    highlightCurrent();
+                    if (refWords[localIdx] && refWords[localIdx].el) {
+                        refWords[localIdx].el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
                 }
-                const card = document.createElement('button');
-                card.className = 'surah-card';
-                card.dataset.num = String(s.num);
-                card.innerHTML = `
-      <div class="sc-id">Surah ${s.num}</div>
-      <div class="sc-name-ar">${s.name}</div>
-      <div class="sc-name-en">${s.translit} · ${s.meaning}</div>
-      <div class="sc-verses">${s.verses} ayahs</div>
-    `;
-                card.addEventListener('click', () => selectSurah(s.num, card));
-                surahGrid.appendChild(card);
+            }, 150);
+        }
+
+        function initOption2Controls() {
+            const tabs = document.querySelectorAll('.nav-tab-btn');
+            const contents = {
+                chapter: document.getElementById('tabChapter'),
+                page: document.getElementById('tabPage'),
+                verse: document.getElementById('tabVerse')
+            };
+
+            tabs.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const target = btn.dataset.tab;
+                    tabs.forEach(t => {
+                        t.classList.toggle('active', t === btn);
+                        t.style.background = (t === btn) ? 'var(--primary)' : 'var(--card)';
+                        t.style.color = (t === btn) ? '#fff' : 'var(--text)';
+                    });
+                    Object.keys(contents).forEach(k => {
+                        if (contents[k]) contents[k].style.display = (k === target) ? 'block' : 'none';
+                    });
+                });
             });
 
-            // Load Surah Al-Fatiha (1) by default so the user lands on a working
-            // recitation screen instead of an empty "Pick a surah" placeholder.
-            // Wait one tick so phonemeData finishes its initial load.
-            setTimeout(() => {
-                const fatihaCard = surahGrid.querySelector('.surah-card[data-num="1"]');
-                if (fatihaCard) selectSurah(1, fatihaCard);
-            }, 100);
+            // Populate Surah Selectors
+            const surahSelectTab = document.getElementById('surahSelectTab');
+            const verseSurahSelectTab = document.getElementById('verseSurahSelectTab');
+            const vInput = document.getElementById('verseNumberInputTab');
+            const surahOptions = SURAH_META.map(s => `<option value="${s.num}">${s.num}. ${s.translit} (${s.name}) — ${s.verses} ayahs</option>`).join('');
+
+            function updateTabAyahMax() {
+                const sNum = parseInt(verseSurahSelectTab ? verseSurahSelectTab.value : 1);
+                const sMeta = SURAH_META.find(s => s.num === sNum);
+                if (sMeta && vInput) {
+                    vInput.max = sMeta.verses;
+                    vInput.placeholder = `Ayah (1-${sMeta.verses})`;
+                }
+            }
+
+            if (surahSelectTab) {
+                surahSelectTab.innerHTML = surahOptions;
+                surahSelectTab.addEventListener('change', (e) => selectSurah(parseInt(e.target.value)));
+            }
+
+            if (verseSurahSelectTab) {
+                verseSurahSelectTab.innerHTML = surahOptions;
+                verseSurahSelectTab.addEventListener('change', updateTabAyahMax);
+                updateTabAyahMax();
+            }
+
+            // Page Slider Sync
+            const pInput = document.getElementById('pageNumberInputTab');
+            const pSlider = document.getElementById('pageSliderTab');
+            const pBtn = document.getElementById('jumpPageTabBtn');
+
+            if (pInput && pSlider) {
+                pInput.addEventListener('input', () => { pSlider.value = pInput.value; });
+                pSlider.addEventListener('input', () => { pInput.value = pSlider.value; });
+            }
+
+            function openPageTab() {
+                const pNum = parseInt(pInput.value);
+                if (pNum >= 1 && pNum <= 604) {
+                    resetState();
+                    step2.classList.remove('hidden');
+                    loadMushafPage(pNum);
+                }
+            }
+            if (pBtn) pBtn.addEventListener('click', openPageTab);
+
+            // Verse Tab Jump
+            const vBtn = document.getElementById('jumpVerseTabBtn');
+
+            function openVerseTab() {
+                const sNum = parseInt(verseSurahSelectTab.value);
+                const aNum = parseInt(vInput.value);
+                if (!sNum || !aNum) {
+                    alert('Please select a Chapter and enter a Verse number.');
+                    return;
+                }
+                jumpToVerse(sNum, aNum);
+            }
+            if (vBtn) vBtn.addEventListener('click', openVerseTab);
+            if (vInput) vInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') openVerseTab();
+            });
+
+            // Smart Omnibox Search Bar & Go Button (From Option 3)
+            const omnibox = document.getElementById('smartOmnibox');
+            const omniboxGoBtn = document.getElementById('omniboxGoBtn');
+
+            function parseAndExecuteOmnibox() {
+                const query = (omnibox ? omnibox.value || '' : '').trim();
+                if (!query) return;
+
+                // 1. Check if surah:ayah format e.g. "2:255" or "2 255"
+                const saMatch = query.match(/^(\d{1,3})[\s:]+(\d{1,3})$/);
+                if (saMatch) {
+                    const sNum = parseInt(saMatch[1]);
+                    const aNum = parseInt(saMatch[2]);
+                    if (sNum >= 1 && sNum <= 114) {
+                        jumpToVerse(sNum, aNum);
+                        return;
+                    }
+                }
+
+                // 2. Check if page number e.g. "4", "p.4", "page 4"
+                const pageMatch = query.match(/^(?:p\.?|page\s*)?(\d{1,3})$/i);
+                if (pageMatch) {
+                    const num = parseInt(pageMatch[1]);
+                    if (num >= 1 && num <= 604) {
+                        resetState();
+                        step2.classList.remove('hidden');
+                        loadMushafPage(num);
+                        return;
+                    }
+                }
+
+                // 3. Text search for surah name
+                const qLower = query.toLowerCase();
+                const matchedSurah = SURAH_META.find(s => 
+                    s.num.toString() === query ||
+                    s.translit.toLowerCase().includes(qLower) ||
+                    s.name.includes(query) ||
+                    s.meaning.toLowerCase().includes(qLower)
+                );
+
+                if (matchedSurah) {
+                    selectSurah(matchedSurah.num);
+                } else {
+                    alert(`Could not find page or chapter matching "${query}". Try typing a page number (1-604), Surah name, or verse like "2:255".`);
+                }
+            }
+
+            if (omniboxGoBtn) omniboxGoBtn.addEventListener('click', parseAndExecuteOmnibox);
+            if (omnibox) omnibox.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') parseAndExecuteOmnibox();
+            });
         }
 
         async function selectSurah(num, cardEl) {
@@ -3381,110 +3479,33 @@
         }
 
         // =========================================================================
+        // LOAD MUSHAF PAGE — fetch a specific page (1-604) from the API and render
         // =========================================================================
-        // 2-PAGE MUSHAF SPREAD & SINGLE-PAGE ENGINE
-        // =========================================================================
-        let _isTwoPageMode = true; // default: 2-page book spread
-        let _currentMushafPage = 1;
-        let _currentRightPage = 1;
-        let _currentLeftPage = null;
-        let _pageLinesRight = [];
-        let _pageLinesLeft = [];
-        let _pageWords = [];
-        let _pageInitialPointer = 0;
-
-        // Initialize saved view mode (default: 'double')
-        let _savedViewMode = 'double';
-        try {
-            const savedVm = localStorage.getItem('hifzapp-view-mode');
-            if (savedVm === 'single' || savedVm === 'single-page') _savedViewMode = 'single';
-            else if (savedVm === 'double' || savedVm === 'two-page') _savedViewMode = 'double';
-        } catch (e) { }
-        _isTwoPageMode = (_savedViewMode === 'double');
-
-        function setViewMode(mode) {
-            _isTwoPageMode = (mode === 'double');
-            document.querySelectorAll('#viewModeToggle .mode-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.view === mode);
-            });
-            const spread = document.getElementById('mushafSpread');
-            if (spread) {
-                spread.classList.toggle('single-page', !_isTwoPageMode);
-            }
-            try { localStorage.setItem('hifzapp-view-mode', mode); } catch (e) { }
-            loadMushafPage(_currentMushafPage, activeSurah);
-        }
-
-        function setupViewModeToggle() {
-            document.querySelectorAll('#viewModeToggle .mode-btn').forEach(btn => {
-                btn.onclick = (e) => {
-                    e.preventDefault();
-                    const mode = btn.dataset.view;
-                    if (mode) setViewMode(mode);
-                };
-                btn.classList.toggle('active', btn.dataset.view === (_isTwoPageMode ? 'double' : 'single'));
-            });
-            const spread = document.getElementById('mushafSpread');
-            if (spread) {
-                spread.classList.toggle('single-page', !_isTwoPageMode);
-            }
-        }
-
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', setupViewModeToggle);
-        } else {
-            setupViewModeToggle();
-        }
+        let _pageWords = [];  // words on the current API page
+        let _pageLines = [];  // words grouped by line for the current page
+        let _pagePUACodes = {};  // verse_key -> space-separated PUA codes (QPC HAFS glyphs)
+        let _puaMode = false;     // true when PUA codes are loaded — render with QPC HAFS
+        let _pageFontFamily = null;  // e.g. "QPC_P100" — page-specific QPC HAFS font
+        let _pageInitialPointer = 0;  // initial pointer position for targetSurah on page load
 
         async function loadMushafPage(pageNum, targetSurah = null) {
             if (!window.QuranAPI) return;
             try {
-                let rightPageNum = pageNum || 1;
-                let leftPageNum = null;
-
-                if (_isTwoPageMode) {
-                    if (rightPageNum === 1) {
-                        rightPageNum = 1;
-                        leftPageNum = 2; // Show Page 1 & Page 2 together
-                    } else if (rightPageNum % 2 === 0) {
-                        // Even on right, odd on left
-                        rightPageNum = rightPageNum;
-                        leftPageNum = (rightPageNum + 1 <= 604) ? (rightPageNum + 1) : null;
-                    } else {
-                        // If requested page is odd, pair with preceding even page
-                        rightPageNum = rightPageNum - 1;
-                        leftPageNum = rightPageNum + 1;
-                    }
-                }
-
-                _currentMushafPage = rightPageNum;
-                _currentRightPage = rightPageNum;
-                _currentLeftPage = leftPageNum;
-
-                statusEl.textContent = leftPageNum ? `Loading pages ${rightPageNum} & ${leftPageNum}...` : `Loading page ${rightPageNum}...`;
-
-                const fetchPromises = [window.QuranAPI.fetchPage(rightPageNum, true)];
-                if (leftPageNum) {
-                    fetchPromises.push(window.QuranAPI.fetchPage(leftPageNum, true));
-                }
-
-                const [dataRight, dataLeft] = await Promise.all(fetchPromises);
-                const wordsRight = window.QuranAPI.flattenPageWords(dataRight);
-                const wordsLeft = dataLeft ? window.QuranAPI.flattenPageWords(dataLeft) : [];
-
-                _pageWords = [...wordsRight, ...wordsLeft];
-
-                // === Build unified refWords for the matcher ===
+                statusEl.textContent = `Loading page ${pageNum}...`;
+                const data = await window.QuranAPI.fetchPage(pageNum, true);
+                const words = window.QuranAPI.flattenPageWords(data);
+                _pageWords = words;
+                // === Build refWords for the matcher ===
+                // refWords excludes end markers (matcher should only match real words)
+                // but refWord indices map to _pageWords positions for highlighting
                 refWords = [];
-                const pageIdxToRefIdxRight = new Map();
-                const pageIdxToRefIdxLeft = new Map();
-
-                // 1) Right Page words
-                let prevSurahRight = -1;
-                for (let i = 0; i < wordsRight.length; i++) {
-                    const w = wordsRight[i];
+                const pageIdxToRefIdx = new Map();  // maps _pageWords idx -> refWords idx
+                let prevSurahOnPage = -1;
+                for (let i = 0; i < words.length; i++) {
+                    const w = words[i];
                     if (w.isEndMarker) continue;
-                    if (w.surah !== prevSurahRight) {
+                    // If starting a new surah on this page (and not Surah 1 or 9), insert Bismillah into refWords!
+                    if (w.surah !== prevSurahOnPage) {
                         if (w.surah !== 1 && w.surah !== 9 && w.ayah === 1 && w.position === 1) {
                             for (let bi = 0; bi < BISMILLAH_WORDS.length; bi++) {
                                 const bw = BISMILLAH_WORDS[bi];
@@ -3497,14 +3518,14 @@
                                     ayah: 'bismillah',
                                     position: bi + 1,
                                     verseKey: `${w.surah}:bismillah`,
-                                    pageNumber: w.pageNumber || rightPageNum,
+                                    pageNumber: w.pageNumber,
                                     lineNumber: w.lineNumber,
                                     isBismillah: true,
                                     el: null
                                 });
                             }
                         }
-                        prevSurahRight = w.surah;
+                        prevSurahOnPage = w.surah;
                     }
                     const refIdx = refWords.length;
                     refWords.push({
@@ -3516,94 +3537,39 @@
                         ayah: w.ayah,
                         position: w.position,
                         verseKey: w.verseKey,
-                        pageNumber: w.pageNumber || rightPageNum,
+                        pageNumber: w.pageNumber,
                         lineNumber: w.lineNumber,
-                        globalIndex: i,
-                        el: null
+                        globalIndex: i,  // index in _pageWords
+                        el: null  // will be set in renderMushafPage
                     });
-                    pageIdxToRefIdxRight.set(i, refIdx);
+                    pageIdxToRefIdx.set(i, refIdx);
                 }
-
-                // 2) Left Page words (if in two-page mode)
-                if (wordsLeft && wordsLeft.length) {
-                    let prevSurahLeft = -1;
-                    for (let i = 0; i < wordsLeft.length; i++) {
-                        const w = wordsLeft[i];
-                        if (w.isEndMarker) continue;
-                        if (w.surah !== prevSurahLeft) {
-                            if (w.surah !== 1 && w.surah !== 9 && w.ayah === 1 && w.position === 1) {
-                                for (let bi = 0; bi < BISMILLAH_WORDS.length; bi++) {
-                                    const bw = BISMILLAH_WORDS[bi];
-                                    refWords.push({
-                                        text: bw.text,
-                                        norm: bw.norm,
-                                        phoneme: bw.phoneme,
-                                        rules: [],
-                                        surah: w.surah,
-                                        ayah: 'bismillah',
-                                        position: bi + 1,
-                                        verseKey: `${w.surah}:bismillah`,
-                                        pageNumber: w.pageNumber || leftPageNum,
-                                        lineNumber: w.lineNumber,
-                                        isBismillah: true,
-                                        el: null
-                                    });
-                                }
-                            }
-                            prevSurahLeft = w.surah;
-                        }
-                        const refIdx = refWords.length;
-                        refWords.push({
-                            text: w.text,
-                            norm: normalize(w.text),
-                            phoneme: phonemizeArabic(w.text),
-                            rules: [],
-                            surah: w.surah,
-                            ayah: w.ayah,
-                            position: w.position,
-                            verseKey: w.verseKey,
-                            pageNumber: w.pageNumber || leftPageNum,
-                            lineNumber: w.lineNumber,
-                            globalIndex: i,
-                            el: null
-                        });
-                        pageIdxToRefIdxLeft.set(i, refIdx);
-                    }
-                }
-
-                // Group Right Page lines
-                _pageLinesRight = [];
-                let curLine = null;
-                for (let i = 0; i < wordsRight.length; i++) {
-                    const w = wordsRight[i];
+                // === No more PUA code fetching needed — using Amiri Quran font on standard text ===
+                _puaMode = false;
+                _pagePUACodes = {};
+                _pageFontFamily = null;
+                // Group by line_number
+                _pageLines = [];
+                let currentLine = null;
+                for (let i = 0; i < words.length; i++) {
+                    const w = words[i];
                     const ln = w.lineNumber || 0;
-                    if (!curLine || curLine.lineNumber !== ln) {
-                        curLine = { lineNumber: ln, surah: w.surah, firstAyah: w.ayah, words: [] };
-                        _pageLinesRight.push(curLine);
+                    if (!currentLine || currentLine.lineNumber !== ln) {
+                        currentLine = { lineNumber: ln, surah: w.surah, firstAyah: w.ayah, words: [] };
+                        _pageLines.push(currentLine);
                     }
-                    curLine.words.push({ w, i, refIdx: pageIdxToRefIdxRight.get(i) });
+                    currentLine.words.push({ w, i, refIdx: pageIdxToRefIdx.get(i) });
                 }
+                _currentMushafPage = pageNum;
 
-                // Group Left Page lines
-                _pageLinesLeft = [];
-                curLine = null;
-                if (wordsLeft && wordsLeft.length) {
-                    for (let i = 0; i < wordsLeft.length; i++) {
-                        const w = wordsLeft[i];
-                        const ln = w.lineNumber || 0;
-                        if (!curLine || curLine.lineNumber !== ln) {
-                            curLine = { lineNumber: ln, surah: w.surah, firstAyah: w.ayah, words: [] };
-                            _pageLinesLeft.push(curLine);
-                        }
-                        curLine.words.push({ w, i, refIdx: pageIdxToRefIdxLeft.get(i) });
-                    }
-                }
-
-                // Target surah positioning
+                // === TARGET SURAH POSITIONING ===
+                // If targetSurah is specified, position pointer at the FIRST word of targetSurah on this page
                 let startPointer = 0;
                 if (targetSurah) {
                     const sIdx = refWords.findIndex(w => w.surah === targetSurah);
-                    if (sIdx !== -1) startPointer = sIdx;
+                    if (sIdx !== -1) {
+                        startPointer = sIdx;
+                    }
                 }
 
                 _pageInitialPointer = startPointer;
@@ -3613,19 +3579,22 @@
                 _prevPastEnd = startPointer;
                 consecutiveMisses = 0;
                 activeSurah = targetSurah || refWords[startPointer]?.surah || refWords[0]?.surah || null;
+                // Set pageStart/pageEnd to refWords range
                 pageStart = 0;
                 pageEnd = refWords.length;
+                // Save the current stats accumulated so far as pageStartStats
+                // so counters keep accumulating across page flips!
                 pageStartStats = { ...stats };
                 debugLog = [];
                 committedWordCount = 0;
                 finalizedText = '';
                 confidences = [];
                 updateStats();
+                // FIX (v4): Tell _runReProcess to skip one tick after a page flip.
                 _pageFlipGuard = true;
+                renderMushafPage();
 
-                renderMushafSpread();
-
-                // Mark previous words (if starting in the middle of a page) as past
+                // Mark any words preceding startPointer (from earlier surahs on the same page) as .past
                 for (let i = 0; i < startPointer; i++) {
                     if (refWords[i] && refWords[i].el) {
                         refWords[i].el.classList.add('past');
@@ -3633,10 +3602,10 @@
                     }
                 }
 
-                highlightCurrent();
-                statusEl.textContent = '';
+                highlightCurrent();  // update .now class for the target surah word
+                statusEl.textContent = '';//`Page ${pageNum} of 604 loaded. (Amiri Quran)`;
             } catch (e) {
-                console.error('[mushaf] Failed to load spread', pageNum, e);
+                console.error('[mushaf] Failed to load page', pageNum, e);
                 statusEl.textContent = `Failed to load page ${pageNum}.`;
             }
         }
@@ -3660,36 +3629,42 @@
             return 1;
         }
 
-        function renderPageLinesToContainer(lines, innerEl, pageNum, juzEl, pageEl, surahEl) {
-            if (!innerEl) return;
-            innerEl.innerHTML = '';
-            innerEl.classList.toggle('page-fatihah', pageNum === 1);
+        function renderMushafPage() {
+            const inner = document.getElementById('page-inner');
+            if (!inner) return;
+            inner.innerHTML = '';
+            inner.classList.toggle('page-fatihah', _currentMushafPage === 1);
             const frag = document.createDocumentFragment();
 
-            const juzNum = getJuzForPage(pageNum);
+            // Update top header bar (Juz, Page # Medallion, Surah Name)
+            const juzNum = getJuzForPage(_currentMushafPage);
             const juzArName = JUZ_NAMES_AR[juzNum - 1] || toArabicNumerals(juzNum);
+            const juzEl = document.getElementById('mushafHeaderJuz');
+            const pageEl = document.getElementById('mushafHeaderPage');
+            const surahEl = document.getElementById('mushafHeaderSurah');
             if (juzEl) juzEl.textContent = `الجزء ${juzArName}`;
-            if (pageEl) pageEl.textContent = toArabicNumerals(pageNum);
-
-            const firstSurah = lines[0]?.surah;
+            if (pageEl) pageEl.textContent = toArabicNumerals(_currentMushafPage);
+            const firstSurah = _pageLines[0]?.surah;
             const metaFirst = SURAH_META.find(s => s.num === firstSurah);
             if (surahEl && metaFirst) surahEl.textContent = `سُورَةُ ${metaFirst.name}`;
 
+            // Find ALL surahs on this page and their starting line indices
             const surahStartLineIdx = {};
             let prevSurah = -1;
-            for (let i = 0; i < lines.length; i++) {
-                const line = lines[i];
+            for (let i = 0; i < _pageLines.length; i++) {
+                const line = _pageLines[i];
                 if (line.surah !== prevSurah) {
                     surahStartLineIdx[line.surah] = i;
                     prevSurah = line.surah;
                 }
             }
 
-            for (let i = 0; i < lines.length; i++) {
-                const line = lines[i];
+            for (let i = 0; i < _pageLines.length; i++) {
+                const line = _pageLines[i];
                 if (surahStartLineIdx[line.surah] === i) {
                     const meta = SURAH_META.find(s => s.num === line.surah);
-                    if (meta && meta.pages && meta.pages[0] === pageNum) {
+                    if (meta && meta.pages && meta.pages[0] === _currentMushafPage) {
+                        // === Surah header (Illuminated Navy/Gold Frame) ===
                         const header = document.createElement('div');
                         header.className = 'mushaf-surah-header';
                         const typeStr = meta.revelationType === 'Meccan' ? 'مَكِّيَّةٌ' : 'مَدَنِيَّةٌ';
@@ -3699,7 +3674,7 @@
                             <span class="surah-meta-badge">آيَاتُهَا ${toArabicNumerals(meta.verses)}</span>
                         `;
                         frag.appendChild(header);
-
+                        // === Bismillah for surahs 2-114 (except 9) ===
                         if (line.surah !== 1 && line.surah !== 9) {
                             const bisLine = document.createElement('div');
                             bisLine.className = 'mushaf-line bismillah-line';
@@ -3708,6 +3683,7 @@
                                 for (let bi = 0; bi < bismRefWords.length; bi++) {
                                     const bw = bismRefWords[bi];
                                     const rIdx = refWords.indexOf(bw);
+                                    if (bi > 0) bisLine.appendChild(document.createTextNode(' '));
                                     const span = document.createElement('span');
                                     span.className = 'word bismillah-word';
                                     if (rIdx !== -1 && rIdx < pointer) span.classList.add('past');
@@ -3715,11 +3691,13 @@
                                     else span.classList.add('future');
                                     span.textContent = bw.text;
                                     bw.el = span;
+                                    if (rIdx !== -1 && refWords[rIdx]) refWords[rIdx].el = span;
                                     bisLine.appendChild(span);
                                 }
                             } else {
                                 for (let bi = 0; bi < BISMILLAH_WORDS.length; bi++) {
                                     const bw = BISMILLAH_WORDS[bi];
+                                    if (bi > 0) bisLine.appendChild(document.createTextNode(' '));
                                     const span = document.createElement('span');
                                     span.className = 'word bismillah-word future';
                                     span.textContent = bw.text;
@@ -3730,13 +3708,14 @@
                         }
                     }
                 }
-
+                // === Render the line itself ===
                 const lineDiv = document.createElement('div');
                 lineDiv.className = 'mushaf-line';
 
                 for (let wi = 0; wi < line.words.length; wi++) {
                     const { w, i, refIdx } = line.words[wi];
                     if (w.isEndMarker) {
+                        // Add a space before the marker
                         lineDiv.appendChild(document.createTextNode(' '));
                         const marker = document.createElement('span');
                         marker.className = 'ayah-marker';
@@ -3746,21 +3725,18 @@
                         lineDiv.appendChild(marker);
                         continue;
                     }
-
+                    // Regular word — add a leading space so words don't touch each other
                     lineDiv.appendChild(document.createTextNode(' '));
                     const span = document.createElement('span');
                     span.className = 'word';
                     span.setAttribute('tabindex', '0');
-                    const rIdx = (refIdx !== undefined) ? refIdx : -1;
-                    if (rIdx >= 0 && rIdx < pointer) span.classList.add('past');
-                    else if (rIdx >= 0 && rIdx === pointer) span.classList.add('now');
-                    else span.classList.add('future');
                     let phText = '';
                     let tajweedStr = '';
                     let sNum = w.surah;
                     let aNum = w.ayah;
                     let pNum = w.position;
 
+                    // CRITICAL: link the DOM element to the refWord for the matcher
                     if (refIdx !== undefined && refWords[refIdx]) {
                         refWords[refIdx].el = span;
                         phText = refWords[refIdx].phoneme || '';
@@ -3770,6 +3746,7 @@
                     }
                     span.textContent = w.text;
 
+                    // Look up letter-by-letter Tajweed rules from SURAH_PHONEMES
                     if (window.SURAH_PHONEMES && sNum && aNum && pNum) {
                         const entry = window.SURAH_PHONEMES[sNum]?.[aNum]?.[pNum];
                         if (entry) {
@@ -3778,12 +3755,14 @@
                         }
                     }
 
+                    // Parse Tajweed rules and format letter-level annotations (e.g., ل → IDGHAM_LAM)
                     const rulesArr = (tajweedStr || '').split(',').filter(Boolean);
                     const ruleNames = rulesArr.map(r => {
                         const [ch, rule] = r.split(':');
                         return `<span style="color:var(--accent);font-weight:600">${ch}</span> → ${rule}`;
                     }).join('<br>');
 
+                    // Apply Tajweed border-color classes to span for visual underlines
                     const ruleSet = new Set(rulesArr.map(r => r.split(':')[1]));
                     if (ruleSet.has('TAFKHEEM')) span.classList.add('tajweed-tafkheem');
                     if (ruleSet.has('QALQALA_KUBRA') || ruleSet.has('QALQALA_SUGHRA')) span.classList.add('tajweed-qalqala');
@@ -3793,6 +3772,7 @@
                     if (ruleSet.has('IQLAB')) span.classList.add('tajweed-iqlab');
                     if (ruleSet.has('GHUNNA')) span.classList.add('tajweed-ghunna');
 
+                    // Tooltip element with IPA phonemes + detailed Tajweed letter breakdown
                     const tt = document.createElement('span');
                     tt.className = 'phoneme-tooltip';
                     const ipaPart = phText ? `<div class="ipa">/${phText}/</div>` : `<div class="ipa">/${phonemizeArabic(w.text)}/</div>`;
@@ -3800,6 +3780,7 @@
                     tt.innerHTML = ipaPart + rulesPart;
                     span.appendChild(tt);
 
+                    // Touch/click toggle handler for mobile screens
                     span.addEventListener('click', (e) => {
                         e.stopPropagation();
                         document.querySelectorAll('.word.show-tooltip').forEach(el => {
@@ -3809,41 +3790,29 @@
                     });
 
                     lineDiv.appendChild(span);
+                    // FIX (v19): NO kashida insertion. The user wants the quran.com
+                    // look — clean text with no visible kashida dashes between every
+                    // word. The browser's text-align: justify handles justification
+                    // (stretching spaces) for wrapped lines, and the natural right
+                    // alignment handles short lines.
                 }
                 frag.appendChild(lineDiv);
             }
-            innerEl.appendChild(frag);
-        }
+            inner.appendChild(frag);
 
-        function renderMushafSpread() {
-            const innerRight = document.getElementById('page-inner-right');
-            const juzRight = document.getElementById('mushafHeaderJuzRight');
-            const pageNumRight = document.getElementById('mushafHeaderPageRight');
-            const surahRight = document.getElementById('mushafHeaderSurahRight');
-
-            renderPageLinesToContainer(_pageLinesRight, innerRight, _currentRightPage, juzRight, pageNumRight, surahRight);
-
-            const pageLeftContainer = document.getElementById('pageLeft');
-            const innerLeft = document.getElementById('page-inner-left');
-            const juzLeft = document.getElementById('mushafHeaderJuzLeft');
-            const pageNumLeft = document.getElementById('mushafHeaderPageLeft');
-            const surahLeft = document.getElementById('mushafHeaderSurahLeft');
-
-            if (_isTwoPageMode && _currentLeftPage && _pageLinesLeft && _pageLinesLeft.length) {
-                if (pageLeftContainer) pageLeftContainer.classList.remove('hidden-page');
-                renderPageLinesToContainer(_pageLinesLeft, innerLeft, _currentLeftPage, juzLeft, pageNumLeft, surahLeft);
-            } else {
-                if (pageLeftContainer) pageLeftContainer.classList.add('hidden-page');
-                if (innerLeft) innerLeft.innerHTML = '';
-            }
-
+            // Update page info
             const pageInfo = document.getElementById('pageInfo');
             if (pageInfo) {
-                if (_isTwoPageMode && _currentLeftPage) {
-                    pageInfo.textContent = `Pages ${_currentRightPage}–${_currentLeftPage} of 604`;
-                } else {
-                    pageInfo.textContent = `Page ${_currentRightPage} of 604`;
+                const surahsOnPage = Object.keys(surahStartLineIdx);
+                let infoText = `Page ${_currentMushafPage} of 604`;
+                if (surahsOnPage.length > 0) {
+                    const surahNames = surahsOnPage.map(s => {
+                        const m = SURAH_META.find(mm => mm.num === parseInt(s));
+                        return m ? m.translit : `Surah ${s}`;
+                    });
+                    infoText += ` · ${surahNames.join(', ')}`;
                 }
+                pageInfo.textContent = infoText;
             }
         }
 
@@ -3854,7 +3823,7 @@
             inner.classList.toggle('page-fatihah', activeSurah === 1);
             const frag = document.createDocumentFragment();
 
-            const lines = (_pageLinesRight && _pageLinesRight.length) ? _pageLinesRight : (_pageLines && _pageLines.length ? _pageLines : []);
+            const lines = (_pageLines && _pageLines.length) ? _pageLines : [];
             if (!lines.length) {
                 let lastSurah = -1;
                 let currentLine = null;
@@ -4043,28 +4012,25 @@
         }
 
         function nextPage() {
-            if (_isTwoPageMode) {
-                if (_currentMushafPage >= 603) return;
-                const nextTarget = (_currentMushafPage === 1) ? 2 : Math.min(604, _currentMushafPage + 2);
-                loadMushafPage(nextTarget);
-            } else {
-                if (_currentMushafPage >= 604) return;
-                loadMushafPage(_currentMushafPage + 1);
-            }
+            // Use actual API pages (1-604)
+            if (_currentMushafPage >= 604) return;
+            loadMushafPage(_currentMushafPage + 1);
             _currentPageLineStart += LINES_PER_PAGE;
+            // FIX (v2): loadMushafPage already calls renderMushafPage() which is
+            // the correct renderer for the new page. DO NOT call renderPage() here
+            // — it uses the OLD allRefWords/surah-relative system and would
+            // overwrite the correct mushaf rendering with wrong content.
             updateStats();
             highlightCurrent();
         }
 
         function prevPage() {
             if (_currentMushafPage <= 1) return;
-            if (_isTwoPageMode) {
-                const prevTarget = Math.max(1, _currentMushafPage - 2);
-                loadMushafPage(prevTarget);
-            } else {
-                loadMushafPage(_currentMushafPage - 1);
-            }
+            loadMushafPage(_currentMushafPage - 1);
             _currentPageLineStart = Math.max(0, _currentPageLineStart - LINES_PER_PAGE);
+            // FIX (v2): same as nextPage — loadMushafPage already renders the
+            // new page correctly. No need to call renderPage() (the old surah-
+            // based renderer) here.
             updateStats();
             highlightCurrent();
         }
@@ -4122,54 +4088,6 @@
                     const _padding = 40;
                     if (_eRect.top < _cRect.top + _padding || _eRect.bottom > _cRect.bottom - _padding) {
                         const _blockMode = _container.classList.contains('script-hidden') ? 'end' : 'nearest';
-                        const _pageY = window.scrollY;
-                        el.scrollIntoView({ behavior: 'auto', block: _blockMode });
-                        if (window.scrollY !== _pageY) window.scrollTo(0, _pageY);
-                    }
-                }
-            }
-        }
-
-            // Update completed verse markers (for Hide Script mode)
-            document.querySelectorAll('.ayah-marker').forEach(m => {
-                const rIdx = parseInt(m.dataset.refIdx);
-                if (!isNaN(rIdx) && pointer > rIdx) {
-                    m.classList.add('past');
-                } else {
-                    m.classList.remove('past');
-                }
-            });
-
-            if (pointer > _maxPointerReached) _maxPointerReached = pointer;
-            _prevPastEnd = _maxPointerReached;
-            _lastHighlightedPointer = pointer;
-            if (pointer < refWords.length && refWords[pointer] && refWords[pointer].el) {
-                const el = refWords[pointer].el;
-                // Only scroll if the current word is OUTSIDE the visible area of
-                // the ayah container. Use instant ('auto') scroll rather than
-                // 'smooth' — smooth scrolling re-triggers on every Chrome interim
-                // tick and visibly shakes the page on long surahs.
-                const _container = document.getElementById('ayahContainer');
-                if (_container) {
-                    const _cRect = _container.getBoundingClientRect();
-                    const _eRect = el.getBoundingClientRect();
-                    const _padding = 40;  // keep some breathing room around the word
-                    if (_eRect.top < _cRect.top + _padding || _eRect.bottom > _cRect.bottom - _padding) {
-                        // SCROLL STRATEGY:
-                        //   - Hide Script ON  -> block: 'end'. Current word sits at
-                        //     the bottom of the container, all past (recited) words
-                        //     stay visible above it, and the first word is never
-                        //     scrolled out of view as soon as the pointer advances.
-                        //   - Hide Script OFF -> block: 'nearest'. Minimum scroll
-                        //     disruption; current word stays in view with context.
-                        // The old block:'center' centered the current word and pushed
-                        // the first word above the visible area as soon as the pointer
-                        // left the first line.
-                        const _blockMode = _container.classList.contains('script-hidden') ? 'end' : 'nearest';
-                        // PAGE-SCROLL GUARD: scrollIntoView walks every scrollable
-                        // ancestor including the document, so on the first interim
-                        // tick it can yank the whole page to the top. Snapshot and
-                        // restore window.scrollY so only the container scrolls.
                         const _pageY = window.scrollY;
                         el.scrollIntoView({ behavior: 'auto', block: _blockMode });
                         if (window.scrollY !== _pageY) window.scrollTo(0, _pageY);
@@ -4528,10 +4446,7 @@
         let scriptHidden = false;
         toggleScriptBtn.addEventListener('click', () => {
             scriptHidden = !scriptHidden;
-            const spread = document.getElementById('mushafSpread');
-            if (spread) spread.classList.toggle('script-hidden', scriptHidden);
-            const legacyPage = document.getElementById('page');
-            if (legacyPage) legacyPage.classList.toggle('script-hidden', scriptHidden);
+            document.getElementById('page').classList.toggle('script-hidden', scriptHidden);
             toggleScriptBtn.classList.toggle('active', scriptHidden);
             toggleScriptBtn.textContent = scriptHidden ? 'Show Script' : 'Hide Script';
             toggleScriptBtn.title = scriptHidden
@@ -4541,7 +4456,7 @@
         if (prevPageBtn) prevPageBtn.addEventListener('click', prevPage);
         if (nextPageBtn) nextPageBtn.addEventListener('click', nextPage);
 
-        searchInput.addEventListener('input', () => renderSurahGrid(searchInput.value));
+        if (searchInput) searchInput.addEventListener('input', () => renderSurahGrid(searchInput.value));
 
         // =========================================================================
         // TEST MODE — exposes matcher logic to window for in-browser verification
@@ -4661,13 +4576,14 @@
 
         // ==== COLLAPSIBLE MISTAKE STATISTICS ====
         // Direct approach: attach handlers by ID at the right time
+        let _debugRetryCount = 0;
         function _setupCollapsibleMistakePanel() {
             const debugPanel = document.getElementById('debugPanel');
             const debugPanelHeader = document.getElementById('debugPanelHeader');
             const debugCloseBtn = document.getElementById('debugCloseBtn');
             if (!debugPanel || !debugPanelHeader) {
-                console.warn('[debug-panel] elements not found, retrying...');
-                setTimeout(_setupCollapsibleMistakePanel, 100);
+                _debugRetryCount++;
+                if (_debugRetryCount < 10) setTimeout(_setupCollapsibleMistakePanel, 100);
                 return;
             }
             // Load saved state (default: closed)
