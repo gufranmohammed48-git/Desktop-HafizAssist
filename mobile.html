@@ -536,27 +536,29 @@
      visibly on long surahs. The color/bg transitions stay smooth; the
      transform/box-shadow change instantly. */
         .word[data-status="correct"] {
-            background: var(--green-soft);
-            color: var(--green);
-            border-color: rgba(46, 204, 113, .3)
+            background: transparent;
+            color: #2ECC71;
+            border-color: transparent
         }
 
         .word[data-status="correct"].now {
             box-shadow: 0 0 0 3px rgba(46, 204, 113, .4);
-            transform: scale(1.08)
+            transform: scale(1.08);
+            background: #2ECC71 !important;
+            color: #0A1220 !important;
         }
 
         .word[data-status="mistake"] {
-            background: var(--red-soft);
-            color: var(--red);
-            border-color: rgba(231, 76, 60, .3);
+            background: transparent;
+            color: #E74C3C;
+            border-color: transparent;
             text-decoration: none
         }
 
         .word[data-status="unclear"] {
-            background: var(--yellow-soft);
-            color: var(--yellow);
-            border-color: rgba(241, 196, 15, .3)
+            background: transparent;
+            color: #F1C40F;
+            border-color: transparent
         }
 
         /* Under Hide Script, the .past class dims every past word. Unclear
@@ -1708,8 +1710,11 @@
             justify-content: center !important;
         }
 
-        /* Current word (now) — dynamic theme-aware pointer */
-        .mushaf-line .word.now {
+        /* Current word (now) — dynamic theme-aware pointer (ALWAYS HAS BACKGROUND) */
+        .mushaf-line .word.now,
+        .mushaf-line .word.now[data-status="correct"],
+        .mushaf-line .word.now[data-status="mistake"],
+        .mushaf-line .word.now[data-status="unclear"] {
             color: #0A1220 !important;
             background: #2ECC71 !important;
             border: none !important;
@@ -1720,14 +1725,23 @@
             box-shadow: 0 0 0 2px #2ECC71, 0 2px 12px rgba(46, 204, 113, 0.5) !important;
             transform: none !important;
             font-weight: 700 !important;
+            opacity: 1 !important;
         }
 
-        body.theme-dark .mushaf-line .word.now {
+        body.theme-dark .mushaf-line .word.now,
+        body.theme-dark .mushaf-line .word.now[data-status="correct"],
+        body.theme-dark .mushaf-line .word.now[data-status="mistake"],
+        body.theme-dark .mushaf-line .word.now[data-status="unclear"] {
             color: #0A1220 !important;
+            background: #2ECC71 !important;
         }
 
-        body.theme-royal .mushaf-line .word.now {
+        body.theme-royal .mushaf-line .word.now,
+        body.theme-royal .mushaf-line .word.now[data-status="correct"],
+        body.theme-royal .mushaf-line .word.now[data-status="mistake"],
+        body.theme-royal .mushaf-line .word.now[data-status="unclear"] {
             color: #0d1b2a !important;
+            background: #2ECC71 !important;
         }
 
         /* Past words — dimmed */
@@ -1740,29 +1754,32 @@
             color: var(--text, #E8EDF4);
         }
 
-        /* Unclear words — clean yellow highlight tile */
+        /* Unclear words — clean yellow font without background */
         .mushaf-line .word[data-status="unclear"] {
-            background: rgba(241, 196, 15, 0.28) !important;
+            background: transparent !important;
             color: #F1C40F !important;
+            opacity: 1 !important;
             text-decoration: underline dotted #F1C40F !important;
             border-radius: 4px !important;
             padding: 1px 3px !important;
             margin: 0 !important;
         }
 
-        /* Mistake words — clean red highlight tile */
+        /* Mistake words — clean red font without background */
         .mushaf-line .word[data-status="mistake"] {
-            background: rgba(231, 76, 60, 0.28) !important;
+            background: transparent !important;
             color: #E74C3C !important;
+            opacity: 1 !important;
             border-radius: 4px !important;
             padding: 1px 3px !important;
             margin: 0 !important;
         }
 
-        /* Correct words — clean green highlight tile */
+        /* Correct words — clean green font without background */
         .mushaf-line .word[data-status="correct"] {
-            background: rgba(46, 204, 113, 0.25) !important;
+            background: transparent !important;
             color: #2ECC71 !important;
+            opacity: 1 !important;
             border-radius: 4px !important;
             padding: 1px 3px !important;
             margin: 0 !important;
