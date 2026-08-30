@@ -1559,22 +1559,221 @@
             color: var(--primary)
         }
 
-        /* Theme picker */
+           #page {
+            font-family: var(--quran-font, 'Amiri'), serif;
+            font-size: 20px;
+            line-height: 1.8;
+            direction: rtl;
+            text-align: right;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 8px 6px;
+            min-height: auto;
+            height: auto;
+            overflow: visible;
+            transition: filter .2s ease, opacity .2s ease
+        }
+
+        #page::-webkit-scrollbar {
+            width: 8px
+        }
+
+        #page::-webkit-scrollbar-track {
+            background: transparent
+        }
+
+        #page::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px
+        }
+
+        .surah-header {
+            text-align: center;
+            padding: 0 0;
+            margin: 0 0 2px;
+            box-shadow: 0 2px 8px var(--shadow);
+            border-radius: 8px
+        }
+
+        .surah-header .title {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: var(--primary)
+        }
+
+        .surah-header .sub {
+            font-size: .85em;
+            color: var(--text-dim)
+        }
+
+        .ayah-num {
+            display: inline-block;
+            background: var(--primary-soft);
+            color: var(--primary);
+            font-size: .65em;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin: 0 3px;
+            vertical-align: middle
+        }
+
+        .rule-badge {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            cursor: pointer
+        }
+
+        .rule-ghunnah {
+            background: rgba(46, 204, 113, .2);
+            color: #27ae60
+        }
+
+        .rule-qalqalah {
+            background: rgba(231, 76, 60, .2);
+            color: #c0392b
+        }
+
+        .rule-madd {
+            background: rgba(52, 152, 219, .2);
+            color: #2980b9
+        }
+
+        .rule-ikhfa {
+            background: rgba(155, 89, 182, .2);
+            color: #8e44ad
+        }
+
+        .rule-idgham {
+            background: rgba(241, 196, 15, .2);
+            color: #f39c12
+        }
+
+        .rule-iqlab {
+            background: rgba(230, 126, 34, .2);
+            color: #d35400
+        }
+
+        .rule-panel {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px;
+            margin: 8px 0;
+            font-size: 13px
+        }
+
+        .rule-panel h4 {
+            margin: 0 0 6px;
+            color: var(--primary)
+        }
+
+        .phoneme {
+            font-family: monospace;
+            background: var(--primary-soft);
+            color: var(--primary);
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-size: .9em
+        }
+
+        .mistake-counter {
+            font-size: 12px;
+            color: var(--red);
+            font-weight: 700
+        }
+
+        .transcript-box {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 14px;
+            margin: 8px 0;
+            font-size: 13px;
+            direction: rtl;
+            text-align: right
+        }
+
+        .transcript-box .label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-dim);
+            margin-bottom: 4px
+        }
+
+        .transcript-box .heard-text {
+            color: var(--text);
+            font-size: 15px
+        }
+
+        .transcript-box .conf {
+            font-size: 11px;
+            color: var(--text-dim);
+            margin-top: 4px
+        }
+
+        .searchbar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px
+        }
+
+        .searchbar input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--card);
+            color: var(--text);
+            font-size: 14px
+        }
+
+        .surah-card.active {
+            border-color: var(--primary);
+            background: var(--primary-soft)
+        }
+
+        .recite-tip {
+            font-size: 12px;
+            color: var(--text-dim);
+            text-align: center;
+            margin: 6px 0 0
+        }
+
+        .version-badge {
+            font-size: 11px;
+            color: var(--text-dim);
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2px 10px;
+            display: inline-block;
+            margin-top: 4px;
+            font-weight: 600;
+            letter-spacing: .3px;
+        }
+
         .settings-picker {
-            position: absolute;
-            top: 8px;
-            left: 8px;
-            z-index: 9999
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            z-index: 1000
         }
 
         .settings-picker button {
             background: var(--card);
             color: var(--text);
             border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 6px 10px;
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 13px;
             cursor: pointer;
-            font-size: 14px
+            box-shadow: 0 2px 8px var(--shadow)
         }
 
         .settings-picker .dropdown {
@@ -1582,12 +1781,14 @@
             position: absolute;
             top: 100%;
             left: 0;
+            margin-top: 4px;
             background: var(--card);
             border: 1px solid var(--border);
-            border-radius: 6px;
-            margin-top: 4px;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px var(--shadow);
+            padding: 6px 0;
             min-width: 140px;
-            box-shadow: 0 4px 12px var(--shadow)
+            z-index: 1001
         }
 
         .settings-picker.open .dropdown {
@@ -1595,7 +1796,8 @@
         }
 
         .theme-option {
-            padding: 8px 12px;
+            padding: 8px 14px;
+            font-size: 13px;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -1651,11 +1853,11 @@
    See https://fonts.google.com/specimen/Amiri+Quran */
         .mushaf-line {
             font-family: 'KFGQPC Uthman Taha Naskh', 'Amiri Quran', 'Scheherazade New', 'Amiri', serif;
-            font-size: clamp(17px, 4.2vw, 24px);
-            line-height: 2.0;
+            font-size: clamp(16px, 4.2vw, 22px);
+            line-height: 1.75;
             direction: rtl;
             margin: 2px 0;
-            padding: 0 16px;
+            padding: 0 4px;
             font-weight: 400;
             color: var(--text, #E8EDF4);
             width: 100%;
@@ -1663,6 +1865,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 1px 4px;
             word-spacing: 0;
             hyphens: none;
             height: auto;
@@ -1933,9 +2136,18 @@
             .mushaf-line {
                 height: auto !important;
                 overflow: visible !important;
-                padding: 0 !important;
+                padding: 0 4px !important;
                 width: 100% !important;
                 box-sizing: border-box !important;
+                font-size: clamp(15px, 4.2vw, 21px) !important;
+                line-height: 1.75 !important;
+                margin: 1px 0 !important;
+            }
+
+            .mushaf-line.bismillah-line,
+            #page-inner.page-fatihah .mushaf-line {
+                justify-content: center !important;
+                gap: 6px !important;
             }
 
             .ayah-marker {
@@ -2110,18 +2322,67 @@
 
         <section class="panel">
             <div class="section-header">
-                <h2>① Choose a Surah</h2>
+                <h2>📖 Quran Navigator</h2>
                 <a class='contact-btn' href='support.html' title='Report a bug, suggest a feature, or send feedback'>
                     <span aria-hidden="true">💬</span> Contact Support
                 </a>
             </div>
-            <div class="searchbar">
-                <input type="text" id="searchInput" placeholder="Search by number, transliteration, or Arabic name…"
-                    autocomplete="off">
-                <button class="mic-btn" id="resetBtn"
-                    style="background:var(--card);color:var(--text);border:1px solid var(--border);font-size:13px;padding:8px 14px">Reset</button>
+
+            <!-- Smart Search Bar with Go Button -->
+            <div style="background: var(--card); padding: 14px; border-radius: 12px; border: 1.5px solid var(--border); margin-top: 10px; margin-bottom: 14px;">
+                <label style="display: block; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 6px;">🔍 Smart Search & Quick Jump:</label>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <input type="text" id="smartOmnibox" placeholder="Type: '4' (Page 4) · '2:255' (Ayah 255) · 'Yasin'…" autocomplete="off"
+                        style="flex: 1; min-width: 0; padding: 10px 12px; background: var(--bg); color: var(--text); border: 2px solid var(--primary); border-radius: 8px; font-size: 14px; font-weight: 600; outline: none; font-family: inherit;">
+                    <button id="omniboxGoBtn" style="padding: 10px 16px; background: var(--primary); color: #fff; border: none; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer; white-space: nowrap;">Go ➔</button>
+                </div>
+                <div id="omniboxHint" style="font-size: 11px; color: var(--muted); margin-top: 6px; margin-left: 2px;">
+                    💡 Try: <b>"4"</b> for Page 4 · <b>"2:255"</b> for Surah 2 Ayah 255 · <b>"Yasin"</b> or <b>"يس"</b>
+                </div>
             </div>
-            <div class="surah-grid" id="surahGrid"></div>
+
+            <!-- Navigation Tabs Header -->
+            <div style="display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap;">
+                <button class="nav-tab-btn active" data-tab="chapter" style="padding: 8px 12px; background: var(--primary); color: #fff; border: none; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer;">📖 Chapter</button>
+                <button class="nav-tab-btn" data-tab="page" style="padding: 8px 12px; background: var(--card); color: var(--text); border: 1.5px solid var(--border); border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer;">📄 Page #</button>
+                <button class="nav-tab-btn" data-tab="verse" style="padding: 8px 12px; background: var(--card); color: var(--text); border: 1.5px solid var(--border); border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer;">۝ Verse #</button>
+                <button id="resetBtn" style="background:var(--card);color:var(--text);border:1px solid var(--border);font-size:12px;padding:7px 12px; border-radius: 8px; cursor: pointer; margin-left: auto;">Reset</button>
+            </div>
+
+            <!-- Tab 1 Body: Chapter Selector -->
+            <div id="tabChapter" class="tab-content" style="background: var(--card); padding: 12px; border-radius: 10px; border: 1.5px solid var(--border);">
+                <label style="display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; font-weight: 700;">Select Chapter / Surah:</label>
+                <select id="surahSelectTab" style="width: 100%; padding: 10px; background: var(--bg); color: var(--text); border: 1.5px solid var(--border); border-radius: 8px; font-size: 14px; outline: none; cursor: pointer; font-family: inherit;">
+                </select>
+            </div>
+
+            <!-- Tab 2 Body: Page Number Slider & Input -->
+            <div id="tabPage" class="tab-content" style="background: var(--card); padding: 12px; border-radius: 10px; border: 1.5px solid var(--border); display: none;">
+                <label style="display: block; font-size: 12px; color: var(--muted); margin-bottom: 8px; font-weight: 700;">Select Page Number (1 – 604):</label>
+                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                    <input type="number" id="pageNumberInputTab" min="1" max="604" value="1" style="width: 75px; padding: 8px; background: var(--bg); color: var(--text); border: 1.5px solid var(--border); border-radius: 8px; font-size: 15px; text-align: center; font-weight: 700;">
+                    <input type="range" id="pageSliderTab" min="1" max="604" value="1" style="flex: 1; min-width: 120px; height: 8px; cursor: pointer;">
+                    <button id="jumpPageTabBtn" style="padding: 8px 16px; background: var(--primary); color: #fff; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 13px;">Open Page</button>
+                </div>
+            </div>
+
+            <!-- Tab 3 Body: Verse (Ayah) Finder -->
+            <div id="tabVerse" class="tab-content" style="background: var(--card); padding: 12px; border-radius: 10px; border: 1.5px solid var(--border); display: none;">
+                <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end;">
+                    <div style="flex: 2; min-width: 140px;">
+                        <label style="display: block; font-size: 11px; color: var(--muted); margin-bottom: 4px; font-weight: 700;">Chapter:</label>
+                        <select id="verseSurahSelectTab" style="width: 100%; padding: 8px; background: var(--bg); color: var(--text); border: 1.5px solid var(--border); border-radius: 8px; font-size: 13px; cursor: pointer; font-family: inherit;">
+                        </select>
+                    </div>
+                    <div style="flex: 1; min-width: 90px;">
+                        <label style="display: block; font-size: 11px; color: var(--muted); margin-bottom: 4px; font-weight: 700;">Verse (Ayah) #:</label>
+                        <input type="number" id="verseNumberInputTab" min="1" placeholder="e.g. 255" style="width: 100%; padding: 8px; background: var(--bg); color: var(--text); border: 1.5px solid var(--border); border-radius: 8px; font-size: 13px;">
+                    </div>
+                    <button id="jumpVerseTabBtn" style="padding: 8px 14px; background: #3B82F6; color: #fff; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 13px;">Find Verse</button>
+                </div>
+            </div>
+
+            <div id="surahGrid" style="display:none;"></div>
         </section>
 
         <section class="panel hidden" id="step2">
@@ -2828,33 +3089,192 @@
             buildLineIndex();
         }
 
-        function renderSurahGrid(filter) {
-            const q = (filter || '').trim().toLowerCase();
-            surahGrid.innerHTML = '';
-            SURAH_META.forEach(s => {
-                if (q) {
-                    const hay = `${s.num} ${s.translit} ${s.meaning} ${s.name}`.toLowerCase();
-                    if (!hay.includes(q)) return;
+        async function jumpToVerse(surahNum, ayahNum) {
+            const sMeta = SURAH_META.find(s => s.num === surahNum);
+            if (!sMeta) {
+                alert('Invalid Surah number.');
+                return;
+            }
+            if (ayahNum < 1 || ayahNum > sMeta.verses) {
+                alert(`Surah ${sMeta.num} (${sMeta.translit}) has ${sMeta.verses} Ayahs. Please enter an Ayah number between 1 and ${sMeta.verses}.`);
+                return;
+            }
+
+            if (!allRefWords.length) {
+                alert('Quran data still loading — please try again in a moment.');
+                return;
+            }
+
+            const globalWord = allRefWords.find(w => w.surah === surahNum && w.ayah === ayahNum);
+            if (!globalWord) {
+                alert(`Could not find Ayah ${ayahNum} in Surah ${surahNum}.`);
+                return;
+            }
+
+            const targetPage = globalWord.pageNumber || globalWord.page || 1;
+            resetState();
+            step2.classList.remove('hidden');
+
+            await loadMushafPage(targetPage);
+
+            setTimeout(() => {
+                const localIdx = refWords.findIndex(w => w.surah === surahNum && w.ayah === ayahNum);
+                if (localIdx !== -1) {
+                    pointer = localIdx;
+                    _pageInitialPointer = localIdx;
+                    _maxPointerReached = localIdx;
+                    _prevPastEnd = localIdx;
+                    highlightCurrent();
+                    if (refWords[localIdx] && refWords[localIdx].el) {
+                        refWords[localIdx].el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
                 }
-                const card = document.createElement('button');
-                card.className = 'surah-card';
-                card.dataset.num = String(s.num);
-                card.innerHTML = `
-      <div class="sc-id">Surah ${s.num}</div>
-      <div class="sc-name-ar">${s.name}</div>
-      <div class="sc-name-en">${s.translit} · ${s.meaning}</div>
-      <div class="sc-verses">${s.verses} ayahs</div>
-    `;
-                card.addEventListener('click', () => selectSurah(s.num, card));
-                surahGrid.appendChild(card);
+            }, 150);
+        }
+
+        function initOption2Controls() {
+            const tabs = document.querySelectorAll('.nav-tab-btn');
+            const contents = {
+                chapter: document.getElementById('tabChapter'),
+                page: document.getElementById('tabPage'),
+                verse: document.getElementById('tabVerse')
+            };
+
+            tabs.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const target = btn.dataset.tab;
+                    tabs.forEach(t => {
+                        t.classList.toggle('active', t === btn);
+                        t.style.background = (t === btn) ? 'var(--primary)' : 'var(--card)';
+                        t.style.color = (t === btn) ? '#fff' : 'var(--text)';
+                    });
+                    Object.keys(contents).forEach(k => {
+                        if (contents[k]) contents[k].style.display = (k === target) ? 'block' : 'none';
+                    });
+                });
             });
 
-            // Load Surah Al-Fatiha (1) by default so the user lands on a working
-            // recitation screen instead of an empty "Pick a surah" placeholder.
-            // Wait one tick so phonemeData finishes its initial load.
+            // Populate Surah Selectors
+            const surahSelectTab = document.getElementById('surahSelectTab');
+            const verseSurahSelectTab = document.getElementById('verseSurahSelectTab');
+            const vInput = document.getElementById('verseNumberInputTab');
+            const surahOptions = SURAH_META.map(s => `<option value="${s.num}">${s.num}. ${s.translit} (${s.name}) — ${s.verses} ayahs</option>`).join('');
+
+            function updateTabAyahMax() {
+                const sNum = parseInt(verseSurahSelectTab ? verseSurahSelectTab.value : 1);
+                const sMeta = SURAH_META.find(s => s.num === sNum);
+                if (sMeta && vInput) {
+                    vInput.max = sMeta.verses;
+                    vInput.placeholder = `Ayah (1-${sMeta.verses})`;
+                }
+            }
+
+            if (surahSelectTab) {
+                surahSelectTab.innerHTML = surahOptions;
+                surahSelectTab.addEventListener('change', (e) => selectSurah(parseInt(e.target.value)));
+            }
+
+            if (verseSurahSelectTab) {
+                verseSurahSelectTab.innerHTML = surahOptions;
+                verseSurahSelectTab.addEventListener('change', updateTabAyahMax);
+                updateTabAyahMax();
+            }
+
+            // Page Slider Sync
+            const pInput = document.getElementById('pageNumberInputTab');
+            const pSlider = document.getElementById('pageSliderTab');
+            const pBtn = document.getElementById('jumpPageTabBtn');
+
+            if (pInput && pSlider) {
+                pInput.addEventListener('input', () => { pSlider.value = pInput.value; });
+                pSlider.addEventListener('input', () => { pInput.value = pSlider.value; });
+            }
+
+            function openPageTab() {
+                const pNum = parseInt(pInput.value);
+                if (pNum >= 1 && pNum <= 604) {
+                    resetState();
+                    step2.classList.remove('hidden');
+                    loadMushafPage(pNum);
+                }
+            }
+            if (pBtn) pBtn.addEventListener('click', openPageTab);
+
+            // Verse Tab Jump
+            const vBtn = document.getElementById('jumpVerseTabBtn');
+            if (vBtn) {
+                vBtn.addEventListener('click', () => {
+                    const sNum = parseInt(verseSurahSelectTab.value);
+                    const aNum = parseInt(vInput.value);
+                    if (sNum && aNum) {
+                        jumpToVerse(sNum, aNum);
+                    } else {
+                        alert('Please enter a valid verse number.');
+                    }
+                });
+            }
+
+            // Smart Omnibox Integration
+            const omnibox = document.getElementById('smartOmnibox');
+            const goBtn = document.getElementById('omniboxGoBtn');
+
+            function parseAndExecuteOmnibox() {
+                if (!omnibox) return;
+                const query = omnibox.value.trim();
+                if (!query) return;
+
+                // 1) Verse pattern: "2:255" or "2 255" or "Surah 2 Ayah 255"
+                const verseMatch = query.match(/^(?:surah\s*)?(\d+)\s*[:\s\,]\s*(\d+)$/i);
+                if (verseMatch) {
+                    const sNum = parseInt(verseMatch[1]);
+                    const aNum = parseInt(verseMatch[2]);
+                    jumpToVerse(sNum, aNum);
+                    return;
+                }
+
+                // 2) Pure Page Number: "4" or "p4" or "page 4"
+                const pageMatch = query.match(/^(?:page|p)?\s*(\d+)$/i);
+                if (pageMatch) {
+                    const val = parseInt(pageMatch[1]);
+                    if (val >= 1 && val <= 604) {
+                        resetState();
+                        step2.classList.remove('hidden');
+                        loadMushafPage(val);
+                        return;
+                    }
+                }
+
+                // 3) Surah Name or Number search: "Yasin", "يس", "Fatiha"
+                const qLower = query.toLowerCase();
+                const matchedSurah = SURAH_META.find(s =>
+                    String(s.num) === qLower ||
+                    s.translit.toLowerCase().includes(qLower) ||
+                    s.name.includes(query) ||
+                    s.meaning.toLowerCase().includes(qLower)
+                );
+
+                if (matchedSurah) {
+                    selectSurah(matchedSurah.num);
+                    if (surahSelectTab) surahSelectTab.value = matchedSurah.num;
+                } else {
+                    alert(`Could not find "${query}". Try a page number (e.g. "4"), Surah + Verse (e.g. "2:255"), or Surah name (e.g. "Yasin").`);
+                }
+            }
+
+            if (omnibox) {
+                omnibox.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') parseAndExecuteOmnibox();
+                });
+            }
+            if (goBtn) {
+                goBtn.addEventListener('click', parseAndExecuteOmnibox);
+            }
+        }
+
+        function renderSurahGrid(filter) {
+            initOption2Controls();
             setTimeout(() => {
-                const fatihaCard = surahGrid.querySelector('.surah-card[data-num="1"]');
-                if (fatihaCard) selectSurah(1, fatihaCard);
+                selectSurah(1);
             }, 100);
         }
 
@@ -4080,7 +4500,7 @@
             transcriptConf.textContent = '';
             transcriptBox.classList.add('hidden');
             // Clear the search bar so the surah picker shows all 114 surahs again
-            searchInput.value = '';
+            if (searchInput) searchInput.value = '';
             // Deselect any active surah card + reset active surah
             activeSurah = null;
             document.querySelectorAll('.surah-card.active').forEach(c => c.classList.remove('active'));
@@ -4163,7 +4583,7 @@
             if (badge) badge.textContent = stats.mistake;
         };
 
-        searchInput.addEventListener('input', () => renderSurahGrid(searchInput.value));
+        if (searchInput) searchInput.addEventListener('input', () => renderSurahGrid(searchInput.value));
 
         // =========================================================================
         // TEST MODE — exposes matcher logic to window for in-browser verification
