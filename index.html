@@ -1,8 +1,7 @@
 <!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
+<!-- saved from url=(0024)https://hafizassist.com/ -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script>
         // Automatic Android / Mobile Redirect to mobile.html
@@ -15,143 +14,13 @@
             }
         })();
     </script>
-    <!-- Domain Migration Notice (Active on netlify.app OR with ?test_redirect=true) -->
-    <script>
-        (function () {
-            var isNetlify = window.location.hostname.includes('netlify.app');
-            var isTestMode = window.location.search.includes('test_redirect');
-            if (isNetlify || isTestMode) {
-                function initMigrationNotice() {
-                    if (document.getElementById('domainMigrationOverlay')) return;
-                    var targetDomain = 'hafizassist.com';
-                    var targetURL = 'https://' + targetDomain + window.location.pathname + window.location.search.replace(/[\?&]test_redirect=[^&]*/, '') + window.location.hash;
-                    var secondsLeft = 15;
-
-                    var modalHTML = `
-                        <div id="domainMigrationOverlay" style="
-                            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-                            background: rgba(10, 18, 32, 0.94);
-                            backdrop-filter: blur(12px);
-                            -webkit-backdrop-filter: blur(12px);
-                            z-index: 999999;
-                            display: flex; align-items: center; justify-content: center;
-                            padding: 20px; box-sizing: border-box;
-                            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                        ">
-                            <div style="
-                                background: #132238;
-                                border: 1.5px solid #047857;
-                                border-radius: 16px;
-                                max-width: 480px; width: 100%;
-                                padding: 32px 24px;
-                                box-shadow: 0 20px 50px rgba(0,0,0,0.6), 0 0 30px rgba(4, 120, 87, 0.3);
-                                text-align: center;
-                                color: #E8EDF4;
-                            ">
-                                <div style="
-                                    width: 64px; height: 64px; margin: 0 auto 16px auto;
-                                    background: rgba(4, 120, 87, 0.2);
-                                    border: 2px solid #2ECC71;
-                                    border-radius: 50%;
-                                    display: flex; align-items: center; justify-content: center;
-                                    font-size: 32px;
-                                ">✨</div>
-                                
-                                <h2 style="margin: 0 0 8px 0; font-size: 24px; font-weight: 700; color: #FFFFFF;">
-                                    HafizAssist Has Moved!
-                                </h2>
-                                
-                                <p style="margin: 0 0 16px 0; font-size: 15px; line-height: 1.5; color: #94A3B8;">
-                                    We have updated our web address to our official custom domain:
-                                </p>
-                                
-                                <div style="
-                                    background: rgba(4, 120, 87, 0.15);
-                                    border: 1px dashed #2ECC71;
-                                    border-radius: 8px;
-                                    padding: 12px;
-                                    margin-bottom: 20px;
-                                    font-size: 20px;
-                                    font-weight: 700;
-                                    color: #2ECC71;
-                                    letter-spacing: 0.5px;
-                                ">
-                                    hafizassist.com
-                                </div>
-                                
-                                <p style="margin: 0 0 20px 0; font-size: 13.5px; color: #CBD5E1;">
-                                    Please update your browser bookmarks for direct access!
-                                </p>
-                                
-                                <div style="margin-bottom: 24px;">
-                                    <div style="font-size: 14px; font-weight: 600; color: #F7E7B4; margin-bottom: 8px;">
-                                        Auto-redirecting in <span id="migrationCountdown" style="color: #2ECC71; font-size: 16px; font-weight: 700;">15</span> seconds...
-                                    </div>
-                                    <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
-                                        <div id="migrationProgressBar" style="width: 100%; height: 100%; background: linear-gradient(90deg, #047857, #2ECC71); transition: width 1s linear;"></div>
-                                    </div>
-                                </div>
-                                
-                                <a id="migrationRedirectBtn" href="${targetURL}" style="
-                                    display: inline-flex; align-items: center; justify-content: center;
-                                    gap: 8px;
-                                    width: 100%;
-                                    padding: 14px 20px;
-                                    background: linear-gradient(135deg, #047857, #10B981);
-                                    color: #FFFFFF;
-                                    font-size: 16px;
-                                    font-weight: 700;
-                                    text-decoration: none;
-                                    border-radius: 10px;
-                                    box-shadow: 0 4px 14px rgba(4, 120, 87, 0.4);
-                                    transition: transform 0.15s ease, box-shadow 0.15s ease;
-                                    box-sizing: border-box;
-                                ">
-                                    Go to hafizassist.com Now &rarr;
-                                </a>
-                            </div>
-                        </div>
-                    `;
-
-                    if (document.body) {
-                        document.body.insertAdjacentHTML('beforeend', modalHTML);
-                    } else {
-                        document.write(modalHTML);
-                    }
-
-                    var countdownEl = document.getElementById('migrationCountdown');
-                    var progressEl = document.getElementById('migrationProgressBar');
-
-                    var timer = setInterval(function () {
-                        secondsLeft--;
-                        if (countdownEl) countdownEl.textContent = secondsLeft;
-                        if (progressEl) progressEl.style.width = (secondsLeft / 15 * 100) + '%';
-
-                        if (secondsLeft <= 0) {
-                            clearInterval(timer);
-                            if (!isTestMode) window.location.href = targetURL;
-                        }
-                    }, 1000);
-                }
-
-                if (document.readyState === 'loading') {
-                    document.addEventListener('DOMContentLoaded', initMigrationNotice);
-                } else {
-                    initMigrationNotice();
-                }
-            }
-        })();
-    </script>
-    <title>Live Recitation Tracker v2.0</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="icon"
-        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📖</text></svg>">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Scheherazade+New:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
+    <title>Quran recitation tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com/">
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
+    <link rel="preconnect" href="https://fonts.googleapis.com/">
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
+    <link rel="icon" href="data:image/svg+xml,&lt;svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22&gt;&lt;text y=%22.9em%22 font-size=%2290%22&gt;%F0%9F%93%96&lt;/text&gt;&lt;/svg&gt;">
+    <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&amp;family=Amiri:wght@400;700&amp;family=Scheherazade+New:wght@400;500;600;700&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
     <link href="https://fonts.cdnfonts.com/css/kfgqpc-uthman-taha-naskh" rel="stylesheet">
     <style>
         /* QPC HAFS no longer needed — Amiri Quran (Google Font) handles mushaf rendering
@@ -956,6 +825,10 @@
         .stat-val.yellow {
             color: var(--yellow)
         }
+
+        /* Transcript is an opt-in debugging tool: append ?debug=1 to the URL. */
+        #transcriptBox[hidden],
+        #transcriptBox.hidden { display: none !important; }
 
         .transcript-box {
             margin-top: 14px;
@@ -1837,7 +1710,7 @@
             padding: 20px 24px !important;
             box-shadow: 0 12px 40px rgba(15, 45, 74, 0.16) !important;
             position: relative;
-            max-width: 650px;
+            max-width: 600px;
             margin: 0 auto;
             box-sizing: border-box;
         }
@@ -2256,10 +2129,314 @@
                 font-size: 12px;
             }
         }
-    </style>
-</head>
+        /* Errors stay red after the pointer moves, overriding past-word themes. */
+        html body #page .word[data-status="mistake"],
+        html body #page .word[data-status="mistake"] > span:not(.phoneme-tooltip) {
+            color: #EF4444 !important;
+            -webkit-text-fill-color: #EF4444 !important;
+            opacity: 1 !important;
+        }
+        html body #page .word[data-status="mistake"] {
+            background: transparent !important;
+        }
+        html body #page .word.now[data-status="mistake"] {
+            background: rgba(239, 68, 68, .12) !important;
+            box-shadow: 0 0 0 2px #EF4444 !important;
+        }
+        /* Strict unclear words retain yellow text after the pointer moves. */
+        html body #page .word.past[data-status="unclear"],
+        html body #page .word.past[data-status="unclear"] > span:not(.phoneme-tooltip) {
+            color: #F1C40F !important;
+            -webkit-text-fill-color: #F1C40F !important;
+            opacity: 1 !important;
+        }
+        .mode-info-btn {
+            width: 36px; height: 36px; border-radius: 50%; display: inline-grid;
+            place-items: center; flex-shrink: 0; cursor: pointer; font: 700 17px Georgia, serif;
+            color: var(--text); background: var(--card); border: 1px solid var(--border);
+            transition: transform .18s, border-color .18s;
+        }
+        .mode-info-btn:hover { transform: translateY(-2px); border-color: #10b981; }
+        .mode-info-btn:focus-visible, .mode-help button:focus-visible { outline: 3px solid #10b981; outline-offset: 3px; }
+        .mode-help {
+            box-sizing: border-box; width: min(760px, calc(100vw - 28px));
+            max-height: 88vh; margin: auto; padding: 0; overflow: auto;
+            color: var(--text); background: var(--card, #132238);
+            border: 1px solid var(--border); border-radius: 24px;
+            box-shadow: 0 30px 100px rgba(0,0,0,.5); font-family: inherit;
+        }
+        .mode-help::backdrop { background: rgba(4,12,22,.78); backdrop-filter: blur(8px); }
+        .mode-help-head { padding: 28px 28px 20px; background: linear-gradient(135deg, rgba(16,185,129,.15), transparent); }
+        .mode-help-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+        .mode-help-eyebrow { color: #10b981; font-size: 11px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+        .mode-help-close { border: 1px solid var(--border); background: var(--card); color: var(--text); border-radius: 50%; width: 34px; height: 34px; cursor: pointer; font-size: 23px; }
+        .mode-help h2 { margin: 12px 0 8px; font-size: clamp(24px, 4vw, 32px); letter-spacing: -.03em; }
+        .mode-help p { line-height: 1.65; margin: 8px 0; }
+        .mode-help-sub { color: var(--muted); font-size: 14px; }
+        .mode-help-body { padding: 0 28px 26px; }
+        .mode-help-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .mode-help-card { padding: 19px; border: 1px solid var(--border); border-radius: 16px; background: var(--bg); }
+        .mode-help-card h3 { margin: 0 0 10px; font-size: 18px; }
+        .mode-help-card ul { padding-left: 18px; margin: 10px 0 0; }
+        .mode-help-card li { margin: 9px 0; line-height: 1.6; font-size: 13px; }
+        .mode-help-tag { display: inline-block; margin-left: 7px; font-size: 10px; color: #10b981; vertical-align: middle; }
+        .mode-help-legend { display: flex; flex-wrap: wrap; gap: 16px; padding: 19px 0; font-size: 12px; }
+        .mode-help-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; }
+        .mode-help-note { border-left: 3px solid #10b981; padding: 10px 15px; background: rgba(16,185,129,.06); border-radius: 0 12px 12px 0; font-size: 13px; }
+        .mode-help-done { display: block; width: 100%; margin-top: 20px; padding: 13px; border: 0; border-radius: 12px; background: #047857; color: white; cursor: pointer; font: 700 14px inherit; }
+        @media (max-width: 560px) {
+            .mode-help-grid { grid-template-columns: 1fr; }
+            .mode-help-head { padding: 20px; }
+            .mode-help-body { padding: 0 20px 20px; }
+        }
 
-<body class="theme-sepia">
+        body.theme-light {
+            --mushaf-paper: #fffdfb;
+            --mushaf-ink: #252721;
+            --mushaf-muted: #68695f;
+            --mushaf-border: #e6e1d8;
+            --mushaf-ornament: #77786d;
+            --mushaf-pattern: #e8e7de;
+            --mushaf-pointer: #b9d9c5;
+            --mushaf-error-bg: #ebc9c8;
+            --mushaf-correct: #197448;
+            --mushaf-unclear: #9a6a08;
+            --mushaf-error: #bd3039;
+        }
+        body.theme-sepia {
+            --mushaf-paper: #f5ead3;
+            --mushaf-ink: #33291c;
+            --mushaf-muted: #78664b;
+            --mushaf-border: #d6c39e;
+            --mushaf-ornament: #9c845d;
+            --mushaf-pattern: #e6d5b5;
+            --mushaf-pointer: #abc3a1;
+            --mushaf-error-bg: #e5bcb0;
+            --mushaf-correct: #285e38;
+            --mushaf-unclear: #936009;
+            --mushaf-error: #af3035;
+        }
+        body.theme-dark {
+            --mushaf-paper: #101b16;
+            --mushaf-ink: #e5eee7;
+            --mushaf-muted: #a9baad;
+            --mushaf-border: #30483a;
+            --mushaf-ornament: #839b89;
+            --mushaf-pattern: #263d2e;
+            --mushaf-pointer: #244c37;
+            --mushaf-error-bg: #50282c;
+            --mushaf-correct: #70d89d;
+            --mushaf-unclear: #f0cb69;
+            --mushaf-error: #ff858d;
+        }
+        body.theme-royal {
+            --mushaf-paper: #142439;
+            --mushaf-ink: #f2eedf;
+            --mushaf-muted: #bfb79b;
+            --mushaf-border: #38485c;
+            --mushaf-ornament: #a89a6f;
+            --mushaf-pattern: #293d53;
+            --mushaf-pointer: #294d50;
+            --mushaf-error-bg: #542d40;
+            --mushaf-correct: #83dcae;
+            --mushaf-unclear: #f1cc72;
+            --mushaf-error: #ff8e9c;
+        }
+        /* Madani-inspired reading surface; word identity and tracking stay intact. */
+        html body :is(#page, #mushafCompanion).mushaf-page-container {
+            width: min(100%, 650px) !important;
+            max-width: 650px !important;
+            box-sizing: border-box;
+            margin: 24px auto 36px !important;
+            padding: 26px 38px 22px !important;
+            background: var(--mushaf-paper) !important;
+            background-image: none !important;
+            color: var(--mushaf-ink) !important;
+            border: 1px solid var(--mushaf-border) !important;
+            outline: none !important;
+            border-radius: 5px !important;
+            box-shadow: 0 14px 45px rgba(0,0,0,.13) !important;
+            overflow: visible !important;
+        }
+        html body :is(#page, #mushafCompanion) .mushaf-frame-border {
+            border: 0 !important; outline: none !important;
+            padding: 12px 0 0 !important; margin: 0 !important;
+            background: transparent !important; box-shadow: none !important;
+            overflow: visible !important;
+        }
+        html body :is(#page, #mushafCompanion) .mushaf-corner { display: none !important; }
+        html body :is(#page, #mushafCompanion) .mushaf-top-header {
+            display: flex !important; justify-content: space-between !important;
+            align-items: center !important; direction: rtl;
+            padding: 0 0 15px !important; margin: 0 0 10px !important;
+            border: 0 !important; border-bottom: 1px solid var(--mushaf-border) !important;
+            background: transparent !important; color: var(--mushaf-muted) !important;
+            box-shadow: none !important; border-radius: 0 !important;
+        }
+        html body :is(#page, #mushafCompanion) .mushaf-header-juz,
+        html body :is(#page, #mushafCompanion) .mushaf-header-surah {
+            font-family: 'Amiri', serif !important;
+            font-size: 16px !important; font-weight: 400 !important;
+            color: var(--mushaf-muted) !important; text-shadow: none !important;
+        }
+        html body :is(#page, #mushafCompanion) :is(#page-inner, .mushaf-preview-inner) {
+            width: 100% !important; box-sizing: border-box;
+            padding: 0 !important; margin: 0 !important;
+            background: transparent !important; border: 0 !important;
+            overflow: visible !important;
+        }
+        html body :is(#page, #mushafCompanion) :is(#page-inner, .mushaf-preview-inner) .mushaf-line {
+            display: flex !important; flex-flow: row nowrap !important;
+            direction: rtl !important; align-items: baseline !important;
+            justify-content: space-between !important;
+            width: 100% !important; box-sizing: border-box;
+            font-family: 'KFGQPC Uthman Taha Naskh', 'Amiri Quran', 'Amiri', serif !important;
+            font-size: var(--madani-line-font, 36px) !important;
+            font-weight: 400 !important;
+            line-height: 1.8 !important;
+            min-height: var(--madani-line-height, 68px) !important;
+            height: auto !important;
+            margin: 0 !important; padding: 0 !important;
+            gap: .10em !important; letter-spacing: normal !important;
+            word-spacing: normal !important; text-align: right !important;
+            text-shadow: none !important; overflow: visible !important;
+        }
+        html body :is(#page, #mushafCompanion) :is(#page-inner, .mushaf-preview-inner).page-fatihah .mushaf-line,
+        html body :is(#page, #mushafCompanion) :is(#page-inner, .mushaf-preview-inner) .mushaf-line.bismillah-line {
+            justify-content: center !important; gap: .22em !important;
+        }
+        html body :is(#page, #mushafCompanion) :is(#page-inner, .mushaf-preview-inner) .mushaf-line .word {
+            flex: 0 0 auto !important; display: inline-block !important;
+            font-family: inherit !important; font-size: inherit !important;
+            font-weight: 400 !important; line-height: inherit !important;
+            letter-spacing: normal !important; white-space: nowrap !important;
+            padding: 0 1px !important; margin: 0 !important;
+            border: 0 !important; border-radius: 4px !important;
+            transform: none !important; text-shadow: none !important;
+            box-shadow: none !important;
+        }
+        html body :is(#page, #mushafCompanion):not(.script-hidden) .word {
+            color: var(--mushaf-ink) !important;
+            -webkit-text-fill-color: currentColor !important;
+            background: transparent !important; opacity: 1 !important;
+        }
+        html body :is(#page, #mushafCompanion):not(.script-hidden) .word[data-status="correct"] {
+            color: var(--mushaf-correct) !important;
+        }
+        html body :is(#page, #mushafCompanion):not(.script-hidden) .word[data-status="unclear"],
+        html body :is(#page, #mushafCompanion):not(.script-hidden) .word[data-status="unclear"] > span:not(.phoneme-tooltip) {
+            color: var(--mushaf-unclear) !important; -webkit-text-fill-color: var(--mushaf-unclear) !important;
+        }
+        html body :is(#page, #mushafCompanion):not(.script-hidden) .word[data-status="mistake"],
+        html body :is(#page, #mushafCompanion):not(.script-hidden) .word[data-status="mistake"] > span:not(.phoneme-tooltip) {
+            color: var(--mushaf-error) !important; -webkit-text-fill-color: var(--mushaf-error) !important;
+        }
+        html body :is(#page, #mushafCompanion) :is(#page-inner, .mushaf-preview-inner) .word.now {
+            background: var(--mushaf-pointer) !important;
+            box-shadow: 0 0 0 1px var(--mushaf-ornament) !important;
+        }
+        html body :is(#page, #mushafCompanion) :is(#page-inner, .mushaf-preview-inner) .word.now[data-status="mistake"] {
+            background: var(--mushaf-error-bg) !important;
+            box-shadow: 0 0 0 1px var(--mushaf-error) !important;
+        }
+        html body :is(#page, #mushafCompanion) :is(#page-inner, .mushaf-preview-inner) .ayah-marker {
+            display: inline-flex !important; flex: 0 0 auto !important;
+            align-items: center !important; justify-content: center !important;
+            align-self: center !important;
+            font-family: 'Amiri', serif !important;
+            font-size: .43em !important; line-height: 1 !important;
+            width: 1.65em !important; height: 1.65em !important;
+            min-width: 0 !important; min-height: 0 !important;
+            margin: 0 .14em !important; padding: 0 !important;
+            border: 1px solid var(--mushaf-ornament) !important;
+            outline: 1px solid var(--mushaf-ornament) !important; outline-offset: 2px !important;
+            border-radius: 45% !important; background: transparent !important;
+            box-shadow: none !important; color: var(--mushaf-muted) !important;
+            font-weight: 400 !important;
+        }
+        html body :is(#page, #mushafCompanion) .mushaf-surah-header {
+            display: flex !important; justify-content: center !important;
+            align-items: center !important; position: relative;
+            min-height: 50px; box-sizing: border-box;
+            margin: 14px 0 10px !important; padding: 5px 48px !important;
+            background: transparent !important; color: var(--mushaf-ink) !important;
+            border: 3px double var(--mushaf-ornament) !important; outline: none !important;
+            border-radius: 2px !important; box-shadow: none !important;
+        }
+        html body :is(#page, #mushafCompanion) .mushaf-surah-header::before,
+        html body :is(#page, #mushafCompanion) .mushaf-surah-header::after {
+            content: '❖'; position: absolute; top: 50%; transform: translateY(-50%);
+            width: 34px; height: 28px; line-height: 28px; text-align: center;
+            color: var(--mushaf-ornament); border: 1px solid var(--mushaf-ornament); font-size: 21px;
+            background: repeating-linear-gradient(45deg, transparent 0 4px, var(--mushaf-pattern) 4px 5px);
+        }
+        html body :is(#page, #mushafCompanion) .mushaf-surah-header::before { right: 5px; }
+        html body :is(#page, #mushafCompanion) .mushaf-surah-header::after { left: 5px; }
+        html body :is(#page, #mushafCompanion) .mushaf-surah-header .surah-title,
+        html body :is(#page, #mushafCompanion) .mushaf-surah-name-ar {
+            font-family: 'Amiri', serif !important; font-size: 25px !important;
+            font-weight: 400 !important; line-height: 1.4 !important;
+            color: var(--mushaf-ink) !important; text-shadow: none !important; letter-spacing: normal !important;
+        }
+        html body :is(#page, #mushafCompanion) .surah-meta-badge,
+        html body :is(#page, #mushafCompanion) .mushaf-surah-name-en { display: none !important; }
+        html body :is(#page, #mushafCompanion) .mushaf-page-footer {
+            display: flex; justify-content: center; padding-top: 23px;
+            margin-top: 10px; color: var(--mushaf-muted); direction: rtl;
+        }
+        html body :is(#page, #mushafCompanion) .mushaf-header-page {
+            position: static !important; transform: none !important;
+            display: inline !important; padding: 0 !important; margin: 0 !important;
+            background: transparent !important; color: var(--mushaf-muted) !important;
+            border: 0 !important; outline: none !important; border-radius: 0 !important;
+            box-shadow: none !important; width: auto !important; height: auto !important;
+            font: 400 16px 'Amiri', serif !important;
+        }
+        html body :is(#page, #mushafCompanion) .phoneme-tooltip {
+            --text-dim: #667064; --accent: #247447;
+            background: #fffefb !important; color: #30382e !important;
+            border: 1px solid #d8ddcf !important; border-radius: 10px !important;
+            box-shadow: 0 8px 24px rgba(0,0,0,.18) !important;
+            max-width: min(300px, 75vw) !important;
+            font: 13px/1.5 system-ui, sans-serif !important;
+            -webkit-text-fill-color: initial !important; z-index: 100 !important;
+        }
+        html body :is(#page, #mushafCompanion) .phoneme-tooltip .ipa { color: #247447 !important; }
+        @media (max-width: 600px) {
+            html body :is(#page, #mushafCompanion).mushaf-page-container { padding: 15px 14px 14px !important; margin: 14px auto !important; }
+            html body :is(#page, #mushafCompanion) .mushaf-header-juz, html body :is(#page, #mushafCompanion) .mushaf-header-surah { font-size: 13px !important; }
+            html body :is(#page, #mushafCompanion) .mushaf-surah-header { min-height: 40px; margin: 8px 0 !important; }
+            html body :is(#page, #mushafCompanion) .mushaf-surah-header .surah-title { font-size: 21px !important; }
+        }
+
+    
+        #mushafSpread { width: 100%; }
+        #mushafCompanion { display: none; }
+        #mushafSpread.double {
+            display: flex; direction: rtl; align-items: stretch; gap: 14px;
+            width: 100%; margin: 20px auto; scroll-margin-top: 12px;
+        }
+        html body #mushafSpread.double > :is(#page, #mushafCompanion) {
+            display: flex; flex-direction: column; flex: 1 1 0; min-width: 0;
+            width: calc(50% - 7px) !important; margin: 0 !important;
+            padding: 14px 18px 12px !important;
+        }
+        html body #mushafSpread.double .mushaf-top-header { padding-bottom: 7px !important; margin-bottom: 4px !important; }
+        html body #mushafSpread.double .mushaf-surah-header { min-height: 35px; padding-top: 1px !important; padding-bottom: 1px !important; margin: 5px 0 !important; }
+        html body #mushafSpread.double .surah-title { font-size: 20px !important; }
+        html body #mushafSpread.double .mushaf-page-footer { padding-top: 8px; margin-top: auto; }
+        html body #mushafCompanion.script-hidden .word:not(.past),
+        html body #mushafCompanion.script-hidden .ayah-marker:not(.past) { visibility: hidden !important; }
+        #pageLayoutDialog { width: min(440px, calc(100vw - 40px)); box-sizing: border-box; padding: 28px; border: 1px solid var(--border); border-radius: 20px; background: var(--bg); color: var(--text); box-shadow: 0 24px 80px rgba(0,0,0,.4); }
+        #pageLayoutDialog::backdrop { background: rgba(0,0,0,.65); backdrop-filter: blur(4px); }
+        #pageLayoutDialog h2 { margin: 0 0 14px; font-size: 24px; }
+        #pageLayoutDialog p { margin: 0 0 16px; font-size: 16px; line-height: 1.6; }
+        #pageLayoutDialog button { width: 100%; margin-top: 8px; padding: 12px; border: 0; border-radius: 10px; background: var(--primary); color: var(--primary-text); font: 600 16px system-ui; cursor: pointer; }
+        .companion-loading { padding: 40px; text-align: center; }
+</style>
+<script src="./phonemes-data.js"></script></head>
+
+<body class="theme-royal">
     <div class="settings-picker" id="settingsPicker">
         <button id="settingsBtn" title="Settings">⚙ Settings</button>
         <div class="dropdown">
@@ -2267,12 +2444,9 @@
                 <div class="dropdown-label">Theme</div>
                 <div class="theme-option" data-theme="dark"><span class="swatch" style="background:#0a1f12"></span>Dark
                     Green</div>
-                <div class="theme-option" data-theme="light"><span class="swatch"
-                        style="background:#fafaf5"></span>Light</div>
-                <div class="theme-option" data-theme="sepia"><span class="swatch"
-                        style="background:#f4ecd8"></span>Sepia (Mushaf)</div>
-                <div class="theme-option" data-theme="royal"><span class="swatch"
-                        style="background:#0d1b2a"></span>Royal Blue</div>
+                <div class="theme-option" data-theme="light"><span class="swatch" style="background:#fafaf5"></span>Light</div>
+                <div class="theme-option" data-theme="sepia"><span class="swatch" style="background:#f4ecd8"></span>Sepia (Mushaf)</div>
+                <div class="theme-option" data-theme="royal"><span class="swatch" style="background:#0d1b2a"></span>Royal Blue</div>
             </div>
         </div>
     </div>
@@ -2284,8 +2458,8 @@
     <div class="app">
 
         <header>
-            <img class="bismillah" src="assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
-            <h1>Live Recitation Tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
+            <img class="bismillah" src="./assets/bismillah.png" alt="Bismillah ir-Rahman ir-Raheem">
+            <h1>Quran recitation tracker <span class="arabic">مُتَتَبِّع التلاوة</span></h1>
             <div class="version-badge" id="versionBadge" title="Current build version"></div>
         </header>
 
@@ -2299,21 +2473,21 @@
         <section class="panel">
             <div class="section-header">
                 <h2>📖 Quran Navigator</h2>
-                <a class='contact-btn' href='support.html' title='Report a bug, suggest a feature, or send feedback'>
+                <button type="button" style="display:none" class="contact-btn" id="welcomeReopen" aria-haspopup="dialog" aria-controls="welcomeCard">What&#8217;s new</button>
+                <a class="contact-btn" href="https://hafizassist.com/support.html" title="Report a bug, suggest a feature, or send feedback">
                     <span aria-hidden="true">💬</span> Contact Support
                 </a>
             </div>
 
             <!-- Smart Search Bar with Go Button (From Option 3) -->
             <div style="background: var(--card); padding: 16px; border-radius: 12px; border: 1.5px solid var(--border); margin-top: 12px; margin-bottom: 16px;">
-                <label style="display: block; font-size: 13px; font-weight: 700; color: var(--muted); margin-bottom: 6px;">🔍 Smart Search & Quick Jump:</label>
+                <label style="display: block; font-size: 13px; font-weight: 700; color: var(--muted); margin-bottom: 6px;">🔍 Smart Search &amp; Quick Jump:</label>
                 <div style="display: flex; gap: 10px; align-items: center;">
-                    <input type="text" id="smartOmnibox" placeholder="Type anything: '4' (Page 4) · '2:255' (Ayat al-Kursi) · 'Yasin' or 'يس'…" autocomplete="off"
-                        style="flex: 1; padding: 12px 16px; background: var(--bg); color: var(--text); border: 2px solid var(--primary); border-radius: 10px; font-size: 15px; font-weight: 600; outline: none; font-family: inherit;">
+                    <input type="text" id="smartOmnibox" placeholder="Type anything: &#39;4&#39; (Page 4) · &#39;2:255&#39; (Ayat al-Kursi) · &#39;Yasin&#39; or &#39;يس&#39;…" autocomplete="off" style="flex: 1; padding: 12px 16px; background: var(--bg); color: var(--text); border: 2px solid var(--primary); border-radius: 10px; font-size: 15px; font-weight: 600; outline: none; font-family: inherit;">
                     <button id="omniboxGoBtn" style="padding: 12px 24px; background: var(--primary); color: #fff; border: none; border-radius: 10px; font-weight: 700; font-size: 15px; cursor: pointer; white-space: nowrap;">Go ➔</button>
                 </div>
                 <div id="omniboxHint" style="font-size: 12px; color: var(--muted); margin-top: 6px; margin-left: 4px;">
-                    💡 Try typing: <b>"4"</b> for Page 4 · <b>"2:255"</b> for Surah 2 Ayah 255 · <b>"Yasin"</b> or <b>"يس"</b>
+                    💡 Try typing: <b>"4"</b> for Page 4 · <b>"s 2"</b> for Chapter 2 · <b>"2:255"</b> for Surah 2 Ayah 255 · <b>"Yasin"</b> or <b>"يس"</b>
                 </div>
             </div>
 
@@ -2328,9 +2502,7 @@
             <!-- Tab 1 Body: Chapter Selector -->
             <div id="tabChapter" class="tab-content" style="background: var(--card); padding: 16px; border-radius: 12px; border: 1.5px solid var(--border);">
                 <label style="display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; font-weight: 700;">Select Chapter / Surah:</label>
-                <select id="surahSelectTab" style="width: 100%; padding: 12px; background: var(--bg); color: var(--text); border: 1.5px solid var(--border); border-radius: 8px; font-size: 15px; outline: none; cursor: pointer; font-family: inherit;">
-                    <!-- 114 Surahs -->
-                </select>
+                <select id="surahSelectTab" style="width: 100%; padding: 12px; background: var(--bg); color: var(--text); border: 1.5px solid var(--border); border-radius: 8px; font-size: 15px; outline: none; cursor: pointer; font-family: inherit;"><option value="1">1. Al-Fatihah (الفاتحة) — 7 ayahs</option><option value="2">2. Al-Baqarah (البقرة) — 286 ayahs</option><option value="3">3. Ali 'Imran (آل عمران) — 200 ayahs</option><option value="4">4. An-Nisa (النساء) — 176 ayahs</option><option value="5">5. Al-Ma'idah (المائدة) — 120 ayahs</option><option value="6">6. Al-An'am (الأنعام) — 165 ayahs</option><option value="7">7. Al-A'raf (الأعراف) — 206 ayahs</option><option value="8">8. Al-Anfal (الأنفال) — 75 ayahs</option><option value="9">9. At-Tawbah (التوبة) — 129 ayahs</option><option value="10">10. Yunus (يونس) — 109 ayahs</option><option value="11">11. Hud (هود) — 123 ayahs</option><option value="12">12. Yusuf (يوسف) — 111 ayahs</option><option value="13">13. Ar-Ra'd (الرعد) — 43 ayahs</option><option value="14">14. Ibrahim (ابراهيم) — 52 ayahs</option><option value="15">15. Al-Hijr (الحجر) — 99 ayahs</option><option value="16">16. An-Nahl (النحل) — 128 ayahs</option><option value="17">17. Al-Isra (الإسراء) — 111 ayahs</option><option value="18">18. Al-Kahf (الكهف) — 110 ayahs</option><option value="19">19. Maryam (مريم) — 98 ayahs</option><option value="20">20. Taha (طه) — 135 ayahs</option><option value="21">21. Al-Anbya (الأنبياء) — 112 ayahs</option><option value="22">22. Al-Hajj (الحج) — 78 ayahs</option><option value="23">23. Al-Mu'minun (المؤمنون) — 118 ayahs</option><option value="24">24. An-Nur (النور) — 64 ayahs</option><option value="25">25. Al-Furqan (الفرقان) — 77 ayahs</option><option value="26">26. Ash-Shu'ara (الشعراء) — 227 ayahs</option><option value="27">27. An-Naml (النمل) — 93 ayahs</option><option value="28">28. Al-Qasas (القصص) — 88 ayahs</option><option value="29">29. Al-'Ankabut (العنكبوت) — 69 ayahs</option><option value="30">30. Ar-Rum (الروم) — 60 ayahs</option><option value="31">31. Luqman (لقمان) — 34 ayahs</option><option value="32">32. As-Sajdah (السجدة) — 30 ayahs</option><option value="33">33. Al-Ahzab (الأحزاب) — 73 ayahs</option><option value="34">34. Saba (سبإ) — 54 ayahs</option><option value="35">35. Fatir (فاطر) — 45 ayahs</option><option value="36">36. Ya-Sin (يس) — 83 ayahs</option><option value="37">37. As-Saffat (الصافات) — 182 ayahs</option><option value="38">38. Sad (ص) — 88 ayahs</option><option value="39">39. Az-Zumar (الزمر) — 75 ayahs</option><option value="40">40. Ghafir (غافر) — 85 ayahs</option><option value="41">41. Fussilat (فصلت) — 54 ayahs</option><option value="42">42. Ash-Shuraa (الشورى) — 53 ayahs</option><option value="43">43. Az-Zukhruf (الزخرف) — 89 ayahs</option><option value="44">44. Ad-Dukhan (الدخان) — 59 ayahs</option><option value="45">45. Al-Jathiyah (الجاثية) — 37 ayahs</option><option value="46">46. Al-Ahqaf (الأحقاف) — 35 ayahs</option><option value="47">47. Muhammad (محمد) — 38 ayahs</option><option value="48">48. Al-Fath (الفتح) — 29 ayahs</option><option value="49">49. Al-Hujurat (الحجرات) — 18 ayahs</option><option value="50">50. Qaf (ق) — 45 ayahs</option><option value="51">51. Adh-Dhariyat (الذاريات) — 60 ayahs</option><option value="52">52. At-Tur (الطور) — 49 ayahs</option><option value="53">53. An-Najm (النجم) — 62 ayahs</option><option value="54">54. Al-Qamar (القمر) — 55 ayahs</option><option value="55">55. Ar-Rahman (الرحمن) — 78 ayahs</option><option value="56">56. Al-Waqi'ah (الواقعة) — 96 ayahs</option><option value="57">57. Al-Hadid (الحديد) — 29 ayahs</option><option value="58">58. Al-Mujadila (المجادلة) — 22 ayahs</option><option value="59">59. Al-Hashr (الحشر) — 24 ayahs</option><option value="60">60. Al-Mumtahanah (الممتحنة) — 13 ayahs</option><option value="61">61. As-Saf (الصف) — 14 ayahs</option><option value="62">62. Al-Jumu'ah (الجمعة) — 11 ayahs</option><option value="63">63. Al-Munafiqun (المنافقون) — 11 ayahs</option><option value="64">64. At-Taghabun (التغابن) — 18 ayahs</option><option value="65">65. At-Talaq (الطلاق) — 12 ayahs</option><option value="66">66. At-Tahrim (التحريم) — 12 ayahs</option><option value="67">67. Al-Mulk (الملك) — 30 ayahs</option><option value="68">68. Al-Qalam (القلم) — 52 ayahs</option><option value="69">69. Al-Haqqah (الحاقة) — 52 ayahs</option><option value="70">70. Al-Ma'arij (المعارج) — 44 ayahs</option><option value="71">71. Nuh (نوح) — 28 ayahs</option><option value="72">72. Al-Jinn (الجن) — 28 ayahs</option><option value="73">73. Al-Muzzammil (المزمل) — 20 ayahs</option><option value="74">74. Al-Muddaththir (المدثر) — 56 ayahs</option><option value="75">75. Al-Qiyamah (القيامة) — 40 ayahs</option><option value="76">76. Al-Insan (الانسان) — 31 ayahs</option><option value="77">77. Al-Mursalat (المرسلات) — 50 ayahs</option><option value="78">78. An-Naba (النبإ) — 40 ayahs</option><option value="79">79. An-Nazi'at (النازعات) — 46 ayahs</option><option value="80">80. 'Abasa (عبس) — 42 ayahs</option><option value="81">81. At-Takwir (التكوير) — 29 ayahs</option><option value="82">82. Al-Infitar (الإنفطار) — 19 ayahs</option><option value="83">83. Al-Mutaffifin (المطففين) — 36 ayahs</option><option value="84">84. Al-Inshiqaq (الإنشقاق) — 25 ayahs</option><option value="85">85. Al-Buruj (البروج) — 22 ayahs</option><option value="86">86. At-Tariq (الطارق) — 17 ayahs</option><option value="87">87. Al-A'la (الأعلى) — 19 ayahs</option><option value="88">88. Al-Ghashiyah (الغاشية) — 26 ayahs</option><option value="89">89. Al-Fajr (الفجر) — 30 ayahs</option><option value="90">90. Al-Balad (البلد) — 20 ayahs</option><option value="91">91. Ash-Shams (الشمس) — 15 ayahs</option><option value="92">92. Al-Layl (الليل) — 21 ayahs</option><option value="93">93. Ad-Duhaa (الضحى) — 11 ayahs</option><option value="94">94. Ash-Sharh (الشرح) — 8 ayahs</option><option value="95">95. At-Tin (التين) — 8 ayahs</option><option value="96">96. Al-'Alaq (العلق) — 19 ayahs</option><option value="97">97. Al-Qadr (القدر) — 5 ayahs</option><option value="98">98. Al-Bayyinah (البينة) — 8 ayahs</option><option value="99">99. Az-Zalzalah (الزلزلة) — 8 ayahs</option><option value="100">100. Al-'Adiyat (العاديات) — 11 ayahs</option><option value="101">101. Al-Qari'ah (القارعة) — 11 ayahs</option><option value="102">102. At-Takathur (التكاثر) — 8 ayahs</option><option value="103">103. Al-'Asr (العصر) — 3 ayahs</option><option value="104">104. Al-Humazah (الهمزة) — 9 ayahs</option><option value="105">105. Al-Fil (الفيل) — 5 ayahs</option><option value="106">106. Quraysh (قريش) — 4 ayahs</option><option value="107">107. Al-Ma'un (الماعون) — 7 ayahs</option><option value="108">108. Al-Kawthar (الكوثر) — 3 ayahs</option><option value="109">109. Al-Kafirun (الكافرون) — 6 ayahs</option><option value="110">110. An-Nasr (النصر) — 3 ayahs</option><option value="111">111. Al-Masad (المسد) — 5 ayahs</option><option value="112">112. Al-Ikhlas (الإخلاص) — 4 ayahs</option><option value="113">113. Al-Falaq (الفلق) — 5 ayahs</option><option value="114">114. An-Nas (الناس) — 6 ayahs</option></select>
             </div>
 
             <!-- Tab 2 Body: Page Number Slider & Input -->
@@ -2348,12 +2520,11 @@
                 <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end;">
                     <div style="flex: 2; min-width: 180px;">
                         <label style="display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; font-weight: 700;">Chapter:</label>
-                        <select id="verseSurahSelectTab" style="width: 100%; padding: 10px; background: var(--bg); color: var(--text); border: 1.5px solid var(--border); border-radius: 8px; font-size: 14px; cursor: pointer; font-family: inherit;">
-                        </select>
+                        <select id="verseSurahSelectTab" style="width: 100%; padding: 10px; background: var(--bg); color: var(--text); border: 1.5px solid var(--border); border-radius: 8px; font-size: 14px; cursor: pointer; font-family: inherit;"><option value="1">1. Al-Fatihah (الفاتحة) — 7 ayahs</option><option value="2">2. Al-Baqarah (البقرة) — 286 ayahs</option><option value="3">3. Ali 'Imran (آل عمران) — 200 ayahs</option><option value="4">4. An-Nisa (النساء) — 176 ayahs</option><option value="5">5. Al-Ma'idah (المائدة) — 120 ayahs</option><option value="6">6. Al-An'am (الأنعام) — 165 ayahs</option><option value="7">7. Al-A'raf (الأعراف) — 206 ayahs</option><option value="8">8. Al-Anfal (الأنفال) — 75 ayahs</option><option value="9">9. At-Tawbah (التوبة) — 129 ayahs</option><option value="10">10. Yunus (يونس) — 109 ayahs</option><option value="11">11. Hud (هود) — 123 ayahs</option><option value="12">12. Yusuf (يوسف) — 111 ayahs</option><option value="13">13. Ar-Ra'd (الرعد) — 43 ayahs</option><option value="14">14. Ibrahim (ابراهيم) — 52 ayahs</option><option value="15">15. Al-Hijr (الحجر) — 99 ayahs</option><option value="16">16. An-Nahl (النحل) — 128 ayahs</option><option value="17">17. Al-Isra (الإسراء) — 111 ayahs</option><option value="18">18. Al-Kahf (الكهف) — 110 ayahs</option><option value="19">19. Maryam (مريم) — 98 ayahs</option><option value="20">20. Taha (طه) — 135 ayahs</option><option value="21">21. Al-Anbya (الأنبياء) — 112 ayahs</option><option value="22">22. Al-Hajj (الحج) — 78 ayahs</option><option value="23">23. Al-Mu'minun (المؤمنون) — 118 ayahs</option><option value="24">24. An-Nur (النور) — 64 ayahs</option><option value="25">25. Al-Furqan (الفرقان) — 77 ayahs</option><option value="26">26. Ash-Shu'ara (الشعراء) — 227 ayahs</option><option value="27">27. An-Naml (النمل) — 93 ayahs</option><option value="28">28. Al-Qasas (القصص) — 88 ayahs</option><option value="29">29. Al-'Ankabut (العنكبوت) — 69 ayahs</option><option value="30">30. Ar-Rum (الروم) — 60 ayahs</option><option value="31">31. Luqman (لقمان) — 34 ayahs</option><option value="32">32. As-Sajdah (السجدة) — 30 ayahs</option><option value="33">33. Al-Ahzab (الأحزاب) — 73 ayahs</option><option value="34">34. Saba (سبإ) — 54 ayahs</option><option value="35">35. Fatir (فاطر) — 45 ayahs</option><option value="36">36. Ya-Sin (يس) — 83 ayahs</option><option value="37">37. As-Saffat (الصافات) — 182 ayahs</option><option value="38">38. Sad (ص) — 88 ayahs</option><option value="39">39. Az-Zumar (الزمر) — 75 ayahs</option><option value="40">40. Ghafir (غافر) — 85 ayahs</option><option value="41">41. Fussilat (فصلت) — 54 ayahs</option><option value="42">42. Ash-Shuraa (الشورى) — 53 ayahs</option><option value="43">43. Az-Zukhruf (الزخرف) — 89 ayahs</option><option value="44">44. Ad-Dukhan (الدخان) — 59 ayahs</option><option value="45">45. Al-Jathiyah (الجاثية) — 37 ayahs</option><option value="46">46. Al-Ahqaf (الأحقاف) — 35 ayahs</option><option value="47">47. Muhammad (محمد) — 38 ayahs</option><option value="48">48. Al-Fath (الفتح) — 29 ayahs</option><option value="49">49. Al-Hujurat (الحجرات) — 18 ayahs</option><option value="50">50. Qaf (ق) — 45 ayahs</option><option value="51">51. Adh-Dhariyat (الذاريات) — 60 ayahs</option><option value="52">52. At-Tur (الطور) — 49 ayahs</option><option value="53">53. An-Najm (النجم) — 62 ayahs</option><option value="54">54. Al-Qamar (القمر) — 55 ayahs</option><option value="55">55. Ar-Rahman (الرحمن) — 78 ayahs</option><option value="56">56. Al-Waqi'ah (الواقعة) — 96 ayahs</option><option value="57">57. Al-Hadid (الحديد) — 29 ayahs</option><option value="58">58. Al-Mujadila (المجادلة) — 22 ayahs</option><option value="59">59. Al-Hashr (الحشر) — 24 ayahs</option><option value="60">60. Al-Mumtahanah (الممتحنة) — 13 ayahs</option><option value="61">61. As-Saf (الصف) — 14 ayahs</option><option value="62">62. Al-Jumu'ah (الجمعة) — 11 ayahs</option><option value="63">63. Al-Munafiqun (المنافقون) — 11 ayahs</option><option value="64">64. At-Taghabun (التغابن) — 18 ayahs</option><option value="65">65. At-Talaq (الطلاق) — 12 ayahs</option><option value="66">66. At-Tahrim (التحريم) — 12 ayahs</option><option value="67">67. Al-Mulk (الملك) — 30 ayahs</option><option value="68">68. Al-Qalam (القلم) — 52 ayahs</option><option value="69">69. Al-Haqqah (الحاقة) — 52 ayahs</option><option value="70">70. Al-Ma'arij (المعارج) — 44 ayahs</option><option value="71">71. Nuh (نوح) — 28 ayahs</option><option value="72">72. Al-Jinn (الجن) — 28 ayahs</option><option value="73">73. Al-Muzzammil (المزمل) — 20 ayahs</option><option value="74">74. Al-Muddaththir (المدثر) — 56 ayahs</option><option value="75">75. Al-Qiyamah (القيامة) — 40 ayahs</option><option value="76">76. Al-Insan (الانسان) — 31 ayahs</option><option value="77">77. Al-Mursalat (المرسلات) — 50 ayahs</option><option value="78">78. An-Naba (النبإ) — 40 ayahs</option><option value="79">79. An-Nazi'at (النازعات) — 46 ayahs</option><option value="80">80. 'Abasa (عبس) — 42 ayahs</option><option value="81">81. At-Takwir (التكوير) — 29 ayahs</option><option value="82">82. Al-Infitar (الإنفطار) — 19 ayahs</option><option value="83">83. Al-Mutaffifin (المطففين) — 36 ayahs</option><option value="84">84. Al-Inshiqaq (الإنشقاق) — 25 ayahs</option><option value="85">85. Al-Buruj (البروج) — 22 ayahs</option><option value="86">86. At-Tariq (الطارق) — 17 ayahs</option><option value="87">87. Al-A'la (الأعلى) — 19 ayahs</option><option value="88">88. Al-Ghashiyah (الغاشية) — 26 ayahs</option><option value="89">89. Al-Fajr (الفجر) — 30 ayahs</option><option value="90">90. Al-Balad (البلد) — 20 ayahs</option><option value="91">91. Ash-Shams (الشمس) — 15 ayahs</option><option value="92">92. Al-Layl (الليل) — 21 ayahs</option><option value="93">93. Ad-Duhaa (الضحى) — 11 ayahs</option><option value="94">94. Ash-Sharh (الشرح) — 8 ayahs</option><option value="95">95. At-Tin (التين) — 8 ayahs</option><option value="96">96. Al-'Alaq (العلق) — 19 ayahs</option><option value="97">97. Al-Qadr (القدر) — 5 ayahs</option><option value="98">98. Al-Bayyinah (البينة) — 8 ayahs</option><option value="99">99. Az-Zalzalah (الزلزلة) — 8 ayahs</option><option value="100">100. Al-'Adiyat (العاديات) — 11 ayahs</option><option value="101">101. Al-Qari'ah (القارعة) — 11 ayahs</option><option value="102">102. At-Takathur (التكاثر) — 8 ayahs</option><option value="103">103. Al-'Asr (العصر) — 3 ayahs</option><option value="104">104. Al-Humazah (الهمزة) — 9 ayahs</option><option value="105">105. Al-Fil (الفيل) — 5 ayahs</option><option value="106">106. Quraysh (قريش) — 4 ayahs</option><option value="107">107. Al-Ma'un (الماعون) — 7 ayahs</option><option value="108">108. Al-Kawthar (الكوثر) — 3 ayahs</option><option value="109">109. Al-Kafirun (الكافرون) — 6 ayahs</option><option value="110">110. An-Nasr (النصر) — 3 ayahs</option><option value="111">111. Al-Masad (المسد) — 5 ayahs</option><option value="112">112. Al-Ikhlas (الإخلاص) — 4 ayahs</option><option value="113">113. Al-Falaq (الفلق) — 5 ayahs</option><option value="114">114. An-Nas (الناس) — 6 ayahs</option></select>
                     </div>
                     <div style="flex: 1; min-width: 120px;">
                         <label style="display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; font-weight: 700;">Verse (Ayah) Number:</label>
-                        <input type="number" id="verseNumberInputTab" min="1" placeholder="e.g. 255" style="width: 100%; padding: 10px; background: var(--bg); color: var(--text); border: 1.5px solid var(--border); border-radius: 8px; font-size: 14px;">
+                        <input type="number" id="verseNumberInputTab" min="1" placeholder="Ayah (1-7)" style="width: 100%; padding: 10px; background: var(--bg); color: var(--text); border: 1.5px solid var(--border); border-radius: 8px; font-size: 14px;" max="7">
                     </div>
                     <button id="jumpVerseTabBtn" style="padding: 10px 20px; background: #3B82F6; color: #fff; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">Find Verse</button>
                 </div>
@@ -2362,11 +2533,11 @@
             <div id="surahGrid" style="display:none;"></div>
         </section>
 
-        <section class="panel hidden" id="step2">
+        <section class="panel" id="step2">
             <div class="stats" id="stats">
                 <div class="stat">
                     <div class="stat-label">Correct</div>
-                    <div class="stat-val green" id="statCorrect">0</div>
+                    <div class="stat-val green" id="statCorrect">736</div>
                 </div>
                 <div class="stat">
                     <div class="stat-label">Mistakes</div>
@@ -2383,17 +2554,20 @@
                     <span class="mic-dot"></span>
                     <span id="micLabel">Start reciting</span>
                 </button>
-                <button class="toggle-script-btn" id="toggleScriptBtn" title="Toggle the visible mushaf text">Hide
-                    Script</button>
-                <div class="mode-toggle-group" id="sensitivityToggle" title="Set recitation match difficulty">
-                    <button class="mode-btn" data-mode="easy">Easy</button>
-                    <button class="mode-btn active" data-mode="balanced">Balanced</button>
-                    <button class="mode-btn" data-mode="strict">Strict</button>
+                <button class="toggle-script-btn" id="toggleScriptBtn" title="Hide the script for memory practice">Hide Script</button>
+                <div class="mode-toggle-group" id="pageLayoutToggle" role="group" aria-label="Page layout">
+                    <button type="button" class="mode-btn active" data-layout="single" aria-pressed="true">Single</button>
+                    <button type="button" class="mode-btn" data-layout="double" aria-pressed="false" title="Two pages on wide screens; one page on smaller screens">Double</button>
                 </div>
-                <span class="status" id="status">Pick a surah from the above list and track your recitation</span>
+                <div class="mode-toggle-group" id="sensitivityToggle" title="Choose recitation mode">
+                    <button class="mode-btn active" data-mode="easy" aria-pressed="true" title="Skipped words are errors; unrelated speech pauses at the current word">Easy</button>
+                    <button class="mode-btn" data-mode="strict" aria-pressed="false" title="Skipped words are red errors; close spelling differences are yellow/unclear; unrelated speech pauses tracking">Strict</button>
+                </div>
+                <button type="button" class="mode-info-btn" id="modeInfoBtn" aria-label="How Easy and Strict work" aria-haspopup="dialog" aria-controls="modeHelpDialog" title="How Easy and Strict work">i</button>
+                <span class="status warn" id="status"></span>
             </div>
 
-            <div class="playback-row" id="playbackRow">
+            <div class="playback-row hidden" id="playbackRow">
                 <button class="play-btn" id="playBtn">▶</button>
                 <div class="progress-wrap">
                     <div class="progress-fill" id="progressFill"></div>
@@ -2404,25 +2578,29 @@
 
             <div class="page-controls">
                 <button id="prevPageBtn">← Previous page</button>
-                <span id="pageInfo">Page 1 of 1</span>
+                <span id="pageInfo">Page 322 of 604 · Al-Anbya</span>
                 <button id="nextPageBtn">Next page →</button>
             </div>
             <div id="page" class="page mushaf-page-container">
                 <div class="mushaf-top-header">
-                    <span class="mushaf-header-juz" id="mushafHeaderJuz">الجزء ١</span>
-                    <span class="mushaf-header-page" id="mushafHeaderPage">صفحة 1</span>
-                    <span class="mushaf-header-surah" id="mushafHeaderSurah">سُورَةُ الفَاتِحَةِ</span>
+                    <span class="mushaf-header-juz" id="mushafHeaderJuz">الجزء السابع عشر</span>
+                    <span class="mushaf-header-page" id="mushafHeaderPage">٣٢٢</span>
+                    <span class="mushaf-header-surah" id="mushafHeaderSurah">سُورَةُ الأنبياء</span>
                 </div>
                 <div class="mushaf-frame-border">
                     <div class="mushaf-corner corner-tr"></div>
                     <div class="mushaf-corner corner-tl"></div>
                     <div class="mushaf-corner corner-br"></div>
                     <div class="mushaf-corner corner-bl"></div>
-                    <div id="page-inner"></div>
+                    <div id="page-inner" class=""><div class="mushaf-surah-header">
+                            <span class="surah-meta-badge">مَدَنِيَّةٌ</span>
+                            <span class="surah-title">سُورَةُ الأنبياء</span>
+                            <span class="surah-meta-badge">آيَاتُهَا ١١٢</span>
+                        </div><div class="mushaf-line bismillah-line"><span class="word bismillah-word now" data-status="">بِسْمِ</span> <span class="word bismillah-word" data-status="">ٱللَّهِ</span> <span class="word bismillah-word" data-status="">ٱلرَّحْمَـٰنِ</span> <span class="word bismillah-word" data-status="">ٱلرَّحِيمِ</span></div><div class="mushaf-line"> <span class="word tajweed-tafkheem tajweed-qalqala" tabindex="0" data-status="">ٱقْتَرَبَ<span class="phoneme-tooltip"><div class="ipa">/ʔiqQtarˤaˤba/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ٱ</span> → HAMZA_WASL_KASRA<br><span style="color:var(--accent);font-weight:600">ق</span> → QALQALA_SUGHRA<br><span style="color:var(--accent);font-weight:600">ق</span> → TAFKHEEM<br><span style="color:var(--accent);font-weight:600">ر</span> → TAFKHEEM</div></span></span> <span class="word tajweed-madd" tabindex="0" data-status="">لِلنَّاسِ<span class="phoneme-tooltip"><div class="ipa">/liña:si/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ل</span> → LAM_SHAMSIYAH<br><span style="color:var(--accent);font-weight:600">ن</span> → NOON_GHUNNAH<br><span style="color:var(--accent);font-weight:600">ن</span> → LAM_SHAMSIYAH<br><span style="color:var(--accent);font-weight:600">ا</span> → MADD_TABII</div></span></span> <span class="word tajweed-madd" tabindex="0" data-status="">حِسَابُهُمْ<span class="phoneme-tooltip"><div class="ipa">/ħisa:buhum/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ا</span> → MADD_TABII</div></span></span> <span class="word" tabindex="0" data-status="">وَهُمْ<span class="phoneme-tooltip"><div class="ipa">/wahum/</div><div class="rules"><span style="color:var(--text-dim)">no Tajweed annotations</span></div></span></span> <span class="word tajweed-madd" tabindex="0" data-status="">فِى<span class="phoneme-tooltip"><div class="ipa">/fi:/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ى</span> → MADD_TABII</div></span></span> <span class="word tajweed-tafkheem" tabindex="0" data-status="">غَفْلَةٍۢ<span class="phoneme-tooltip"><div class="ipa">/ɣaˤflati/</div><div class="rules"><span style="color:var(--accent);font-weight:600">غ</span> → TAFKHEEM<br><span style="color:var(--accent);font-weight:600">ة</span> → IDGHAM_GHUNNAH_TANWEEN</div></span></span> <span class="word tajweed-tafkheem tajweed-madd" tabindex="0" data-status="">مُّعْرِضُونَ<span class="phoneme-tooltip"><div class="ipa">/m̃uʕridˤu:n/</div><div class="rules"><span style="color:var(--accent);font-weight:600">م</span> → IDGHAM_GHUNNAH_TANWEEN<br><span style="color:var(--accent);font-weight:600">ض</span> → TAFKHEEM<br><span style="color:var(--accent);font-weight:600">و</span> → MADD_ARID_LISSUKUN</div></span></span> <span class="ayah-marker" data-ref-idx="10">١</span></div><div class="mushaf-line"> <span class="word tajweed-madd" tabindex="0" data-status="">مَا<span class="phoneme-tooltip"><div class="ipa">/ma:/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ا</span> → MADD_TABII</div></span></span> <span class="word tajweed-madd" tabindex="0" data-status="">يَأْتِيهِم<span class="phoneme-tooltip"><div class="ipa">/jaʔti:him̃/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ي</span> → MADD_TABII<br><span style="color:var(--accent);font-weight:600">م</span> → IDGHAM_SHAFAWI</div></span></span> <span class="word" tabindex="0" data-status="">مِّن<span class="phoneme-tooltip"><div class="ipa">/iŋ/</div><div class="rules"><span style="color:var(--accent);font-weight:600">م</span> → IDGHAM_SHAFAWI<br><span style="color:var(--accent);font-weight:600">ن</span> → IKHFAA_NOON</div></span></span> <span class="word" tabindex="0" data-status="">ذِكْرٍۢ<span class="phoneme-tooltip"><div class="ipa">/ðikri/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ذ</span> → IKHFAA_NOON<br><span style="color:var(--accent);font-weight:600">ر</span> → IDGHAM_GHUNNAH_TANWEEN</div></span></span> <span class="word" tabindex="0" data-status="">مِّن<span class="phoneme-tooltip"><div class="ipa">/m̃i/</div><div class="rules"><span style="color:var(--accent);font-weight:600">م</span> → IDGHAM_GHUNNAH_TANWEEN<br><span style="color:var(--accent);font-weight:600">ن</span> → IDGHAM_BILA_GHUNNAH_NOON</div></span></span> <span class="word tajweed-tafkheem" tabindex="0" data-status="">رَّبِّهِم<span class="phoneme-tooltip"><div class="ipa">/rˤrˤaˤbbihim̃/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ر</span> → TAFKHEEM<br><span style="color:var(--accent);font-weight:600">ر</span> → IDGHAM_BILA_GHUNNAH_NOON<br><span style="color:var(--accent);font-weight:600">م</span> → IDGHAM_SHAFAWI</div></span></span> <span class="word" tabindex="0" data-status="">مُّحْدَثٍ<span class="phoneme-tooltip"><div class="ipa">/uħdaθin/</div><div class="rules"><span style="color:var(--accent);font-weight:600">م</span> → IDGHAM_SHAFAWI</div></span></span> <span class="word" tabindex="0" data-status="">إِلَّا<span class="phoneme-tooltip"><div class="ipa">/ʔilla/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ا</span> → SILENT_ILTIQAA_SAKINAYN</div></span></span> <span class="word tajweed-madd" tabindex="0" data-status="">ٱسْتَمَعُوهُ<span class="phoneme-tooltip"><div class="ipa">/stamaʕu:hu/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ٱ</span> → HAMZA_WASL_SILENT<br><span style="color:var(--accent);font-weight:600">و</span> → MADD_TABII</div></span></span> <span class="word" tabindex="0" data-status="">وَهُمْ<span class="phoneme-tooltip"><div class="ipa">/wahum/</div><div class="rules"><span style="color:var(--text-dim)">no Tajweed annotations</span></div></span></span></div><div class="mushaf-line"> <span class="word tajweed-madd" tabindex="0" data-status="">يَلْعَبُونَ<span class="phoneme-tooltip"><div class="ipa">/jalʕabu:n/</div><div class="rules"><span style="color:var(--accent);font-weight:600">و</span> → MADD_ARID_LISSUKUN</div></span></span> <span class="ayah-marker" data-ref-idx="21">٢</span> <span class="word tajweed-madd" tabindex="0" data-status="">لَاهِيَةًۭ<span class="phoneme-tooltip"><div class="ipa">/la:hijataŋ/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ا</span> → MADD_TABII<br><span style="color:var(--accent);font-weight:600">ة</span> → IKHFAA_TANWEEN</div></span></span> <span class="word tajweed-tafkheem tajweed-madd" tabindex="0" data-status="">قُلُوبُهُمْ ۗ<span class="phoneme-tooltip"><div class="ipa">/qulu:buhum/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ق</span> → TAFKHEEM<br><span style="color:var(--accent);font-weight:600">ق</span> → IKHFAA_TANWEEN<br><span style="color:var(--accent);font-weight:600">و</span> → MADD_TABII</div></span></span> <span class="word tajweed-tafkheem" tabindex="0" data-status="">وَأَسَرُّوا۟<span class="phoneme-tooltip"><div class="ipa">/waʔasarˤrˤu/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ر</span> → TAFKHEEM<br><span style="color:var(--accent);font-weight:600">و</span> → SILENT_ILTIQAA_SAKINAYN<br><span style="color:var(--accent);font-weight:600">ا</span> → VOWEL_SILENT</div></span></span> <span class="word tajweed-qalqala" tabindex="0" data-status="">ٱلنَّجْوَى<span class="phoneme-tooltip"><div class="ipa">/ñaʒQwa/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ٱ</span> → HAMZA_WASL_SILENT<br><span style="color:var(--accent);font-weight:600">ل</span> → LAM_SHAMSIYAH<br><span style="color:var(--accent);font-weight:600">ن</span> → NOON_GHUNNAH<br><span style="color:var(--accent);font-weight:600">ن</span> → LAM_SHAMSIYAH<br><span style="color:var(--accent);font-weight:600">ج</span> → QALQALA_SUGHRA<br><span style="color:var(--accent);font-weight:600">ى</span> → SILENT_ILTIQAA_SAKINAYN</div></span></span> <span class="word tajweed-madd" tabindex="0" data-status="">ٱلَّذِينَ<span class="phoneme-tooltip"><div class="ipa">/llaði:na/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ٱ</span> → HAMZA_WASL_SILENT<br><span style="color:var(--accent);font-weight:600">ي</span> → MADD_TABII</div></span></span> <span class="word tajweed-tafkheem tajweed-madd" tabindex="0" data-status="">ظَلَمُوا۟<span class="phoneme-tooltip"><div class="ipa">/ðˤaˤlamu:/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ظ</span> → TAFKHEEM<br><span style="color:var(--accent);font-weight:600">و</span> → MADD_TABII<br><span style="color:var(--accent);font-weight:600">ا</span> → VOWEL_SILENT</div></span></span></div><div class="mushaf-line"> <span class="word" tabindex="0" data-status="">هَلْ<span class="phoneme-tooltip"><div class="ipa">/hal/</div><div class="rules"><span style="color:var(--text-dim)">no Tajweed annotations</span></div></span></span> <span class="word tajweed-madd" tabindex="0" data-status="">هَـٰذَآ<span class="phoneme-tooltip"><div class="ipa">/ha:ða:/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ٰ</span> → MADD_TABII<br><span style="color:var(--accent);font-weight:600">ا</span> → MADD_JAIZ_MUNFASIL</div></span></span> <span class="word tajweed-madd" tabindex="0" data-status="">إِلَّا<span class="phoneme-tooltip"><div class="ipa">/ʔilla:/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ا</span> → MADD_TABII</div></span></span> <span class="word tajweed-tafkheem" tabindex="0" data-status="">بَشَرٌۭ<span class="phoneme-tooltip"><div class="ipa">/baʃarˤu/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ر</span> → TAFKHEEM<br><span style="color:var(--accent);font-weight:600">ر</span> → IDGHAM_GHUNNAH_TANWEEN</div></span></span> <span class="word" tabindex="0" data-status="">مِّثْلُكُمْ ۖ<span class="phoneme-tooltip"><div class="ipa">/m̃iθlukum/</div><div class="rules"><span style="color:var(--accent);font-weight:600">م</span> → IDGHAM_GHUNNAH_TANWEEN</div></span></span> <span class="word tajweed-madd" tabindex="0" data-status="">أَفَتَأْتُونَ<span class="phoneme-tooltip"><div class="ipa">/ʔafataʔtu:na/</div><div class="rules"><span style="color:var(--accent);font-weight:600">و</span> → MADD_TABII</div></span></span> <span class="word tajweed-tafkheem" tabindex="0" data-status="">ٱلسِّحْرَ<span class="phoneme-tooltip"><div class="ipa">/ssiħrˤaˤ/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ٱ</span> → HAMZA_WASL_SILENT<br><span style="color:var(--accent);font-weight:600">ل</span> → LAM_SHAMSIYAH<br><span style="color:var(--accent);font-weight:600">س</span> → LAM_SHAMSIYAH<br><span style="color:var(--accent);font-weight:600">ر</span> → TAFKHEEM</div></span></span> <span class="word" tabindex="0" data-status="">وَأَنتُمْ<span class="phoneme-tooltip"><div class="ipa">/waʔaŋtum/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ن</span> → IKHFAA_NOON<br><span style="color:var(--accent);font-weight:600">ت</span> → IKHFAA_NOON</div></span></span></div><div class="mushaf-line"> <span class="word tajweed-tafkheem tajweed-qalqala tajweed-madd" tabindex="0" data-status="">تُبْصِرُونَ<span class="phoneme-tooltip"><div class="ipa">/tubQsˤirˤu:n/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ب</span> → QALQALA_SUGHRA<br><span style="color:var(--accent);font-weight:600">ص</span> → TAFKHEEM<br><span style="color:var(--accent);font-weight:600">ر</span> → TAFKHEEM<br><span style="color:var(--accent);font-weight:600">و</span> → MADD_ARID_LISSUKUN</div></span></span> <span class="ayah-marker" data-ref-idx="36">٣</span> <span class="word tajweed-tafkheem tajweed-madd" tabindex="0" data-status="">قَالَ<span class="phoneme-tooltip"><div class="ipa">/qaˤ:la/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ق</span> → TAFKHEEM<br><span style="color:var(--accent);font-weight:600">ا</span> → MADD_TABII<br><span style="color:var(--accent);font-weight:600">ا</span> → TAFKHEEM</div></span></span> <span class="word tajweed-tafkheem tajweed-madd" tabindex="0" data-status="">رَبِّى<span class="phoneme-tooltip"><div class="ipa">/rˤaˤbbi:/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ر</span> → TAFKHEEM<br><span style="color:var(--accent);font-weight:600">ى</span> → MADD_TABII</div></span></span> <span class="word" tabindex="0" data-status="">يَعْلَمُ<span class="phoneme-tooltip"><div class="ipa">/jaʕlamu/</div><div class="rules"><span style="color:var(--text-dim)">no Tajweed annotations</span></div></span></span> <span class="word tajweed-tafkheem" tabindex="0" data-status="">ٱلْقَوْلَ<span class="phoneme-tooltip"><div class="ipa">/lqaˤwla/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ٱ</span> → HAMZA_WASL_SILENT<br><span style="color:var(--accent);font-weight:600">ق</span> → TAFKHEEM</div></span></span> <span class="word" tabindex="0" data-status="">فِى<span class="phoneme-tooltip"><div class="ipa">/fi/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ى</span> → SILENT_ILTIQAA_SAKINAYN</div></span></span> <span class="word tajweed-madd" tabindex="0" data-status="">ٱلسَّمَآءِ<span class="phoneme-tooltip"><div class="ipa">/ssama:ʔi/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ٱ</span> → HAMZA_WASL_SILENT<br><span style="color:var(--accent);font-weight:600">ل</span> → LAM_SHAMSIYAH<br><span style="color:var(--accent);font-weight:600">س</span> → LAM_SHAMSIYAH<br><span style="color:var(--accent);font-weight:600">ا</span> → MADD_WAJIB_MUTTASIL</div></span></span> <span class="word tajweed-tafkheem" tabindex="0" data-status="">وَٱلْأَرْضِ ۖ<span class="phoneme-tooltip"><div class="ipa">/walʔarˤdˤi/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ٱ</span> → HAMZA_WASL_SILENT<br><span style="color:var(--accent);font-weight:600">ر</span> → TAFKHEEM<br><span style="color:var(--accent);font-weight:600">ض</span> → TAFKHEEM</div></span></span></div><div class="mushaf-line"> <span class="word" tabindex="0" data-status="">وَهُوَ<span class="phoneme-tooltip"><div class="ipa">/wahuwa/</div><div class="rules"><span style="color:var(--text-dim)">no Tajweed annotations</span></div></span></span> <span class="word tajweed-madd" tabindex="0" data-status="">ٱلسَّمِيعُ<span class="phoneme-tooltip"><div class="ipa">/ssami:ʕu/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ٱ</span> → HAMZA_WASL_SILENT<br><span style="color:var(--accent);font-weight:600">ل</span> → LAM_SHAMSIYAH<br><span style="color:var(--accent);font-weight:600">س</span> → LAM_SHAMSIYAH<br><span style="color:var(--accent);font-weight:600">ي</span> → MADD_TABII</div></span></span> <span class="word tajweed-madd" tabindex="0" data-status="">ٱلْعَلِيمُ<span class="phoneme-tooltip"><div class="ipa">/lʕali:m/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ٱ</span> → HAMZA_WASL_SILENT<br><span style="color:var(--accent);font-weight:600">ي</span> → MADD_ARID_LISSUKUN</div></span></span> <span class="ayah-marker" data-ref-idx="46">٤</span> <span class="word" tabindex="0" data-status="">بَلْ<span class="phoneme-tooltip"><div class="ipa">/bal/</div><div class="rules"><span style="color:var(--text-dim)">no Tajweed annotations</span></div></span></span> <span class="word tajweed-tafkheem tajweed-madd" tabindex="0" data-status="">قَالُوٓا۟<span class="phoneme-tooltip"><div class="ipa">/qaˤ:lu:/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ق</span> → TAFKHEEM<br><span style="color:var(--accent);font-weight:600">ا</span> → MADD_TABII<br><span style="color:var(--accent);font-weight:600">ا</span> → TAFKHEEM<br><span style="color:var(--accent);font-weight:600">و</span> → MADD_JAIZ_MUNFASIL<br><span style="color:var(--accent);font-weight:600">ا</span> → VOWEL_SILENT</div></span></span> <span class="word tajweed-tafkheem tajweed-madd" tabindex="0" data-status="">أَضْغَـٰثُ<span class="phoneme-tooltip"><div class="ipa">/ʔadˤɣaˤ:θu/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ض</span> → TAFKHEEM<br><span style="color:var(--accent);font-weight:600">غ</span> → TAFKHEEM<br><span style="color:var(--accent);font-weight:600">ٰ</span> → MADD_TABII<br><span style="color:var(--accent);font-weight:600">ٰ</span> → TAFKHEEM</div></span></span> <span class="word tajweed-madd" tabindex="0" data-status="">أَحْلَـٰمٍۭ<span class="phoneme-tooltip"><div class="ipa">/ʔaħla:miŋ/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ٰ</span> → MADD_TABII<br><span style="color:var(--accent);font-weight:600">م</span> → IQLAB_TANWEEN</div></span></span> <span class="word" tabindex="0" data-status="">بَلِ<span class="phoneme-tooltip"><div class="ipa">/bali/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ب</span> → IQLAB_TANWEEN</div></span></span></div><div class="mushaf-line"> <span class="word tajweed-tafkheem tajweed-madd" tabindex="0" data-status="">ٱفْتَرَىٰهُ<span class="phoneme-tooltip"><div class="ipa">/ftarˤaˤ:hu/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ٱ</span> → HAMZA_WASL_SILENT<br><span style="color:var(--accent);font-weight:600">ر</span> → TAFKHEEM<br><span style="color:var(--accent);font-weight:600">ى</span> → VOWEL_SILENT<br><span style="color:var(--accent);font-weight:600">ٰ</span> → MADD_TABII<br><span style="color:var(--accent);font-weight:600">ٰ</span> → TAFKHEEM</div></span></span> <span class="word" tabindex="0" data-status="">بَلْ<span class="phoneme-tooltip"><div class="ipa">/bal/</div><div class="rules"><span style="color:var(--text-dim)">no Tajweed annotations</span></div></span></span> <span class="word" tabindex="0" data-status="">هُوَ<span class="phoneme-tooltip"><div class="ipa">/huwa/</div><div class="rules"><span style="color:var(--text-dim)">no Tajweed annotations</span></div></span></span> <span class="word tajweed-tafkheem tajweed-madd" tabindex="0" data-status="">شَاعِرٌۭ<span class="phoneme-tooltip"><div class="ipa">/ʃa:ʕirˤuŋ/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ا</span> → MADD_TABII<br><span style="color:var(--accent);font-weight:600">ر</span> → TAFKHEEM<br><span style="color:var(--accent);font-weight:600">ر</span> → IKHFAA_TANWEEN</div></span></span> <span class="word tajweed-madd" tabindex="0" data-status="">فَلْيَأْتِنَا<span class="phoneme-tooltip"><div class="ipa">/faljaʔtina:/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ف</span> → IKHFAA_TANWEEN<br><span style="color:var(--accent);font-weight:600">ا</span> → MADD_TABII</div></span></span> <span class="word tajweed-madd" tabindex="0" data-status="">بِـَٔايَةٍۢ<span class="phoneme-tooltip"><div class="ipa">/biʔa:jatiŋ/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ا</span> → MADD_TABII<br><span style="color:var(--accent);font-weight:600">ة</span> → IKHFAA_TANWEEN</div></span></span> <span class="word tajweed-madd" tabindex="0" data-status="">كَمَآ<span class="phoneme-tooltip"><div class="ipa">/kama:/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ك</span> → IKHFAA_TANWEEN<br><span style="color:var(--accent);font-weight:600">ا</span> → MADD_JAIZ_MUNFASIL</div></span></span> <span class="word tajweed-tafkheem" tabindex="0" data-status="">أُرْسِلَ<span class="phoneme-tooltip"><div class="ipa">/ʔurˤsila/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ر</span> → TAFKHEEM</div></span></span> <span class="word tajweed-madd" tabindex="0" data-status="">ٱلْأَوَّلُونَ<span class="phoneme-tooltip"><div class="ipa">/lʔawwalu:n/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ٱ</span> → HAMZA_WASL_SILENT<br><span style="color:var(--accent);font-weight:600">و</span> → MADD_ARID_LISSUKUN</div></span></span></div><div class="mushaf-line"> <span class="ayah-marker">٥</span> <span class="word tajweed-madd" tabindex="0" data-status="">مَآ<span class="phoneme-tooltip"><div class="ipa">/ma:/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ا</span> → MADD_JAIZ_MUNFASIL</div></span></span> <span class="word tajweed-madd" tabindex="0" data-status="">ءَامَنَتْ<span class="phoneme-tooltip"><div class="ipa">/ʔa:manat/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ا</span> → MADD_TABII</div></span></span> <span class="word tajweed-tafkheem tajweed-qalqala" tabindex="0" data-status="">قَبْلَهُم<span class="phoneme-tooltip"><div class="ipa">/qaˤbQlahum̃/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ق</span> → TAFKHEEM<br><span style="color:var(--accent);font-weight:600">ب</span> → QALQALA_SUGHRA<br><span style="color:var(--accent);font-weight:600">م</span> → IDGHAM_SHAFAWI</div></span></span> <span class="word" tabindex="0" data-status="">مِّن<span class="phoneme-tooltip"><div class="ipa">/iŋ/</div><div class="rules"><span style="color:var(--accent);font-weight:600">م</span> → IDGHAM_SHAFAWI<br><span style="color:var(--accent);font-weight:600">ن</span> → IKHFAA_NOON</div></span></span> <span class="word tajweed-tafkheem" tabindex="0" data-status="">قَرْيَةٍ<span class="phoneme-tooltip"><div class="ipa">/qaˤrˤjatin/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ق</span> → TAFKHEEM<br><span style="color:var(--accent);font-weight:600">ق</span> → IKHFAA_NOON<br><span style="color:var(--accent);font-weight:600">ر</span> → TAFKHEEM</div></span></span> <span class="word tajweed-madd" tabindex="0" data-status="">أَهْلَكْنَـٰهَآ ۖ<span class="phoneme-tooltip"><div class="ipa">/ʔahlakna:ha:/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ٰ</span> → MADD_TABII<br><span style="color:var(--accent);font-weight:600">ا</span> → MADD_JAIZ_MUNFASIL</div></span></span> <span class="word" tabindex="0" data-status="">أَفَهُمْ<span class="phoneme-tooltip"><div class="ipa">/ʔafahum/</div><div class="rules"><span style="color:var(--text-dim)">no Tajweed annotations</span></div></span></span> <span class="word tajweed-madd" tabindex="0" data-status="">يُؤْمِنُونَ<span class="phoneme-tooltip"><div class="ipa">/juʔminu:n/</div><div class="rules"><span style="color:var(--accent);font-weight:600">و</span> → MADD_ARID_LISSUKUN</div></span></span></div><div class="mushaf-line"> <span class="ayah-marker">٦</span> <span class="word tajweed-madd" tabindex="0" data-status="">وَمَآ<span class="phoneme-tooltip"><div class="ipa">/wama:/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ا</span> → MADD_JAIZ_MUNFASIL</div></span></span> <span class="word tajweed-tafkheem tajweed-madd" tabindex="0" data-status="">أَرْسَلْنَا<span class="phoneme-tooltip"><div class="ipa">/ʔarˤsalna:/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ر</span> → TAFKHEEM<br><span style="color:var(--accent);font-weight:600">ا</span> → MADD_TABII</div></span></span> <span class="word tajweed-tafkheem tajweed-qalqala" tabindex="0" data-status="">قَبْلَكَ<span class="phoneme-tooltip"><div class="ipa">/qaˤbQlaka/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ق</span> → TAFKHEEM<br><span style="color:var(--accent);font-weight:600">ب</span> → QALQALA_SUGHRA</div></span></span> <span class="word tajweed-madd" tabindex="0" data-status="">إِلَّا<span class="phoneme-tooltip"><div class="ipa">/ʔilla:/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ا</span> → MADD_TABII</div></span></span> <span class="word tajweed-madd" tabindex="0" data-status="">رِجَالًۭا<span class="phoneme-tooltip"><div class="ipa">/riʒa:la/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ا</span> → MADD_TABII<br><span style="color:var(--accent);font-weight:600">ل</span> → IDGHAM_GHUNNAH_TANWEEN</div></span></span> <span class="word tajweed-madd" tabindex="0" data-status="">نُّوحِىٓ<span class="phoneme-tooltip"><div class="ipa">/ñu:ħi:/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ن</span> → IDGHAM_GHUNNAH_TANWEEN<br><span style="color:var(--accent);font-weight:600">و</span> → MADD_TABII<br><span style="color:var(--accent);font-weight:600">ى</span> → MADD_JAIZ_MUNFASIL</div></span></span> <span class="word" tabindex="0" data-status="">إِلَيْهِمْ ۖ<span class="phoneme-tooltip"><div class="ipa">/ʔilajhim/</div><div class="rules"><span style="color:var(--text-dim)">no Tajweed annotations</span></div></span></span> <span class="word tajweed-madd" tabindex="0" data-status="">فَسْـَٔلُوٓا۟<span class="phoneme-tooltip"><div class="ipa">/fasʔalu:/</div><div class="rules"><span style="color:var(--accent);font-weight:600">و</span> → MADD_JAIZ_MUNFASIL<br><span style="color:var(--accent);font-weight:600">ا</span> → VOWEL_SILENT</div></span></span> <span class="word" tabindex="0" data-status="">أَهْلَ<span class="phoneme-tooltip"><div class="ipa">/ʔahla/</div><div class="rules"><span style="color:var(--text-dim)">no Tajweed annotations</span></div></span></span></div><div class="mushaf-line"> <span class="word" tabindex="0" data-status="">ٱلذِّكْرِ<span class="phoneme-tooltip"><div class="ipa">/ððikri/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ٱ</span> → HAMZA_WASL_SILENT<br><span style="color:var(--accent);font-weight:600">ل</span> → LAM_SHAMSIYAH<br><span style="color:var(--accent);font-weight:600">ذ</span> → LAM_SHAMSIYAH</div></span></span> <span class="word" tabindex="0" data-status="">إِن<span class="phoneme-tooltip"><div class="ipa">/ʔiŋ/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ن</span> → IKHFAA_NOON</div></span></span> <span class="word" tabindex="0" data-status="">كُنتُمْ<span class="phoneme-tooltip"><div class="ipa">/kuŋtum/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ك</span> → IKHFAA_NOON<br><span style="color:var(--accent);font-weight:600">ن</span> → IKHFAA_NOON<br><span style="color:var(--accent);font-weight:600">ت</span> → IKHFAA_NOON</div></span></span> <span class="word tajweed-madd" tabindex="0" data-status="">لَا<span class="phoneme-tooltip"><div class="ipa">/la:/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ا</span> → MADD_TABII</div></span></span> <span class="word tajweed-madd" tabindex="0" data-status="">تَعْلَمُونَ<span class="phoneme-tooltip"><div class="ipa">/taʕlamu:n/</div><div class="rules"><span style="color:var(--accent);font-weight:600">و</span> → MADD_ARID_LISSUKUN</div></span></span> <span class="ayah-marker" data-ref-idx="82">٧</span> <span class="word tajweed-madd" tabindex="0" data-status="">وَمَا<span class="phoneme-tooltip"><div class="ipa">/wama:/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ا</span> → MADD_TABII</div></span></span> <span class="word tajweed-madd" tabindex="0" data-status="">جَعَلْنَـٰهُمْ<span class="phoneme-tooltip"><div class="ipa">/ʒaʕalna:hum/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ٰ</span> → MADD_TABII</div></span></span> <span class="word" tabindex="0" data-status="">جَسَدًۭا<span class="phoneme-tooltip"><div class="ipa">/ʒasada/</div><div class="rules"><span style="color:var(--accent);font-weight:600">د</span> → IDGHAM_BILA_GHUNNAH_TANWEEN</div></span></span></div><div class="mushaf-line"> <span class="word tajweed-madd" tabindex="0" data-status="">لَّا<span class="phoneme-tooltip"><div class="ipa">/lla:/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ل</span> → IDGHAM_BILA_GHUNNAH_TANWEEN<br><span style="color:var(--accent);font-weight:600">ا</span> → MADD_TABII</div></span></span> <span class="word tajweed-madd" tabindex="0" data-status="">يَأْكُلُونَ<span class="phoneme-tooltip"><div class="ipa">/jaʔkulu:na/</div><div class="rules"><span style="color:var(--accent);font-weight:600">و</span> → MADD_TABII</div></span></span> <span class="word tajweed-tafkheem tajweed-madd" tabindex="0" data-status="">ٱلطَّعَامَ<span class="phoneme-tooltip"><div class="ipa">/tˤtˤaˤʕa:ma/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ٱ</span> → HAMZA_WASL_SILENT<br><span style="color:var(--accent);font-weight:600">ل</span> → LAM_SHAMSIYAH<br><span style="color:var(--accent);font-weight:600">ط</span> → TAFKHEEM<br><span style="color:var(--accent);font-weight:600">ط</span> → LAM_SHAMSIYAH<br><span style="color:var(--accent);font-weight:600">ا</span> → MADD_TABII</div></span></span> <span class="word tajweed-madd" tabindex="0" data-status="">وَمَا<span class="phoneme-tooltip"><div class="ipa">/wama:/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ا</span> → MADD_TABII</div></span></span> <span class="word tajweed-madd" tabindex="0" data-status="">كَانُوا۟<span class="phoneme-tooltip"><div class="ipa">/ka:nu:/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ا</span> → MADD_TABII<br><span style="color:var(--accent);font-weight:600">و</span> → MADD_TABII<br><span style="color:var(--accent);font-weight:600">ا</span> → VOWEL_SILENT</div></span></span> <span class="word tajweed-tafkheem tajweed-madd" tabindex="0" data-status="">خَـٰلِدِينَ<span class="phoneme-tooltip"><div class="ipa">/xaˤ:lidi:n/</div><div class="rules"><span style="color:var(--accent);font-weight:600">خ</span> → TAFKHEEM<br><span style="color:var(--accent);font-weight:600">ٰ</span> → MADD_TABII<br><span style="color:var(--accent);font-weight:600">ٰ</span> → TAFKHEEM<br><span style="color:var(--accent);font-weight:600">ي</span> → MADD_ARID_LISSUKUN</div></span></span> <span class="ayah-marker" data-ref-idx="91">٨</span> <span class="word" tabindex="0" data-status="">ثُمَّ<span class="phoneme-tooltip"><div class="ipa">/θum̃a/</div><div class="rules"><span style="color:var(--accent);font-weight:600">م</span> → MEEM_GHUNNAH</div></span></span> <span class="word tajweed-tafkheem tajweed-qalqala tajweed-madd" tabindex="0" data-status="">صَدَقْنَـٰهُمُ<span class="phoneme-tooltip"><div class="ipa">/sˤaˤdaqQna:humu/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ص</span> → TAFKHEEM<br><span style="color:var(--accent);font-weight:600">ق</span> → QALQALA_SUGHRA<br><span style="color:var(--accent);font-weight:600">ق</span> → TAFKHEEM<br><span style="color:var(--accent);font-weight:600">ٰ</span> → MADD_TABII</div></span></span></div><div class="mushaf-line"> <span class="word" tabindex="0" data-status="">ٱلْوَعْدَ<span class="phoneme-tooltip"><div class="ipa">/lwaʕda/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ٱ</span> → HAMZA_WASL_SILENT</div></span></span> <span class="word tajweed-madd" tabindex="0" data-status="">فَأَنجَيْنَـٰهُمْ<span class="phoneme-tooltip"><div class="ipa">/faʔaŋʒajna:hum/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ن</span> → IKHFAA_NOON<br><span style="color:var(--accent);font-weight:600">ج</span> → IKHFAA_NOON<br><span style="color:var(--accent);font-weight:600">ٰ</span> → MADD_TABII</div></span></span> <span class="word" tabindex="0" data-status="">وَمَن<span class="phoneme-tooltip"><div class="ipa">/wama/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ن</span> → IDGHAM_GHUNNAH_NOON</div></span></span> <span class="word tajweed-madd" tabindex="0" data-status="">نَّشَآءُ<span class="phoneme-tooltip"><div class="ipa">/ñaʃa:ʔu/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ن</span> → IDGHAM_GHUNNAH_NOON<br><span style="color:var(--accent);font-weight:600">ا</span> → MADD_WAJIB_MUTTASIL</div></span></span> <span class="word" tabindex="0" data-status="">وَأَهْلَكْنَا<span class="phoneme-tooltip"><div class="ipa">/waʔahlakna/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ا</span> → SILENT_ILTIQAA_SAKINAYN</div></span></span> <span class="word tajweed-madd" tabindex="0" data-status="">ٱلْمُسْرِفِينَ<span class="phoneme-tooltip"><div class="ipa">/lmusrifi:n/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ٱ</span> → HAMZA_WASL_SILENT<br><span style="color:var(--accent);font-weight:600">ي</span> → MADD_ARID_LISSUKUN</div></span></span> <span class="ayah-marker" data-ref-idx="99">٩</span></div><div class="mushaf-line"> <span class="word tajweed-tafkheem tajweed-qalqala" tabindex="0" data-status="">لَقَدْ<span class="phoneme-tooltip"><div class="ipa">/laqaˤdQ/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ق</span> → TAFKHEEM<br><span style="color:var(--accent);font-weight:600">د</span> → QALQALA_SUGHRA</div></span></span> <span class="word tajweed-madd" tabindex="0" data-status="">أَنزَلْنَآ<span class="phoneme-tooltip"><div class="ipa">/ʔaŋzalna:/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ن</span> → IKHFAA_NOON<br><span style="color:var(--accent);font-weight:600">ز</span> → IKHFAA_NOON<br><span style="color:var(--accent);font-weight:600">ا</span> → MADD_JAIZ_MUNFASIL</div></span></span> <span class="word" tabindex="0" data-status="">إِلَيْكُمْ<span class="phoneme-tooltip"><div class="ipa">/ʔilajkum/</div><div class="rules"><span style="color:var(--text-dim)">no Tajweed annotations</span></div></span></span> <span class="word tajweed-madd" tabindex="0" data-status="">كِتَـٰبًۭا<span class="phoneme-tooltip"><div class="ipa">/kita:baŋ/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ٰ</span> → MADD_TABII<br><span style="color:var(--accent);font-weight:600">ب</span> → IKHFAA_TANWEEN</div></span></span> <span class="word tajweed-madd" tabindex="0" data-status="">فِيهِ<span class="phoneme-tooltip"><div class="ipa">/fi:hi/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ف</span> → IKHFAA_TANWEEN<br><span style="color:var(--accent);font-weight:600">ي</span> → MADD_TABII</div></span></span> <span class="word tajweed-tafkheem" tabindex="0" data-status="">ذِكْرُكُمْ ۖ<span class="phoneme-tooltip"><div class="ipa">/ðikrˤukum/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ر</span> → TAFKHEEM</div></span></span> <span class="word tajweed-madd" tabindex="0" data-status="">أَفَلَا<span class="phoneme-tooltip"><div class="ipa">/ʔafala:/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ا</span> → MADD_TABII</div></span></span> <span class="word tajweed-tafkheem tajweed-madd" tabindex="0" data-status="">تَعْقِلُونَ<span class="phoneme-tooltip"><div class="ipa">/taʕqilu:n/</div><div class="rules"><span style="color:var(--accent);font-weight:600">ق</span> → TAFKHEEM<br><span style="color:var(--accent);font-weight:600">و</span> → MADD_ARID_LISSUKUN</div></span></span> <span class="ayah-marker" data-ref-idx="107">١٠</span></div></div>
                 </div>
             </div>
 
-            <div class="transcript-box hidden" id="transcriptBox">
+            <div class="transcript-box hidden" id="transcriptBox" hidden>
                 <span class="label">Live transcript — what the app heard from you</span>
                 <div class="text" id="transcriptText"></div>
                 <div class="conf" id="transcriptConf"></div>
@@ -2439,8 +2617,58 @@
 
     </div>
 
-    <script src="quran-api.js"></script>
-    <script src="hybrid-loader.js"></script>
+    <dialog id="pageLayoutDialog" aria-labelledby="pageLayoutTitle" aria-describedby="pageLayoutDescription">
+        <h2 id="pageLayoutTitle">Two pages need more room</h2>
+        <p id="pageLayoutDescription">Maximize your browser window or zoom out to fit both pages comfortably.</p>
+        <p>For now, you will see one page. Double view will appear automatically when there is enough space.</p>
+        <form method="dialog"><button type="submit" autofocus>Got it</button></form>
+    </dialog>
+    <dialog class="mode-help" id="modeHelpDialog" aria-labelledby="modeHelpTitle" aria-describedby="modeHelpIntro">
+        <div class="mode-help-head">
+            <div class="mode-help-top">
+                <span class="mode-help-eyebrow">Your recitation companion</span>
+                <button type="button" class="mode-help-close" id="modeHelpClose" aria-label="Close help" autofocus>&times;</button>
+            </div>
+            <h2 id="modeHelpTitle">Find your recitation rhythm.</h2>
+            <p id="modeHelpIntro" class="mode-help-sub">Two ways to follow your recitation. Choose the mode that suits your practice.</p>
+        </div>
+        <div class="mode-help-body">
+            <div class="mode-help-grid">
+                <section class="mode-help-card">
+                    <h3>Easy <span class="mode-help-tag">DEFAULT</span></h3>
+                    <p class="mode-help-sub">Keep your focus on the flow.</p>
+                    <ul>
+                        <li><strong>Forgiving recognition.</strong> Exact words and small spelling or sound differences pass green.</li>
+                        <li><strong>Skipped words turn red.</strong> When the following words confirm your position, the tracker marks the missing words and continues.</li>
+                        <li><strong>Different recitation pauses tracking.</strong> Three confirmed unmatched words at the same position turn the current word red. Correct it to continue.</li>
+                    </ul>
+                </section>
+                <section class="mode-help-card">
+                    <h3>Strict</h3>
+                    <p class="mode-help-sub">Notice the words that need attention.</p>
+                    <ul>
+                        <li><strong>Exact matches pass green.</strong> Close words with one- or two-letter differences can pass yellow as unclear. Very different short words are not close matches.</li>
+                        <li><strong>Skipped words turn red.</strong> The tracker continues once the following words confirm where you are.</li>
+                        <li><strong>Different recitation pauses tracking.</strong> A confirmed mismatch with no matching nearby continuation turns the current word red. Correct it to continue.</li>
+                    </ul>
+                </section>
+            </div>
+            <div class="mode-help-legend" aria-label="Word colors">
+                <span><i class="mode-help-dot" style="background:#2ecc71"></i>Green · accepted</span>
+                <span><i class="mode-help-dot" style="background:#f1c40f"></i>Yellow · unclear</span>
+                <span><i class="mode-help-dot" style="background:#ef4444"></i>Red · error history</span>
+            </div>
+            <div class="mode-help-note">
+                <p><strong>How skipping works.</strong> Both modes can recover past up to two words. Skipping one needs two following exact matches; skipping two needs three. The limit is two skipped words per recognition result.</p>
+                <p><strong>Your corrections count.</strong> Correct the word and keep reciting. It stays red as a reminder of the mistake, and the error is counted only once.</p>
+                <p><strong>Switch anytime.</strong> Your mode applies to new recognition updates and stays selected across chapter and Quran-page changes. Reloading starts in Easy.</p>
+            </div>
+            <p class="mode-help-sub">Colors reflect what the app hears. Speech recognition can mishear you, so these marks are a guide for practice, not a full assessment of pronunciation or tajweed.</p>
+            <button type="button" class="mode-help-done" id="modeHelpDone">Got it — back to reciting</button>
+        </div>
+    </dialog>
+    <script src="./quran-api.js"></script>
+    <script src="./hybrid-loader.js"></script>
 
     <script>
         // =========================================================================
@@ -2566,9 +2794,7 @@
         // =========================================================================
         // CONSTANTS — matching thresholds, look-ahead windows.
         // =========================================================================
-        const NEAR_WINDOW = 8;     // normal lookahead
-        const FAR_WINDOW = 8;     // limited lookahead for resync (was 40 — too aggressive, jumped 4 lines on a single mispronunciation)
-        const RESYNC_THRESHOLD = 6;     // misses in a row before we trust a jump (was 4 — too eager)
+        let recitationMode = 'easy';
         let LEVENSHTEIN_RATIO = 0.30;  // ≤30% edit distance is a match (dynamically updated by Lenient/Strict slider)
         // Phoneme-similarity threshold (used as fallback when text is borderline)
         const PHONEME_LEVENSHTEIN_RATIO = 0.30;
@@ -2584,21 +2810,14 @@
         let _prevPastEnd = 0;  // index of first non-.past word
         let _maxPointerReached = 0;
         let _isAutoFlipping = false;  // guard to prevent multiple auto-flips per Chrome result
-        let _lastAutoFlipTime = 0;  // timestamp of last auto-flip, used to prevent rapid double-flips  // furthest pointer reached this surah
-        let _lastProcessedWordCount = 0;  // unused, kept for legacy
-        let _pendingReProcess = false;  // rAF throttle for the heavy re-processing
-        let _pendingFullText = "";     // latest fullText waiting to be re-processed
-        let _pendingWords = [];     // latest words array waiting to be re-processed
-        let _pageFlipGuard = false;  // when true, _runReProcess skips one tick to prevent
-        // OLD words (from the previous page) from being
-        // matched against the NEW page after auto-flip.
-        // Chrome's SpeechRecognition keeps event.results
-        // around even after we clear our transcript vars,
-        // so the next onresult re-populates finalizedText
-        // with the OLD words. By skipping one matcher tick
-        // AND clearing finalizedText in that skip, the next
-        // onresult builds a fresh transcript starting from
-        // the user's NEW words only.
+        // Speech evidence and visual progress use separate forward-only cursors.
+        let _flow = null;
+        let _flowOffset = 0;
+        let _flowTimer = null;
+        let _flowGeneration = 0;
+        let _flowLoading = false;
+        let _speechSnapshot = [];
+        let _speechSnapshotTime = 0;
         let stats = { correct: 0, mistake: 0, unclear: 0 };
         let pageStartStats = { correct: 0, mistake: 0, unclear: 0 };
         let debugLog = [];     // every mistake/unclear pushed here for the debug panel
@@ -2803,191 +3022,318 @@
         }
 
         // =========================================================================
-        // MATCH SEARCH — find the first fuzzy match in [from, to).
+        // SEQUENTIAL TRACKER
+        // Each recognition result has a fixed reference anchor. Revisions can add
+        // evidence, but cannot rewind progress or replay into a later verse.
+        // Small recognition omissions can recover only with consecutive exact context.
         // =========================================================================
-        function findMatch(heardNorm, from, to) {
-            const end = Math.min(refWords.length, to);
-            for (let i = from; i < end; i++) {
-                const m = isFuzzyMatch(heardNorm, refWords[i].norm, refWords[i].phoneme);
-                if (m.matched) return { idx: i, match: m };
-            }
-            return { idx: -1, match: { matched: false, kind: 'none' } };
+        function easyCloseWordMatch(heard, expected) {
+            const shortest = Math.min(heard.length, expected.length);
+            if (shortest < 2) return heard === expected;
+            // Easy includes two-letter words (e.g. كل heard for قل): one changed
+            // letter in shorter words, up to two when both words have five letters.
+            return levenshtein(heard, expected) <= (shortest >= 5 ? 2 : 1);
         }
 
-        // =========================================================================
-        // APPLY MATCH — mark all in-between as correct, advance pointer smoothly.
-        // =========================================================================
-        function applyMatch(matchAt, matchInfo, heardWord) {
-            // Mark all recited words up to matchAt as CORRECT (GREEN TILE)
-            for (let i = pointer; i <= matchAt; i++) {
-                const w = refWords[i];
-                if (!w) continue;
-                if (w.el) w.el.dataset.status = 'correct';
-                if (w.spaceEl) w.spaceEl.dataset.status = 'correct';
-                stats.correct++;
+        function pointerWordMatches(heard, expected, allowApproximate) {
+            if (!heard || !expected) return false;
+            if (heard === expected) return true;
+            if (!allowApproximate) return false;
+            if (recitationMode === 'strict') {
+                // Close spelling differences are unclear, not correct. Keep
+                // completely different short words outside this tolerance.
+                const length = Math.max(heard.length, expected.length);
+                const distance = levenshtein(heard, expected);
+                return Math.min(heard.length, expected.length) >= 2 &&
+                    distance <= 2 && distance / length <= 0.5;
             }
-            pointer = matchAt + 1;
+            if (recitationMode === 'easy' && easyCloseWordMatch(heard, expected)) return true;
+            // Keep tiny particles distinct; use the original forgiving matcher
+            // for longer words, including Arabic spelling and phonetic variants.
+            if (Math.min(heard.length, expected.length) < 3) return false;
+            return isFuzzyMatch(heard, expected, phonemizeArabic(expected)).matched;
+        }
+
+        function createPointerFlow(words, start = 0, ignoredResults = 0) {
+            const reference = words.map(w => w.norm);
+            let position = start;
+            let firstResult = ignoredResults;
+            let snapshot = [];
+            let retainedResults = [];
+            const records = new Map();
+            const omitted = new Set();
+            const uncertain = new Set();
+            let heldWord = -1;
+            let strictPending = null;
+            let easyMisses = { target: -1, count: 0 };
+
+            function update(results, now = performance.now()) {
+                results = retainedResults.concat(results);
+                snapshot = results;
+                for (let index = firstResult; index < results.length; index++) {
+                    const result = results[index];
+                    let record = records.get(index);
+                    if (!record) {
+                        record = {
+                            anchor: position, previous: [], since: [],
+                            easyBase: easyMisses.target === position ? easyMisses.count : 0,
+                            leading: recitationMode === 'strict' && strictPending &&
+                                strictPending.target === position &&
+                                result.words[0] !== reference[position] ? strictPending.words : []
+                        };
+                        records.set(index, record);
+                        strictPending = null;
+                    }
+                    const tokens = recitationMode === 'strict' ? record.leading.concat(result.words) : result.words;
+                    // Stability is measured across actual recognition events.
+                    let prefix = 0;
+                    while (prefix < tokens.length && tokens[prefix] === record.previous[prefix]) prefix++;
+                    const since = tokens.map((_, i) => i < prefix ? record.since[i] : now);
+                    let target = record.anchor;
+                    let blocked = false;
+                    let recovered = 0;
+                    const gaps = new Set();
+                    const unclearMatches = new Set();
+                    let missTarget = record.anchor;
+                    let missCount = record.easyBase;
+                    for (let tokenIndex = 0; tokenIndex < tokens.length; tokenIndex++) {
+                        if (target >= reference.length) { blocked = true; break; }
+                        if (target !== missTarget) { missTarget = target; missCount = 0; }
+                        const heard = tokens[tokenIndex];
+                        // Strict may reconsider the prefix when newly arriving
+                        // continuation words now prove a small omission.
+                        if (recitationMode !== 'strict' && target === heldWord &&
+                            tokenIndex < Math.min(prefix, record.rejectedUntil || 0)) continue;
+                        const stable = tokenIndex < prefix && now - since[tokenIndex] >= 80;
+                        const nextExact = target + 1 < reference.length &&
+                            tokens[tokenIndex + 1] === reference[target + 1];
+                        const repeated = reference.slice(Math.max(0, target - 3), target).includes(heard);
+
+                        // Exact words need no repeated interim event or final result.
+                        if (heard === reference[target]) { target++; continue; }
+
+                        // Speech recognition sometimes changes word boundaries.
+                        if (target + 1 < reference.length &&
+                            heard === reference[target] + reference[target + 1]) {
+                            target += 2;
+                            continue;
+                        }
+                        if (tokenIndex + 1 < tokens.length &&
+                            heard + tokens[tokenIndex + 1] === reference[target]) {
+                            target++;
+                            tokenIndex++;
+                            continue;
+                        }
+
+                        // In Easy, a close spelling is still the current word.
+                        // Tiny particles need an exact following word as context.
+                        if (recitationMode === 'easy' && !repeated &&
+                            (easyCloseWordMatch(heard, reference[target]) ||
+                             (nextExact && Math.min(heard.length, reference[target].length) >= 2 &&
+                              levenshtein(heard, reference[target]) <= 1))) {
+                            target++;
+                            continue;
+                        }
+
+                        // Prefer strong forward context to a coincidental fuzzy
+                        // match against the missed word. Never search a whole line.
+                        let skip = 0;
+                        for (let gap = 1; (target !== heldWord || recitationMode === 'strict') && gap <= 2 - recovered; gap++) {
+                            const needed = gap + 1;
+                            if (target + gap + needed > reference.length) continue;
+                            if (tokenIndex + needed > tokens.length) continue;
+                            let exactRun = true;
+                            for (let k = 0; k < needed; k++) {
+                                if (tokens[tokenIndex + k] !== reference[target + gap + k]) {
+                                    exactRun = false;
+                                    break;
+                                }
+                            }
+                            if (exactRun) { skip = gap; break; }
+                        }
+                        if (skip) {
+                            for (let k = 0; k < skip; k++) gaps.add(target + k);
+                            recovered += skip;
+                            target += skip + 1;
+                            continue;
+                        }
+
+                        if (!repeated && pointerWordMatches(heard, reference[target], true) &&
+                            (recitationMode !== 'strict' || target !== heldWord || nextExact)) {
+                            // Easy keeps its existing confirmation behavior. Strict
+                            // records non-exact matches as unclear before advancing.
+                            if (result.isFinal || stable || nextExact) {
+                                if (recitationMode === 'strict') unclearMatches.add(target);
+                                target++;
+                                continue;
+                            }
+                            blocked = true;
+                            break;
+                        }
+                        // Easy holds only after three unmatched spoken tokens at
+                        // the same word, not three replays of one interim token.
+                        // Strict keeps its existing single confirmed mismatch rule.
+                        if (!repeated && target >= position) missCount++;
+                        if (!repeated && target >= position &&
+                            (recitationMode !== 'easy' || missCount >= 3) &&
+                            (result.isFinal || (tokenIndex < prefix && now - since[tokenIndex] >= 350))) {
+                            heldWord = target;
+                            // Preserve only a plausible nearby continuation across
+                            // finalized chunks. Unrelated verses are never buffered.
+                            if (recitationMode === 'strict' && result.isFinal &&
+                                (heard === reference[target + 1] || heard === reference[target + 2])) {
+                                strictPending = { target, words: tokens.slice(tokenIndex, tokenIndex + 3) };
+                            }
+                            record.rejectedUntil = tokens.length;
+                            blocked = !result.isFinal;
+                            break;
+                        }
+                    }
+                    for (let i = position; i < target; i++) {
+                        if (gaps.has(i)) omitted.add(i);
+                        if (unclearMatches.has(i)) uncertain.add(i);
+                    }
+                    record.previous = tokens.slice();
+                    record.since = since;
+                    position = Math.max(position, target);
+                    if (result.isFinal && !blocked) {
+                        easyMisses = { target: position, count: missTarget === position ? missCount : 0 };
+                    }
+                    if (heldWord >= 0 && position > heldWord) heldWord = -1;
+                    if (result.isFinal && !blocked) {
+                        firstResult = index + 1;
+                        records.delete(index);
+                    } else {
+                        // Preserve unfinished next-page tokens at the same anchor.
+                        break;
+                    }
+                }
+                return position;
+            }
+
+            return {
+                update,
+                get position() { return position; },
+                get heldWord() { return heldWord; },
+                statusAt(index) { return omitted.has(index) ? 'mistake' : uncertain.has(index) ? 'unclear' : 'correct'; },
+                append(words) {
+                    const offset = reference.length;
+                    reference.push(...words.map(w => w.norm));
+                    return offset;
+                },
+                restart() {
+                    // Keep finalized overflow waiting for a page load, but discard
+                    // an unfinished old-session hypothesis without replaying it.
+                    const interim = snapshot.findIndex(result => !result.isFinal);
+                    retainedResults = snapshot.slice(0, interim < 0 ? snapshot.length : interim);
+                    for (const index of records.keys()) {
+                        if (index >= retainedResults.length) records.delete(index);
+                    }
+                    firstResult = Math.min(firstResult, retainedResults.length);
+                    snapshot = retainedResults;
+                }
+            };
+        }
+
+        function cancelPointerWork() {
+            _flowGeneration++;
+            clearTimeout(_flowTimer);
+            _flowTimer = null;
+            _isAutoFlipping = false;
+        }
+
+        function resetPointerFlow(ignoreExisting = true) {
+            cancelPointerWork();
+            _flowOffset = 0;
+            _flow = createPointerFlow(refWords, pointer, ignoreExisting ? _speechSnapshot.length : 0);
+        }
+
+        function showPointerError() {
+            if (!_flow || _flow.heldWord !== _flowOffset + pointer) return;
+            const word = refWords[pointer];
+            if (!word) return;
+            if (word.el) word.el.dataset.status = 'mistake';
+            if (word.spaceEl) word.spaceEl.dataset.status = 'mistake';
+            // Both modes preserve an already counted red error after correction.
+            word.trackerKeepError = true;
+            // Count the word once, even if recognition repeats the error.
+            if (!word.trackerErrorCounted) {
+                word.trackerErrorCounted = true;
+                stats.mistake++;
+                _pushDebug({
+                    kind: 'mistake', heard: '', heardNorm: '',
+                    expected: word.text, expectedNorm: word.norm,
+                    reason: 'No matching word or nearby continuation. Waiting for correction.',
+                    ts: Date.now()
+                });
+                renderDebugPanel();
+                updateStats();
+            }
+        }
+
+        function advancePointerFlow() {
+            if (!listening || _flowLoading || !_flow || _isAutoFlipping) return;
+            showPointerError();
+            if (_flowTimer !== null) return;
+            if (pointer >= refWords.length || _flow.position <= _flowOffset + pointer) return;
+            const generation = _flowGeneration;
+            // Show each confirmed word even when a whole phrase arrives at once.
+            _flowTimer = setTimeout(() => {
+                _flowTimer = null;
+                if (generation !== _flowGeneration || !listening || _flowLoading) return;
+                applyMatch(pointer);
+                advancePointerFlow();
+            }, 80);
+        }
+
+        function applyMatch(matchAt) {
+            // Animate one word per step; omissions are errors in both modes.
+            if (matchAt !== pointer || !refWords[pointer]) return;
+            const word = refWords[pointer];
+            const trackedStatus = _flow ? _flow.statusAt(_flowOffset + pointer) : 'correct';
+            const matchStatus = word.trackerKeepError ? 'mistake' : trackedStatus;
+            word.trackerSkipped = trackedStatus === 'mistake';
+            word.trackerUnclear = matchStatus === 'unclear';
+            if (word.el) word.el.dataset.status = matchStatus;
+            if (word.spaceEl) word.spaceEl.dataset.status = matchStatus;
+            // Correction advances normally while preserving the red error history.
+            // Never count the same word twice.
+            if (!word.trackerErrorCounted) {
+                stats[matchStatus] = (stats[matchStatus] || 0) + 1;
+                if (matchStatus === 'mistake') {
+                    word.trackerErrorCounted = true;
+                    _pushDebug({
+                        kind: 'mistake', heard: '', heardNorm: '',
+                        expected: word.text, expectedNorm: word.norm,
+                        reason: 'Skipped word; following words confirmed the position.',
+                        ts: Date.now()
+                    });
+                    renderDebugPanel();
+                }
+            }
+            pointer++;
             consecutiveMisses = 0;
             updateStats();
             highlightCurrent();
-            renderDebugPanel();
-            // Auto-flip to next page when user reaches the end of current page
-            // CRITICAL: pointer is LOCAL (relative to refWords, the surah's slice)
-            // but pageEnd is GLOBAL (relative to allRefWords).
-            // We need to compute the local page end for the current surah.
-            // CRITICAL FIX: in the mushaf page system, refWords IS the page's words
-            // (set by loadMushafPage). So localPageEnd is just refWords.length — there's
-            // no need to subtract surahGlobalStart (that's the OLD surah-based system).
-            // The previous code did `pageEnd - surahGlobalStart` which was 1 for
-            // Al-Baqarah (29 - 29 = 0, +1 = 1), causing immediate auto-flip.
-            const localPageEnd = refWords.length;
-            // ONLY flip page if there are MORE words in this surah after this page
-            // If localPageEnd == refWords.length, the surah is done — advance to next surah instead
-            // ALSO: guard with _isAutoFlipping to prevent multiple setTimeout(nextPage)
-            // calls from a single Chrome result event (which processes many words at once)
-            if (pointer >= localPageEnd && !_isAutoFlipping) {
-                // Page complete — load the NEXT MUSHAF PAGE
-                // Guard against double-flip: if the user keeps talking during the
-                // 700ms transition, the matcher could process the next page's
-                // words and trigger ANOTHER auto-flip immediately.
-                // Solution: check that 2 seconds have passed since the last flip.
-                const now = Date.now();
-                const timeSinceLastFlip = now - (_lastAutoFlipTime || 0);
-                if (timeSinceLastFlip < 2000) {
-                    // Too soon since last flip - ignore this one
-                    return;
-                }
-                if (_currentMushafPage < 604) {
-                    _isAutoFlipping = true;
-                    _lastAutoFlipTime = now;
-                    statusEl.textContent = 'Page complete. Loading next mushaf page...';
-                    setTimeout(() => {
-                        // FIX (v3): Clear the speech transcript so the matcher doesn't
-                        // carry over words from the previous page. Without this, the
-                        // next _runReProcess() tick re-processes the full transcript
-                        // (finalizedText + interim) against the NEW page's refWords,
-                        // and any words that happen to match the new page's first few
-                        // words get marked as .past (user saw "4 highlighted words by
-                        // default" after auto-flip). Clearing the transcript makes the
-                        // new page start fresh — the user just continues reciting.
-                        // We touch ONLY the auto-flip setTimeout here, NOT loadMushafPage
-                        // or setSurahPage or the manual next/prev page, so other paths
-                        // are unchanged.
-                        finalizedText = '';
-                        _pendingFullText = '';
-                        _pendingWords = [];
-                        committedWordCount = 0;
-                        loadMushafPage(_currentMushafPage + 1);
-                        _isAutoFlipping = false;  // reset guard AFTER flip completes
-                        statusEl.textContent = 'Listening — keep reciting!';
-                    }, 700);
-                    return;
-                }
-            }
-            if (pointer >= refWords.length && !_isAutoFlipping) {
-                // Surah complete — try to auto-advance to the next surah
-                if (activeSurah && activeSurah < 114) {
-                    const nextSurah = activeSurah + 1;
-                    // Slight delay so the user sees "Surah complete" briefly
-                    _isAutoFlipping = true;
-                    statusEl.textContent = `Surah ${activeSurah} complete. Continuing to Surah ${nextSurah}...`;
-                    setTimeout(() => {
-                        setSurahPage(nextSurah);
-                        _isAutoFlipping = false;  // reset guard AFTER surah advance completes
-                        statusEl.textContent = `Now reciting Surah ${nextSurah}. Keep going!`;
-                    }, 800);
-                    // Keep listening — do NOT stop
-                } else {
-                    statusEl.textContent = 'Quran complete! Press reset to go again, or pick another surah.';
-                    stopListening();
-                }
-            }
-        }
 
-        // =========================================================================
-        // PROCESS NEW WORD — the core recognition loop.
-        // On every Chrome result event, the latest fullText is split by whitespace
-        // and any new words get processed here.
-        // =========================================================================
-        function processNewWord(rawWord) {
-            if (!rawWord) return;
-            // Ignore non-Arabic words (e.g. English WebSpeech fallback tokens)
-            if (!/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(rawWord)) return;
-            const norm = normalize(rawWord);
-            if (!norm) {
-                _pushDebug({
-                    kind: 'empty',
-                    heard: rawWord, heardNorm: '',
-                    expected: '', expectedNorm: '',
-                    expectedPhoneme: '',
-                    reason: 'Empty after normalization (likely silence / noise artifact)',
-                    ts: Date.now(),
-                });
+            if (pointer < refWords.length || _isAutoFlipping) return;
+            if (_currentMushafPage >= 604) {
+                statusEl.textContent = 'Quran complete! Press reset to go again, or pick another surah.';
+                stopListening();
                 return;
             }
-            if (pointer >= refWords.length) {
-                _pushDebug({
-                    kind: 'overflow',
-                    heard: rawWord, heardNorm: norm,
-                    expected: '(surah complete)', expectedNorm: '',
-                    expectedPhoneme: '',
-                    reason: 'Surah already complete — extra words ignored',
-                    ts: Date.now(),
-                });
-                return;
-            }
-
-            // FIRST-WORD BIAS: when pointer is at 0, the very first heard word almost
-            // certainly belongs to position 0 — Chrome might have split it weirdly
-            // (e.g. dropped the diacritics or misheard a single letter). Use a much
-            // more lenient match here (allow substring OR ratio >= 0.40).
-            if (pointer === 0 && consecutiveMisses === 0) {
-                const head = isFuzzyMatch(norm, refWords[0].norm, refWords[0].phoneme, 0.40);
-                if (head.matched) {
-                    applyMatch(0, head, rawWord);
-                    return;
-                }
-            }
-
-            // 1) near-window search (normal lookahead max 2 words ahead to prevent jumping
-            //    to repeated Quran words like Allah, Ar-Rahman, Ar-Raheem in later verses).
-            const near = findMatch(norm, pointer, pointer + 3);
-            if (near.idx !== -1 && (near.idx - pointer) <= 2) {
-                applyMatch(near.idx, near.match, rawWord);
-                return;
-            }
-
-            // 2) far-window search (only after RESYNC_THRESHOLD misses in a row).
-            //    Cap the skip so we never mark a position as mistake/unclear if the
-            //    user is clearly still actively reciting (no consecutive misses yet).
-            consecutiveMisses++;
-            if (consecutiveMisses >= RESYNC_THRESHOLD) {
-                const far = findMatch(norm, pointer + NEAR_WINDOW, pointer + FAR_WINDOW);
-                if (far.idx !== -1) {
-                    applyMatch(far.idx, far.match, rawWord);
-                    return;
-                }
-            }
-
-            // 3) no match → increment misses, wait for valid match or skip
-            const expected = refWords[pointer];
-            const expectedPhoneme = expected ? expected.phoneme : '';
-            const heardPh = phonemizeArabic(norm);
-            let phRatio = null;
-            if (expectedPhoneme && heardPh && heardPh.length >= 3 && expectedPhoneme.length >= 3) {
-                phRatio = levRatio(heardPh, expectedPhoneme);
-            }
-            const textRatio = expected ? levRatio(norm, expected.norm) : 0;
-            _pushDebug({
-                kind: 'miss',
-                heard: rawWord, heardNorm: norm, heardPhoneme: heardPh,
-                expected: expected ? expected.text : '', expectedNorm: expected ? expected.norm : '', expectedPhoneme,
-                reason: `Heard "${norm}" doesn't match expected "${expected ? expected.norm : ''}" at pointer=${pointer}. ` +
-                    `Text ratio=${textRatio.toFixed(2)} (need ≥${(1 - LEVENSHTEIN_RATIO).toFixed(2)}). ` +
-                    `Miss #${consecutiveMisses}/${RESYNC_THRESHOLD} before resync. Pointer stays put.`,
-                ts: Date.now(),
-            });
-            renderDebugPanel();
+            _isAutoFlipping = true;
+            const generation = _flowGeneration;
+            statusEl.textContent = 'Page complete. Loading next mushaf page...';
+            _flowTimer = setTimeout(async () => {
+                _flowTimer = null;
+                if (generation !== _flowGeneration || !listening) return;
+                // Await loading and retain unconsumed speech across the page.
+                await loadMushafPage(_currentMushafPage + 1, null, true);
+                if (generation !== _flowGeneration) return;
+                _isAutoFlipping = false;
+                advancePointerFlow();
+            }, 240);
         }
 
         // =========================================================================
@@ -3061,6 +3407,254 @@
         const transcriptBox = document.getElementById('transcriptBox');
         const transcriptText = document.getElementById('transcriptText');
         const transcriptConf = document.getElementById('transcriptConf');
+        const transcriptDebugEnabled = new URLSearchParams(location.search).get('debug') === '1';
+        transcriptBox.hidden = !transcriptDebugEnabled;
+        transcriptBox.classList.toggle('hidden', !transcriptDebugEnabled);
+        const modeHelpDialog = document.getElementById('modeHelpDialog');
+        const modeInfoBtn = document.getElementById('modeInfoBtn');
+        modeInfoBtn.addEventListener('click', () => modeHelpDialog.showModal());
+        document.getElementById('modeHelpClose').addEventListener('click', () => modeHelpDialog.close());
+        document.getElementById('modeHelpDone').addEventListener('click', () => modeHelpDialog.close());
+        modeHelpDialog.addEventListener('click', event => {
+            if (event.target !== modeHelpDialog) return;
+            const bounds = modeHelpDialog.getBoundingClientRect();
+            if (event.clientX < bounds.left || event.clientX > bounds.right ||
+                event.clientY < bounds.top || event.clientY > bounds.bottom) modeHelpDialog.close();
+        });
+        modeHelpDialog.addEventListener('close', () => modeInfoBtn.focus({ preventScroll: true }));
+
+        function scrollToRecitation() {
+            const target = refWords[pointer]?.el || document.getElementById('page');
+            if (target) target.scrollIntoView({
+                behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+                block: 'center'
+            });
+        }
+
+
+        // Fit existing API lines without changing text, word order, or event bindings.
+        let madaniLayoutFrame = null;
+        let madaniObservedWidth = -1;
+
+        function scheduleMadaniLayout() {
+            if (madaniLayoutFrame !== null) return;
+            madaniLayoutFrame = requestAnimationFrame(() => {
+                madaniLayoutFrame = null;
+                for (const inner of document.querySelectorAll('#page-inner, #mushafCompanion .mushaf-preview-inner')) {
+                    if (!inner.clientWidth) continue;
+                    const width = inner.clientWidth;
+                    const lines = inner.querySelectorAll('.mushaf-line');
+                    let base = Math.min(30, Math.max(18, width / 17));
+                    if (inner.closest('#mushafSpread.double')) {
+                        const headers = inner.querySelectorAll('.mushaf-surah-header').length;
+                        const available = window.innerHeight - 180 - headers * 50;
+                        base = Math.min(base, Math.max(14, available / (Math.max(1, lines.length) * 1.95)));
+                    }
+                    inner.style.setProperty('--madani-line-height', (base * 1.95) + 'px');
+                    for (const line of lines) {
+                        line.style.setProperty('--madani-line-font', base + 'px');
+                        const children = Array.from(line.children).filter(el =>
+                            el.classList.contains('word') || el.classList.contains('ayah-marker'));
+                        if (!children.length) continue;
+                        const naturalWidth = children.reduce((sum, el) => {
+                            const style = getComputedStyle(el);
+                            return sum + el.getBoundingClientRect().width +
+                                (parseFloat(style.marginLeft) || 0) + (parseFloat(style.marginRight) || 0);
+                        }, 0) + Math.max(0, children.length - 1) * base * .22;
+                        if (naturalWidth > width) {
+                            line.style.setProperty('--madani-line-font', (base * width / naturalWidth * .98) + 'px');
+                        }
+                    }
+                }
+            });
+        }
+        const madaniInner = document.getElementById('page-inner');
+        if (madaniInner && typeof ResizeObserver !== 'undefined') {
+            const madaniObserver = new ResizeObserver(entries => {
+                const width = entries[0].contentRect.width;
+                if (Math.abs(width - madaniObservedWidth) > 1) {
+                    madaniObservedWidth = width;
+                    scheduleMadaniLayout();
+                }
+            });
+            madaniObserver.observe(madaniInner);
+        }
+        if (madaniInner) {
+            new MutationObserver(scheduleMadaniLayout).observe(madaniInner, { childList: true });
+        }
+        if (document.fonts) {
+            document.fonts.ready.then(scheduleMadaniLayout);
+            document.fonts.addEventListener('loadingdone', scheduleMadaniLayout);
+        }
+
+
+        // Two-page presentation. Only #page owns live tracker references.
+        let doublePageMode = false;
+        let companionRevision = 0;
+        const spreadMedia = matchMedia('(min-width: 1100px) and (min-height: 700px)');
+        const spreadCache = new Map();
+        const activeMushaf = document.getElementById('page');
+        const mushafSpread = document.createElement('div');
+        mushafSpread.id = 'mushafSpread';
+        activeMushaf.before(mushafSpread);
+        mushafSpread.appendChild(activeMushaf);
+
+        function rememberMushafPage() {
+            const number = Number(activeMushaf.dataset.renderedPage);
+            if (!number) return;
+            spreadCache.set(number, activeMushaf.cloneNode(true));
+            while (spreadCache.size > 4) spreadCache.delete(spreadCache.keys().next().value);
+        }
+
+        function createCompanionPage(words, number) {
+            const paper = document.createElement('div');
+            paper.className = 'page mushaf-page-container';
+            const header = document.createElement('div');
+            header.className = 'mushaf-top-header';
+            const surah = document.createElement('span');
+            surah.className = 'mushaf-header-surah';
+            surah.textContent = SURAH_META.find(s => s.num === words[0]?.surah)?.name || '';
+            const juz = document.createElement('span');
+            juz.className = 'mushaf-header-juz';
+            juz.textContent = 'الجزء ' + toArabicNumerals(getJuzForPage(number));
+            header.append(surah, juz);
+            const frame = document.createElement('div');
+            frame.className = 'mushaf-frame-border';
+            const inner = document.createElement('div');
+            inner.className = 'mushaf-preview-inner' + (number === 1 || number === 2 ? ' page-fatihah' : '');
+            let previousLine = null;
+            let previousSurah = null;
+            let line = null;
+            function addWord(text, phoneme) {
+                const word = document.createElement('span');
+                word.className = 'word future';
+                word.tabIndex = 0;
+                word.textContent = text;
+                if (phoneme) {
+                    const tooltip = document.createElement('span');
+                    tooltip.className = 'phoneme-tooltip';
+                    const ipa = document.createElement('span');
+                    ipa.className = 'ipa';
+                    ipa.textContent = '/' + phoneme + '/';
+                    tooltip.appendChild(ipa);
+                    word.appendChild(tooltip);
+                }
+                line.appendChild(word);
+            }
+            for (const word of words) {
+                if (word.surah !== previousSurah && word.ayah === 1 && word.position === 1 && !word.isEndMarker) {
+                    const heading = document.createElement('div');
+                    heading.className = 'mushaf-surah-header';
+                    const name = document.createElement('span');
+                    name.className = 'surah-title';
+                    name.textContent = 'سُورَةُ ' + (SURAH_META.find(s => s.num === word.surah)?.name || '');
+                    heading.appendChild(name);
+                    inner.appendChild(heading);
+                    if (word.surah !== 1 && word.surah !== 9) {
+                        line = document.createElement('div');
+                        line.className = 'mushaf-line bismillah-line';
+                        for (const bismillah of BISMILLAH_WORDS) addWord(bismillah.text, bismillah.phoneme);
+                        inner.appendChild(line);
+                    }
+                    line = null;
+                }
+                if (!line || previousLine !== word.lineNumber || previousSurah !== word.surah) {
+                    line = document.createElement('div');
+                    line.className = 'mushaf-line';
+                    inner.appendChild(line);
+                }
+                previousLine = word.lineNumber;
+                previousSurah = word.surah;
+                if (word.isEndMarker) {
+                    const marker = document.createElement('span');
+                    marker.className = 'ayah-marker';
+                    marker.textContent = word.text;
+                    line.appendChild(marker);
+                } else {
+                    const entry = window.SURAH_PHONEMES?.[word.surah]?.[word.ayah]?.[word.position];
+                    addWord(word.text, entry?.[1] || phonemizeArabic(word.text));
+                }
+            }
+            frame.appendChild(inner);
+            const footer = document.createElement('div');
+            footer.className = 'mushaf-page-footer';
+            const pageNumber = document.createElement('span');
+            pageNumber.className = 'mushaf-header-page';
+            pageNumber.textContent = toArabicNumerals(number);
+            footer.appendChild(pageNumber);
+            paper.append(header, frame, footer);
+            return paper;
+        }
+
+        async function refreshMushafSpread() {
+            const revision = ++companionRevision;
+            const showingDouble = doublePageMode && spreadMedia.matches;
+            const layoutDialog = document.getElementById('pageLayoutDialog');
+            if (showingDouble && layoutDialog.open) layoutDialog.close();
+            mushafSpread.classList.toggle('double', showingDouble);
+            document.getElementById('mushafCompanion')?.remove();
+            activeMushaf.style.order = showingDouble && _currentMushafPage % 2 === 0 ? '1' : '0';
+            scheduleMadaniLayout();
+            if (!showingDouble || !activeMushaf.dataset.renderedPage || !window.QuranAPI) return;
+            const number = _currentMushafPage % 2 === 1 ? _currentMushafPage + 1 : _currentMushafPage - 1;
+            if (number < 1 || number > 604) return;
+            let companion;
+            try {
+                if (spreadCache.has(number)) {
+                    companion = spreadCache.get(number).cloneNode(true);
+                    const inner = companion.querySelector('#page-inner');
+                    if (inner) inner.classList.add('mushaf-preview-inner');
+                } else {
+                    const data = await window.QuranAPI.fetchPage(number, true);
+                    if (revision !== companionRevision) return;
+                    companion = createCompanionPage(window.QuranAPI.flattenPageWords(data), number);
+                }
+                companion.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
+                companion.id = 'mushafCompanion';
+                companion.classList.toggle('script-hidden', activeMushaf.classList.contains('script-hidden'));
+                companion.querySelectorAll('.word.now, .word.show-tooltip').forEach(word => {
+                    word.classList.remove('now', 'show-tooltip');
+                    if (!word.classList.contains('past')) word.classList.add('future');
+                });
+                companion.style.order = _currentMushafPage % 2 === 1 ? '1' : '0';
+                companion.setAttribute('aria-label', 'Quran page ' + number);
+                companion.addEventListener('click', event => {
+                    const word = event.target.closest('.word');
+                    if (word && !event.target.closest('.phoneme-tooltip')) word.classList.toggle('show-tooltip');
+                });
+            } catch (_) {
+                if (revision !== companionRevision) return;
+                companion = document.createElement('div');
+                companion.id = 'mushafCompanion';
+                companion.className = 'companion-loading';
+                const retry = document.createElement('button');
+                retry.type = 'button';
+                retry.textContent = 'Load facing page ' + number;
+                retry.addEventListener('click', refreshMushafSpread);
+                companion.appendChild(retry);
+            }
+            if (revision !== companionRevision) return;
+            mushafSpread.appendChild(companion);
+            scheduleMadaniLayout();
+        }
+        document.querySelectorAll('#pageLayoutToggle button').forEach(button => {
+            button.addEventListener('click', () => {
+                rememberMushafPage();
+                doublePageMode = button.dataset.layout === 'double';
+                if (doublePageMode && !spreadMedia.matches) {
+                    const layoutDialog = document.getElementById('pageLayoutDialog');
+                    if (!layoutDialog.open) layoutDialog.showModal();
+                }
+                document.querySelectorAll('#pageLayoutToggle button').forEach(item => {
+                    const selected = (item.dataset.layout === 'double') === doublePageMode;
+                    item.classList.toggle('active', selected);
+                    item.setAttribute('aria-pressed', String(selected));
+                });
+                refreshMushafSpread();
+            });
+        });
+        spreadMedia.addEventListener('change', refreshMushafSpread);
+        window.addEventListener('resize', scheduleMadaniLayout);
 
         // Also build line index for the local data path
         function buildLineIndexForLocal() {
@@ -3100,21 +3694,18 @@
             resetState();
             step2.classList.remove('hidden');
 
-            await loadMushafPage(targetPage);
-
-            setTimeout(() => {
-                const localIdx = refWords.findIndex(w => w.surah === surahNum && w.ayah === ayahNum);
-                if (localIdx !== -1) {
-                    pointer = localIdx;
-                    _pageInitialPointer = localIdx;
-                    _maxPointerReached = localIdx;
-                    _prevPastEnd = localIdx;
-                    highlightCurrent();
-                    if (refWords[localIdx] && refWords[localIdx].el) {
-                        refWords[localIdx].el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }
-                }
-            }, 150);
+            const loaded = await loadMushafPage(targetPage);
+            if (!loaded) return false;
+            const localIdx = refWords.findIndex(w => w.surah === surahNum && w.ayah === ayahNum);
+            if (localIdx === -1) return false;
+            pointer = localIdx;
+            resetPointerFlow();
+            _pageInitialPointer = localIdx;
+            _maxPointerReached = localIdx;
+            _prevPastEnd = localIdx;
+            highlightCurrent();
+            scrollToRecitation();
+            return true;
         }
 
         function initOption2Controls() {
@@ -3206,8 +3797,10 @@
             const omnibox = document.getElementById('smartOmnibox');
             const omniboxGoBtn = document.getElementById('omniboxGoBtn');
 
-            function parseAndExecuteOmnibox() {
-                const query = (omnibox ? omnibox.value || '' : '').trim();
+            async function parseAndExecuteOmnibox() {
+                const query = (omnibox ? omnibox.value || '' : '').trim()
+                    .replace(/[٠-٩]/g, d => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)))
+                    .replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)));
                 if (!query) return;
 
                 // 1. Check if surah:ayah format e.g. "2:255" or "2 255"
@@ -3216,9 +3809,17 @@
                     const sNum = parseInt(saMatch[1]);
                     const aNum = parseInt(saMatch[2]);
                     if (sNum >= 1 && sNum <= 114) {
-                        jumpToVerse(sNum, aNum);
+                        await jumpToVerse(sNum, aNum);
                         return;
                     }
+                }
+
+                // Explicit chapter number avoids ambiguity with existing page searches.
+                const chapterMatch = query.match(/^(?:s|surah|chapter)\s*(\d{1,3})$/i);
+                if (chapterMatch) {
+                    const number = Number(chapterMatch[1]);
+                    if (number >= 1 && number <= 114 && await selectSurah(number)) scrollToRecitation();
+                    return;
                 }
 
                 // 2. Check if page number e.g. "4", "p.4", "page 4"
@@ -3228,7 +3829,7 @@
                     if (num >= 1 && num <= 604) {
                         resetState();
                         step2.classList.remove('hidden');
-                        loadMushafPage(num);
+                        if (await loadMushafPage(num)) scrollToRecitation();
                         return;
                     }
                 }
@@ -3243,7 +3844,7 @@
                 );
 
                 if (matchedSurah) {
-                    selectSurah(matchedSurah.num);
+                    if (await selectSurah(matchedSurah.num)) scrollToRecitation();
                 } else {
                     alert(`Could not find page or chapter matching "${query}". Try typing a page number (1-604), Surah name, or verse like "2:255".`);
                 }
@@ -3251,7 +3852,7 @@
 
             if (omniboxGoBtn) omniboxGoBtn.addEventListener('click', parseAndExecuteOmnibox);
             if (omnibox) omnibox.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') parseAndExecuteOmnibox();
+                if (e.key === 'Enter') { e.preventDefault(); parseAndExecuteOmnibox(); }
             });
         }
 
@@ -3264,22 +3865,20 @@
             document.querySelectorAll('.surah-card').forEach(c => c.classList.toggle('active', c === cardEl));
             resetState();
             step2.classList.remove('hidden');
-            setSurahPage(num);
+            const loaded = await setSurahPage(num);
+            if (!loaded) return false;
             // Mark every word as 'future' so the Hide Script button has something
             // to blur. Without this, words render without future/past/now classes
             // and the script-hidden CSS selector matches nothing.
             highlightCurrent();
-            // Scroll the recite section into view so the user sees the words,
-            // not the surah picker they just clicked.
-            // Removed: was scrolling step2 (the recite section) into view after
-            // selecting a surah. The user wanted the page to stay anchored at
-            // the top (Bismillah + title + surah grid) on open and not jump
-            // down. The auto-load of Al-Fatiha fires this same code, so the
-            // page was jumping on every page open. User scrolls down manually
-            // when they want the recite screen.
+            // Startup stays at the top; explicit search scrolls after loading.
+            return true;
         }
 
         function resetState() {
+            cancelPointerWork();
+            _flow = null;
+            _flowLoading = false;
             refWords = [];
             ayahEndIndex = [];
             pointer = 0;
@@ -3293,7 +3892,7 @@
             confidences = [];
             renderDebugPanel();
             updateStats();
-            transcriptBox.classList.add('hidden');
+            transcriptBox.classList.toggle('hidden', !transcriptDebugEnabled);
             playbackRow.classList.add('hidden');
         }
 
@@ -3508,11 +4107,16 @@
         let _pageFontFamily = null;  // e.g. "QPC_P100" — page-specific QPC HAFS font
         let _pageInitialPointer = 0;  // initial pointer position for targetSurah on page load
 
-        async function loadMushafPage(pageNum, targetSurah = null) {
+        async function loadMushafPage(pageNum, targetSurah = null, continueFlow = false) {
             if (!window.QuranAPI) return;
+            rememberMushafPage();
+            if (!continueFlow) cancelPointerWork();
+            const generation = _flowGeneration;
+            _flowLoading = true;
             try {
                 statusEl.textContent = `Loading page ${pageNum}...`;
                 const data = await window.QuranAPI.fetchPage(pageNum, true);
+                if (generation !== _flowGeneration) return;
                 const words = window.QuranAPI.flattenPageWords(data);
                 _pageWords = words;
                 // === Build refWords for the matcher ===
@@ -3610,8 +4214,13 @@
                 finalizedText = '';
                 confidences = [];
                 updateStats();
-                // FIX (v4): Tell _runReProcess to skip one tick after a page flip.
-                _pageFlipGuard = true;
+                if (continueFlow && _flow) {
+                    _flowOffset = _flow.append(refWords);
+                    _flow.update(_speechSnapshot, _speechSnapshotTime);
+                } else {
+                    _flowOffset = 0;
+                    _flow = createPointerFlow(refWords, startPointer, _speechSnapshot.length);
+                }
                 renderMushafPage();
 
                 // Mark any words preceding startPointer (from earlier surahs on the same page) as .past
@@ -3623,10 +4232,17 @@
                 }
 
                 highlightCurrent();  // update .now class for the target surah word
-                statusEl.textContent = '';//`Page ${pageNum} of 604 loaded. (Amiri Quran)`;
+                statusEl.textContent = listening ? 'Listening — keep reciting!' : '';
+                return true;
             } catch (e) {
+                if (generation !== _flowGeneration) return;
                 console.error('[mushaf] Failed to load page', pageNum, e);
-                statusEl.textContent = `Failed to load page ${pageNum}.`;
+                statusEl.textContent = 'Failed to load page ' + pageNum + '.';
+            } finally {
+                if (generation === _flowGeneration) {
+                    _flowLoading = false;
+                    advancePointerFlow();
+                }
             }
         }
 
@@ -3653,7 +4269,7 @@
             const inner = document.getElementById('page-inner');
             if (!inner) return;
             inner.innerHTML = '';
-            inner.classList.toggle('page-fatihah', _currentMushafPage === 1);
+            inner.classList.toggle('page-fatihah', _currentMushafPage === 1 || _currentMushafPage === 2);
             const frag = document.createDocumentFragment();
 
             // Update top header bar (Juz, Page # Medallion, Surah Name)
@@ -3662,6 +4278,14 @@
             const juzEl = document.getElementById('mushafHeaderJuz');
             const pageEl = document.getElementById('mushafHeaderPage');
             const surahEl = document.getElementById('mushafHeaderSurah');
+            let footer = document.getElementById('mushafPageFooter');
+            if (!footer) {
+                footer = document.createElement('div');
+                footer.id = 'mushafPageFooter';
+                footer.className = 'mushaf-page-footer';
+                document.getElementById('page').appendChild(footer);
+            }
+            if (pageEl && pageEl.parentElement !== footer) footer.appendChild(pageEl);
             if (juzEl) juzEl.textContent = `الجزء ${juzArName}`;
             if (pageEl) pageEl.textContent = toArabicNumerals(_currentMushafPage);
             const firstSurah = _pageLines[0]?.surah;
@@ -3819,6 +4443,9 @@
                 frag.appendChild(lineDiv);
             }
             inner.appendChild(frag);
+            activeMushaf.dataset.renderedPage = String(_currentMushafPage);
+            refreshMushafSpread();
+            scheduleMadaniLayout();
 
             // Update page info
             const pageInfo = document.getElementById('pageInfo');
@@ -3993,7 +4620,7 @@
             container.appendChild(header);
         }
 
-        function setSurahPage(num) {
+        async function setSurahPage(num) {
             if (!allRefWords.length) buildGlobalRefWords();
             if (!_lineIndex[num] || !_lineIndex[num].length) buildLineIndex();
             const startIdx = surahStartIndex[num] || 0;
@@ -4013,13 +4640,13 @@
             pageEnd = Math.min(endIdx, pageStart + 100);
             _currentPageLineStart = 0;
             activeSurah = num;
-            _pendingFullText = '';
-            _pendingWords = [];
+            cancelPointerWork();
             finalizedText = '';
             stats = { correct: 0, mistake: 0, unclear: 0 };
             pageStartStats = { correct: 0, mistake: 0, unclear: 0 };
             // Load the actual API page (1-604) and position pointer at the first word of target surah (num)
-            loadMushafPage(_currentMushafPage, num);
+            const loaded = await loadMushafPage(_currentMushafPage, num);
+            if (!loaded) return false;
             // Update active state in surah grid
             document.querySelectorAll('.surah-card').forEach(c => {
                 c.classList.toggle('active', parseInt(c.dataset.num) === num);
@@ -4029,6 +4656,7 @@
             if (meta && statusEl) {
                 statusEl.textContent = `Ready to recite ${meta.translit} (${meta.meaning}). Click Start to begin.`;
             }
+            return true;
         }
 
         function nextPage() {
@@ -4076,6 +4704,15 @@
                 if (w && w.el) {
                     w.el.classList.remove('now', 'future');
                     w.el.classList.add('past');
+                    // Restore error history when a display mode rerenders words.
+                    // Pointer movement must not erase skipped or corrected errors.
+                    if (w.trackerSkipped || w.trackerKeepError) {
+                        w.el.dataset.status = 'mistake';
+                        if (w.spaceEl) w.spaceEl.dataset.status = 'mistake';
+                    } else if (w.trackerUnclear) {
+                        w.el.dataset.status = 'unclear';
+                        if (w.spaceEl) w.spaceEl.dataset.status = 'unclear';
+                    }
                 }
             }
 
@@ -4135,6 +4772,10 @@
                 statusEl.classList.add('warn');
                 return;
             }
+            if (_flowLoading) {
+                statusEl.textContent = 'Wait for the page to finish loading.';
+                return;
+            }
             if (!refWords.length) {
                 statusEl.textContent = "Pick a surah first (or wait for it to finish loading).";
                 statusEl.classList.add('warn');
@@ -4142,8 +4783,8 @@
             }
 
             finalizedText = '';
-            _pendingFullText = '';
-            _pendingWords = [];
+            _speechSnapshot = [];
+            resetPointerFlow(false);
             committedWordCount = 0;
             confidences = [];
 
@@ -4152,169 +4793,38 @@
             recognition.continuous = true;
             recognition.interimResults = true;
 
+            const sessionRecognition = recognition;
+            recognition.onstart = () => {
+                if (recognition !== sessionRecognition) return;
+                _speechSnapshot = [];
+                if (_flow) _flow.restart();
+            };
             recognition.onresult = (event) => {
-                let interim = '';
-                for (let i = event.resultIndex; i < event.results.length; i++) {
-                    const res = event.results[i];
-                    const rawTr = res[0].transcript || '';
-                    const cleanTr = rawTr.replace(/[a-zA-Z]+/g, '').replace(/\s+/g, ' ').trim();
-                    if (res.isFinal) {
-                        if (cleanTr) finalizedText += cleanTr + ' ';
-                        if (res[0].confidence > 0) {
-                            confidences.push(res[0].confidence);
-                            if (confidences.length > 100) confidences.shift();  // cap to 100
-                        }
-                    } else {
-                        if (cleanTr) interim += cleanTr + ' ';
-                    }
+                if (!listening || recognition !== sessionRecognition) return;
+                // Index-based snapshots prevent duplicate final-result appends.
+                _speechSnapshotTime = performance.now();
+                _speechSnapshot = Array.from(event.results, res => ({
+                    words: (res[0].transcript || '').split(/\s+/).map(normalize)
+                        .filter(word => /[\u0621-\u064A]/.test(word)),
+                    isFinal: res.isFinal
+                }));
+                transcriptBox.classList.toggle('hidden', !transcriptDebugEnabled);
+                transcriptText.textContent = Array.from(event.results, res => res[0].transcript || '').join(' ');
+                confidences = Array.from(event.results)
+                    .filter(res => res.isFinal && res[0].confidence > 0)
+                    .map(res => res[0].confidence);
+                transcriptConf.textContent = confidences.length
+                    ? 'Avg confidence: ' + (confidences.reduce((a, b) => a + b, 0) / confidences.length * 100).toFixed(0) +
+                        '% (' + confidences.length + ' finalized)'
+                    : '';
+                if (_flow && !_flowLoading) {
+                    _flow.update(_speechSnapshot, _speechSnapshotTime);
+                    advancePointerFlow();
                 }
-                const fullText = (finalizedText + interim).trim();
-                if (fullText) {
-                    transcriptBox.classList.remove('hidden');
-                    transcriptText.textContent = fullText;
-                    if (confidences.length) {
-                        const avg = confidences.reduce((a, b) => a + b, 0) / confidences.length;
-                        transcriptConf.textContent = `Avg confidence: ${(avg * 100).toFixed(0)}% (${confidences.length} finalized)`;
-                    }
-                }
-
-                // === RE-PROCESS ALL WORDS FROM SCRATCH ON EVERY TICK ===
-                // Why: Chrome's interim results grow left→right, and the same word slot
-                // can change content as recognition refines ("يس" → "يسالونك"). Tracking
-                // committedWordCount is wrong — it doesn't notice when a previously-
-                // processed word has been updated, so the matcher falls behind and marks
-                // correct words as 'unclear' on the next interim tick.
-                //
-                // PERFORMANCE: Chrome can fire onresult 10-30 times/sec. By line 8
-                // the transcript is ~80 words, so the full re-processing is O(80
-                // words × 8-window fuzzy matches) per tick = ~640 matches per tick.
-                // At 30 ticks/sec that is ~20k matches/sec just for the matcher,
-                // and the dataset.status reset loop also touches ~2400 unreached
-                // DOM elements per tick. The main thread gets swamped and the
-                // highlight visibly trails the user.
-                //
-                // Fix: throttle the re-processing to once per animation frame via
-                // requestAnimationFrame. We keep the latest fullText/words in module
-                // scope and the next animation frame picks them up. This caps the
-                // re-processing at the browser's refresh rate (typically 60fps) no
-                // matter how fast Chrome fires interim results.
-                const words = fullText.length ? fullText.split(/\s+/) : [];
-                _pendingFullText = fullText;
-                _pendingWords = words;
-                _scheduleReProcess();
-
             };
 
-            // === rAF-throttled re-processing ===
-            // The full re-derivation is heavy. Run it at most once per animation
-            // frame regardless of how fast Chrome fires interim results. The
-            // onresult handler just stashes the latest transcript here; the next
-            // animation frame picks it up and runs the work.
-            function _scheduleReProcess() {
-                if (_pendingReProcess) return;
-                _pendingReProcess = true;
-                requestAnimationFrame(_runReProcess);
-            }
-
-            function _runReProcess() {
-                _pendingReProcess = false;
-                if (!refWords.length) return;  // surah not loaded yet
-
-                // FIX (v4): Skip one full processing tick immediately after a page
-                // flip. The matcher's transcript (finalizedText, _pendingWords)
-                // still contains words from the previous page at this point.
-                // If we processed them now, they would be re-matched against the
-                // new page's refWords and any matches would mark the new page's
-                // words as .past (the '4 highlighted words by default' bug).
-                //
-                // Why we need the skip-tick:
-                //   Chrome's SpeechRecognition keeps event.results populated with
-                //   the OLD words. The next onresult would re-add them to
-                //   finalizedText via the cumulative '+=' pattern. So just clearing
-                //   finalizedText here isn't enough — the next tick would re-populate
-                //   it. Skipping this tick AND clearing the transcript means the
-                //   NEXT tick starts with a fresh transcript (just the user's new
-                //   words, since Chrome's event.results is still old but we're not
-                //   adding OLD words because we cleared finalizedText).
-                //
-                // The user may lose 1-2 words they said during the page-flip
-                // transition, but the new page starts clean.
-                if (_pageFlipGuard) {
-                    _pageFlipGuard = false;
-                    // Clear all .past classes on the new page so it starts visually clean
-                    for (let i = 0; i < refWords.length; i++) {
-                        if (refWords[i] && refWords[i].el) {
-                            refWords[i].el.classList.remove('past', 'now', 'future');
-                            refWords[i].el.dataset.status = '';
-                        }
-                    }
-                    // Reset matcher state for the new page
-                    pointer = 0;
-                    _maxPointerReached = 0;
-                    _prevPastEnd = 0;
-                    _lastHighlightedPointer = -1;
-                    committedWordCount = 0;
-                    consecutiveMisses = 0;
-                    // FIX (v9): DO NOT reset `stats` here on auto-flip. The user
-                    // expects the CORRECT/MISTAKES/UNCLEAR counters at the top to
-                    // keep accumulating across the entire recitation session so they
-                    // can see their running total. We only reset the per-page state
-                    // (pointer, transcript, classes) so the new page renders fresh,
-                    // but the counters persist until the user picks a new surah or
-                    // hits the explicit Reset button.
-                    pageStartStats = { ...stats };
-                    debugLog = [];
-                    // Clear the cumulative transcript so the NEXT onresult builds
-                    // a fresh transcript starting from the user's new words (Chrome
-                    // re-populates event.results but we cleared finalizedText so
-                    // the cumulative total starts from 0, not from the OLD words).
-                    finalizedText = '';
-                    _pendingFullText = '';
-                    _pendingWords = [];
-                    // Re-apply .now to the first word
-                    highlightCurrent();
-                    return;
-                }
-
-                const words = _pendingWords;
-
-                // Reset dataset.status ONLY for words we haven't reached yet
-                // (_maxPointerReached and beyond). For words below _maxPointerReached,
-                // the status is already finalized from previous ticks and we must NOT
-                // touch it. Resetting and re-setting 'correct' on every tick would
-                // toggle the CSS class off and on, and the background-color/color
-                // transition would animate that toggle, making the highlighted
-                // recited words visibly blink while the user is actively speaking.
-                // (When the user pauses, no new ticks fire, no toggle, no blink.)
-                for (let i = 0; i < refWords.length; i++) {
-                    if (refWords[i]) {
-                        refWords[i].hasMistake = false;
-                        if (refWords[i].el) {
-                            refWords[i].el.dataset.status = '';
-                        }
-                    }
-                }
-                // Reset to _pageInitialPointer (relative to current page refWords).
-                pointer = _pageInitialPointer || 0;
-                _lastHighlightedPointer = -1;
-                _maxPointerReached = pointer;
-                _prevPastEnd = pointer;
-                consecutiveMisses = 0;
-                // Restore stats from pageStartStats so counters accumulate across pages!
-                stats = { ...pageStartStats };
-                debugLog = [];
-
-                // Re-process every word
-                for (let i = 0; i < words.length; i++) {
-                    processNewWord(words[i]);
-                }
-                committedWordCount = words.length;
-                highlightCurrent();
-                renderDebugPanel();
-                updateStats();
-            }
-
             recognition.onerror = (e) => {
+                if (recognition !== sessionRecognition || !listening) return;
                 // 'aborted' is expected during auto-restart (Chrome) — don't show as error
                 if (e.error === 'aborted') {
 
@@ -4357,18 +4867,18 @@
             // DEBOUNCED auto-restart (prevents tight loop on Chrome)
             let _lastRestartTime = 0;
             recognition.onend = () => {
-                if (!listening) return;
+                if (!listening || recognition !== sessionRecognition) return;
                 const now = Date.now();
-                // Don't restart more than once per 1500ms
-                if (now - _lastRestartTime < 1500) return;
-                _lastRestartTime = now;
+                // Delay rapid restarts instead of silently leaving the mic idle.
+                const restartDelay = Math.max(500, 1500 - (now - _lastRestartTime));
                 setTimeout(() => {
-                    if (!listening) return;
+                    if (!listening || recognition !== sessionRecognition) return;
+                    _lastRestartTime = Date.now();
                     try { recognition.start(); }
                     catch (e) {
-                        setTimeout(() => { if (listening) { try { recognition.start(); } catch (_) { } } }, 500);
+                        setTimeout(() => { if (listening && recognition === sessionRecognition) { try { recognition.start(); } catch (_) { } } }, 500);
                     }
-                }, 500);
+                }, restartDelay);
             };
 
             // Diagnostic: surface context info so the user knows if mobile is blocking us.
@@ -4398,6 +4908,8 @@
 
         function stopListening() {
             listening = false;
+            cancelPointerWork();
+            _flowLoading = false;
             if (recognition) { try { recognition.stop(); } catch (_) { } }
             if (mediaRecorder && mediaRecorder.state !== 'inactive') { try { mediaRecorder.stop(); } catch (_) { } }
             micBtn.classList.remove('listening');
@@ -4440,7 +4952,7 @@
             // Clear the live transcript text (resetState only hides the box)
             transcriptText.textContent = '';
             transcriptConf.textContent = '';
-            transcriptBox.classList.add('hidden');
+            transcriptBox.classList.toggle('hidden', !transcriptDebugEnabled);
             // Clear the search bar so the surah picker shows all 114 surahs again
             searchInput.value = '';
             // Deselect any active surah card + reset active surah
@@ -4467,6 +4979,7 @@
         toggleScriptBtn.addEventListener('click', () => {
             scriptHidden = !scriptHidden;
             document.getElementById('page').classList.toggle('script-hidden', scriptHidden);
+            document.getElementById('mushafCompanion')?.classList.toggle('script-hidden', scriptHidden);
             toggleScriptBtn.classList.toggle('active', scriptHidden);
             toggleScriptBtn.textContent = scriptHidden ? 'Show Script' : 'Hide Script';
             toggleScriptBtn.title = scriptHidden
@@ -4485,6 +4998,7 @@
         // =========================================================================
         window.__matcher__ = {
             normalize, phonemizeArabic, levRatio, isFuzzyMatch, levenshtein,
+            createPointerFlow, pointerWordMatches,
         };
 
         // =========================================================================
@@ -4561,38 +5075,24 @@
         // (Quran Font picker removed — we now use Amiri Quran only, the
         //  mushaf-style Google Font. See https://fonts.google.com/specimen/Amiri+Quran)
 
-        // ==== RECITING DIFFICULTY (Easy / Balanced / Strict) ====
-        const SENSITIVITY_MODES = {
-            easy: 0.45,       // Forgiving tolerance for speech variations
-            balanced: 0.27,   // Balanced default
-            strict: 0.10      // Strict exact pronunciation matching
-        };
-
+        // ==== RECITING DIFFICULTY (Easy / Strict) ====
+        // Both modes use the same forgiving matcher and bounded omission recovery.
+        // Both modes mark omissions as errors and hold on confirmed unrelated speech.
         function setSensitivityMode(mode) {
-            const ratio = SENSITIVITY_MODES[mode] !== undefined ? SENSITIVITY_MODES[mode] : 0.27;
-            LEVENSHTEIN_RATIO = ratio;
+            recitationMode = mode === 'strict' ? 'strict' : 'easy';
             document.querySelectorAll('#sensitivityToggle .mode-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.mode === mode);
+                const selected = btn.dataset.mode === recitationMode;
+                btn.classList.toggle('active', selected);
+                btn.setAttribute('aria-pressed', String(selected));
             });
-            try { localStorage.setItem('hifzapp-sensitivity-mode', mode); } catch (e) { }
         }
 
         document.querySelectorAll('#sensitivityToggle .mode-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const mode = btn.dataset.mode;
-                if (mode) setSensitivityMode(mode);
-            });
+            btn.addEventListener('click', () => setSensitivityMode(btn.dataset.mode));
         });
 
-        // Load saved mode or default to Balanced (with legacy mapping support)
-        let _savedMode = 'balanced';
-        try {
-            let s = localStorage.getItem('hifzapp-sensitivity-mode');
-            if (s === 'lenient') s = 'easy';
-            if (s === 'medium') s = 'balanced';
-            if (s && SENSITIVITY_MODES[s] !== undefined) _savedMode = s;
-        } catch (e) { }
-        setSensitivityMode(_savedMode);
+        // Every page load starts in Easy, regardless of older saved preferences.
+        setSensitivityMode('easy');
 
         // ==== COLLAPSIBLE MISTAKE STATISTICS ====
         // Direct approach: attach handlers by ID at the right time
@@ -4647,6 +5147,234 @@
         }
     </script>
 
-</body>
 
-</html>
+
+
+
+    <style>
+        #welcomeOverlay[hidden] { display: none !important; }
+        #welcomeOverlay { position: fixed; inset: 0; z-index: 10000; display: grid; place-items: center; padding: 20px; background: rgba(0,0,0,.7); backdrop-filter: blur(6px); box-sizing: border-box; }
+        #welcomeCard { position: relative; width: min(100%, 620px); max-height: calc(100dvh - 40px); overflow-y: auto; box-sizing: border-box; padding: 30px; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 24px; box-shadow: 0 30px 100px rgba(0,0,0,.45); font: 15px/1.6 system-ui, sans-serif; }
+        #welcomeCard h2 { font-size: clamp(24px, 5vw, 32px); line-height: 1.2; margin: 8px 35px 12px 0; }
+        #welcomeCard h3 { font-size: 17px; margin: 0 0 8px; }
+        #welcomeCard p { margin: 8px 0 14px; }
+        #welcomeCard .welcome-badge { color: var(--primary); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; }
+        #welcomeCard .welcome-updates { padding-left: 22px; margin: 16px 0; }
+        #welcomeCard .welcome-updates li { margin-bottom: 8px; }
+        #welcomeCard .welcome-section { border-top: 1px solid var(--border); padding-top: 18px; margin-top: 18px; }
+        #welcomeCard .welcome-share { display: flex; flex-wrap: wrap; gap: 8px; }
+        #welcomeCard a { color: var(--primary); }
+        #welcomeCard .welcome-share a, #welcomeCard button { border: 1px solid var(--border); border-radius: 10px; padding: 9px 14px; background: var(--card); color: var(--text); font: 600 14px/1.4 system-ui; text-decoration: none; cursor: pointer; }
+        #welcomeCard .welcome-share .welcome-social-icon { display:inline-flex; align-items:center; justify-content:center; width:48px; height:48px; padding:10px; box-sizing:border-box; border-radius:50%; color:#fff; }
+        #welcomeCard .welcome-social-icon svg { width:25px; height:25px; }
+        #welcomeCard #welcomeWhatsApp { background:#16883f; }
+        #welcomeCard #welcomeFacebook { background:#1877f2; }
+        #welcomeCard #welcomeInstagram { background:linear-gradient(35deg,#d96914,#cb2476,#6f42c1); }
+        #welcomeCard #welcomeTwitter { background:#141414; }
+        #welcomeCard button:focus-visible, #welcomeCard a:focus-visible, #welcomeCard input:focus-visible { outline: 3px solid var(--primary); outline-offset: 3px; }
+        #welcomeCard #welcomeClose { position: absolute; top: 18px; right: 18px; font-size: 22px; padding: 2px 10px; }
+        #welcomeCard .welcome-email-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+        #welcomeCard input[type=email] { flex: 1 1 200px; min-width: 0; border: 1px solid var(--border); background: var(--card); color: var(--text); border-radius: 10px; padding: 11px; font: 16px system-ui; }
+        #welcomeCard button:disabled, #welcomeCard input:disabled { opacity: .55; cursor: not-allowed; }
+        #welcomeCard .welcome-note { color: var(--text-dim); font-size: 13px; }
+        #welcomeCard #welcomeContinue { width: 100%; background: var(--primary); color: var(--primary-text); margin-top: 14px; padding: 12px; }
+        #welcomeCard .welcome-dismiss { display: flex; align-items: center; gap: 9px; margin-top: 20px; cursor: pointer; }
+        #welcomeCard .welcome-dismiss input { width: 18px; height: 18px; accent-color: var(--primary); }
+        @media(max-width: 480px) { #welcomeOverlay { padding: 10px; } #welcomeCard { padding: 22px 18px; max-height: calc(100dvh - 20px); } }
+    </style>
+    <div id="welcomeOverlay" hidden>
+        <div id="welcomeCard" role="dialog" aria-modal="true" aria-labelledby="welcomeTitle" aria-describedby="welcomeIntro" tabindex="-1">
+            <button type="button" id="welcomeClose" aria-label="Close welcome message">×</button>
+            <span class="welcome-badge">Made for your Quran journey</span>
+            <h2 id="welcomeTitle">A better way to practice</h2>
+            <p id="welcomeIntro">We have updated Quran recitation tracker to make your practice smoother and easier to follow.</p>
+            <ul class="welcome-updates">
+                <li><strong>Smoother tracking:</strong> improved word-by-word movement as you recite.</li>
+                <li><strong>Easy &amp; Strict:</strong> skipped words stay red. Reading a different verse pauses tracking until you get back on track. Strict also shows unclear words in yellow.</li>
+                <li><strong>A refreshed Mushaf:</strong> Single or Double view, with colors that follow your theme.</li>
+            </ul>
+            <div class="welcome-section">
+                <h3>Free to use. No ads.</h3>
+                <p>If this helps you, share it with your family, friends, or Quran group. Help someone practice the Quran, ALLAH will reward you for the good.</p>
+                <div class="welcome-share" aria-label="Share Quran recitation tracker">
+                    <a target="_blank" rel="noopener noreferrer" class="welcome-social-icon" id="welcomeWhatsApp" title="WhatsApp" aria-label="Share via WhatsApp"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5-1.3A10 10 0 1 0 12 2z" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 7c-3 2 3 9 7 9 1 0 2-2 1-2l-2-1-1 1c-2-1-3-2-4-4l1-1-1-2z" fill="currentColor"/></svg></a>
+                    <a target="_blank" rel="noopener noreferrer" class="welcome-social-icon" id="welcomeFacebook" title="Facebook" aria-label="Share via Facebook"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M14 22v-9h3l.5-4H14V7c0-1 .3-2 2-2h2V1.4C17.4 1.2 16 1 14.6 1 11.2 1 9 3.1 9 6.8V9H6v4h3v9z"/></svg></a>
+<button type="button" class="welcome-social-icon" id="welcomeInstagram" title="Instagram" aria-label="Share via Instagram"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/></g><circle fill="currentColor" cx="17.5" cy="6.5" r="1.2"/></svg></button>
+<a target="_blank" rel="noopener noreferrer" class="welcome-social-icon" id="welcomeTwitter" title="X (Twitter)" aria-label="Share via X (Twitter)"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M18.9 2H22l-6.8 7.8L23 22h-6.3l-4.9-7.4L5.3 22H2l8.3-9.6L1 2h6.5l4.5 6.8L18.9 2zm-1.1 18h1.8L6.5 3.9H4.6z"/></svg></a>
+                    <a id="welcomeEmailShare">Email</a>
+                    <button type="button" id="welcomeCopy">Copy link</button>
+                    <button type="button" id="welcomeNativeShare" hidden>More options</button>
+                </div>
+                <p id="welcomeShareStatus" class="welcome-note" role="status"></p>
+            </div>
+            <div class="welcome-section">
+                <h3>Let us know you are here <span class="welcome-note">(optional)</span></h3>
+                <p>We would love to know how many people are using the tracker. Share your email to help us understand our community beyond automated visits.</p>
+                <form id="welcomeEmailForm">
+                    <label for="welcomeEmail">Your email address</label>
+                    <div class="welcome-email-row">
+                        <input id="welcomeEmail" type="email" autocomplete="email" maxlength="254" placeholder="you@example.com" required disabled aria-describedby="welcomeEmailNotice">
+                        <button type="submit" id="welcomeEmailSubmit" disabled>Count me in</button>
+                    </div>
+                    <p class="welcome-note" id="welcomeEmailNotice">By clicking “Count me in,” you agree to save your email in our private Google spreadsheet for the community count. This is optional; you can use every feature without signing up.</p>
+                    <input type="text" id="welcomeWebsite" name="website" tabindex="-1" autocomplete="off" hidden aria-hidden="true">
+                    <p class="welcome-note" id="welcomeEmailStatus" role="status" aria-live="polite"></p>
+                </form>
+            </div>
+            <p class="welcome-section">Help us improve this please click <a href="https://hafizassist.com/support.html">Contact Support</a> and provide your feedback or Report Bugs.</p>
+            <label class="welcome-dismiss"><input type="checkbox" id="welcomeRemember" checked>Don’t show this again</label>
+            <button type="button" id="welcomeContinue">Start practicing</button>
+            <p id="welcomeStorageNotice" class="welcome-note" role="status"></p>
+        </div>
+    </div>
+    <script>
+        (() => {
+            const overlay = document.getElementById('welcomeOverlay');
+            const card = document.getElementById('welcomeCard');
+            const preferenceKey = 'hafizassist-welcome-dismissed';
+            // Send only an explicitly submitted email; never store it in the browser.
+            const signupEndpoint = 'https://script.google.com/macros/s/AKfycbynFCmdOLqwSAMeddFxnU7Eapv7LubmXuS9gkcaOp_hCHKJvJugBk93ba98zG99f6YzQA/exec';
+            const signupForm = document.getElementById('welcomeEmailForm');
+            const signupEmail = document.getElementById('welcomeEmail');
+            const signupButton = document.getElementById('welcomeEmailSubmit');
+            const signupStatus = document.getElementById('welcomeEmailStatus');
+            let signupPending = false;
+            let signupComplete = false;
+            signupEmail.disabled = false;
+            signupButton.disabled = false;
+            signupForm.addEventListener('submit', async event => {
+                event.preventDefault();
+                if (signupPending || signupComplete) return;
+                signupEmail.value = signupEmail.value.trim();
+                if (!signupForm.reportValidity()) return;
+                signupPending = true;
+                signupEmail.disabled = true;
+                signupButton.disabled = true;
+                signupButton.textContent = 'Saving…';
+                signupForm.setAttribute('aria-busy', 'true');
+                signupStatus.textContent = 'Saving your email…';
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 20000);
+                try {
+                    const response = await fetch(signupEndpoint, {
+                        method: 'POST',
+                        body: new URLSearchParams({
+                            email: signupEmail.value,
+                            consent: 'yes',
+                            website: document.getElementById('welcomeWebsite').value
+                        }),
+                        credentials: 'omit',
+                        redirect: 'follow',
+                        signal: controller.signal
+                    });
+                    if (!response.ok) throw new Error('Submission response unavailable');
+                    const result = await response.json();
+                    if (result.ok === true) {
+                        signupComplete = true;
+                        signupEmail.value = '';
+                        signupStatus.textContent = 'Thank you! Your email is recorded. Each email is counted only once.';
+                    } else {
+                        signupStatus.textContent = result.message || 'We could not save your email. Please try again later.';
+                    }
+                } catch (_) {
+                    signupStatus.textContent = 'We could not confirm that your email was saved. Please try again; duplicate emails are counted only once. You can keep using the tracker without signing up.';
+                } finally {
+                    clearTimeout(timeout);
+                    signupPending = false;
+                    signupEmail.disabled = signupComplete;
+                    signupButton.disabled = signupComplete;
+                    signupButton.textContent = signupComplete ? 'Submitted' : 'Count me in';
+                    signupForm.removeAttribute('aria-busy');
+                }
+            });
+            const shareUrl = 'https://hafizassist.com/';
+            const shareText = 'Practice Quran recitation with HafizAssist — free and ad-free.';
+            document.getElementById('welcomeWhatsApp').href = 'https://wa.me/?text=' + encodeURIComponent(shareText + ' ' + shareUrl);
+            document.getElementById('welcomeFacebook').href = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(shareUrl);
+            document.getElementById('welcomeEmailShare').href = 'mailto:?subject=' + encodeURIComponent('Quran recitation tracker') + '&body=' + encodeURIComponent(shareText + '\n\n' + shareUrl);
+            const shareStatus = document.getElementById('welcomeShareStatus');
+            document.getElementById('welcomeCopy').addEventListener('click', async () => {
+                try {
+                    await navigator.clipboard.writeText(shareUrl);
+                    shareStatus.textContent = 'Link copied. Thank you for sharing!';
+                } catch (_) {
+                    shareStatus.textContent = 'Copy this link: ' + shareUrl;
+                }
+            });
+            document.getElementById('welcomeTwitter').href = 'https://x.com/intent/tweet?text=' + encodeURIComponent(shareText) + '&url=' + encodeURIComponent(shareUrl);
+            document.getElementById('welcomeInstagram').addEventListener('click', async () => {
+                if (typeof navigator.share === 'function') {
+                    shareStatus.textContent = 'Choose Instagram if available, or copy the link to paste into Instagram.';
+                    try { await navigator.share({ title: 'Quran recitation tracker', text: shareText, url: shareUrl }); return; }
+                    catch (error) { if (error.name === 'AbortError') return; }
+                }
+                try { await navigator.clipboard.writeText(shareUrl); shareStatus.textContent = 'Link copied. Open Instagram and paste it into a message or Story link sticker.'; }
+                catch (_) { shareStatus.textContent = 'Copy this link and paste it into Instagram: ' + shareUrl; }
+            });
+            const nativeShare = document.getElementById('welcomeNativeShare');
+            nativeShare.hidden = typeof navigator.share !== 'function';
+            nativeShare.addEventListener('click', async () => {
+                try { await navigator.share({ title: 'Quran recitation tracker', text: shareText, url: shareUrl }); }
+                catch (error) { if (error.name !== 'AbortError') shareStatus.textContent = 'Please use one of the sharing links above.'; }
+            });
+            let previousFocus, previousOverflow;
+            const inertSiblings = [];
+            function closeWelcome() {
+                try { localStorage.setItem(preferenceKey, document.getElementById('welcomeRemember').checked ? '1' : '0'); } catch (_) {}
+                overlay.hidden = true;
+                document.body.style.overflow = previousOverflow;
+                inertSiblings.forEach(([element, value]) => { element.inert = value; });
+                if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true });
+            }
+            document.getElementById('welcomeRemember').addEventListener('change', event => {
+                try {
+                    if (event.target.checked) localStorage.setItem(preferenceKey, '1');
+                    else localStorage.setItem(preferenceKey, '0');
+                    document.getElementById('welcomeStorageNotice').textContent = '';
+                } catch (_) {
+                    event.target.checked = false;
+                    document.getElementById('welcomeStorageNotice').textContent = 'Your browser could not save this preference. You can still close this message.';
+                }
+            });
+            document.getElementById('welcomeClose').addEventListener('click', closeWelcome);
+            document.getElementById('welcomeContinue').addEventListener('click', closeWelcome);
+            overlay.addEventListener('keydown', event => {
+                if (event.key === 'Escape') { event.preventDefault(); closeWelcome(); }
+                if (event.key !== 'Tab') return;
+                const focusable = Array.from(card.querySelectorAll('a[href], button, input')).filter(el => !el.disabled && !el.hidden && el.getClientRects().length);
+                const first = focusable[0], last = focusable[focusable.length - 1];
+                if (event.shiftKey && (document.activeElement === first || document.activeElement === card)) {
+                    event.preventDefault(); last.focus();
+                } else if (!event.shiftKey && document.activeElement === last) {
+                    event.preventDefault(); first.focus();
+                }
+            });
+            function showWelcome(force = false) {
+                if (!overlay.hidden) return;
+                let dismissed = false;
+                try { dismissed = localStorage.getItem(preferenceKey) === '1'; } catch (_) {}
+                if (dismissed && !force) return;
+                document.getElementById('welcomeRemember').checked = true;
+                try { document.getElementById('welcomeRemember').checked = localStorage.getItem(preferenceKey) !== '0'; } catch (_) {}
+                inertSiblings.length = 0;
+                previousFocus = document.activeElement;
+                previousOverflow = document.body.style.overflow;
+                Array.from(document.body.children).forEach(element => {
+                    if (element !== overlay && !['SCRIPT', 'STYLE'].includes(element.tagName)) {
+                        inertSiblings.push([element, element.inert]);
+                        element.inert = true;
+                    }
+                });
+                document.body.style.overflow = 'hidden';
+                overlay.hidden = false;
+                card.focus({ preventScroll: true });
+            }
+            document.getElementById('welcomeReopen').addEventListener('click', () => showWelcome(true));
+            const initialWelcome = () => showWelcome(new URLSearchParams(location.search).get('welcome') === '1');
+            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initialWelcome, { once: true });
+            else initialWelcome();
+        })();
+    </script>
+
+
+</body></html>
